@@ -1,8 +1,8 @@
 interface IDBMenuItem {
-  ID: number;
-  NAME: string;
-  APP_ID: number;
-  MAS_ID: number;
+  id: number;
+  name: string;
+  app_id: number;
+  mas_id: number;
 }
 
 export default IDBMenuItem;

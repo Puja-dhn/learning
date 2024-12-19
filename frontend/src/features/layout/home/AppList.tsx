@@ -45,7 +45,7 @@ function AppList(props: IProps) {
       ? "text-[11px] font-bold p-1"
       : "text-md font-bold p-2";
   const popupAppDescClass = screenType === "Popup" ? "hidden" : "";
-  if (accessState.apps.filter((item) => item.ID !== 1).length <= 0) {
+  if (accessState.apps.filter((item) => item.id !== 0).length <= 0) {
     return (
       <AlertInfo
         heading="You donot have access on any App"
@@ -60,14 +60,14 @@ function AppList(props: IProps) {
       className={`w-full overflow-auto grid items-center justify-evenly ${popupGridClass}`}
     >
       {accessState.apps
-        .filter((item) => item.ID !== 1)
+        .filter((item) => item.id !== 0)
         .map((app) => (
           <button
             tabIndex={disableTabFocus ? -1 : 0}
             type="button"
-            key={app.ID}
+            key={app.id}
             onClick={() => {
-              handleAppSelection(app.ID);
+              handleAppSelection(app.id);
             }}
           >
             <div
@@ -77,8 +77,8 @@ function AppList(props: IProps) {
                 className={`flex flex-1 items-center justify-center ${popupImgClass}`}
               >
                 <img
-                  src={`${ASSET_BASE_URL}/images/logo/${app.LOGO_PATH}`}
-                  alt={app.SHT_NAME}
+                  src={`${ASSET_BASE_URL}/images/logo/${app.logo_path}`}
+                  alt={app.sht_name}
                   width={screenType === "Popup" ? "45" : "100"}
                   className=""
                 />
@@ -86,14 +86,14 @@ function AppList(props: IProps) {
               <h3
                 className={`flex flex-col items-center justify-center text-center  text-blue-900 dark:text-teal-100 ${popupTextClass}`}
               >
-                {screenType === "Popup" ? app.SHT_NAME : app.NAME}
+                {screenType === "Popup" ? app.sht_name : app.name}
 
-                {screenType === "Popup" ? "" : <span>({app.SHT_NAME})</span>}
+                {screenType === "Popup" ? "" : <span>({app.sht_name})</span>}
               </h3>
               <p
                 className={`flex item-center justify-center text-center text-xs font-normal text-slate-500 dark:text-slate-300 ${popupAppDescClass}`}
               >
-                {app.APP_DESC}
+                {app.app_desc}
               </p>
             </div>
           </button>

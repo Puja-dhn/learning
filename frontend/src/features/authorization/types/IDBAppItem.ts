@@ -1,9 +1,9 @@
 interface IDBAppItem {
-  ID: number;
-  NAME: string;
-  SHT_NAME: string;
-  APP_DESC: string;
-  LOGO_PATH: string;
+  id: number;
+  name: string;
+  sht_name: string;
+  app_desc: string;
+  logo_path: string;
 }
 
 export default IDBAppItem;

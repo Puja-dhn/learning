@@ -68,11 +68,11 @@ function HomeLayout(props: IProps) {
         <HomeSettings mode="FullScreen" />
       </div> */}
       <div
-        className={`${toggleClass} md:hidden   h-full w-full  overflow-hidden  grid   box-border bg-[#f4f7fa]
+        className={`${toggleClass}    h-full w-full  overflow-hidden  grid   box-border bg-[#f4f7fa]
     dark:bg-gradient-to-t dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 dark:bg-gray-900`}
       >
         <HomeSidebar />
-        <div className={`${visibleClass} w-[300px]`} />
+        <div className={`${visibleClass} `} />
         <div
           className={`w-full h-full overflow-auto grid ${toggleAppModeClass} box-border`}
         >

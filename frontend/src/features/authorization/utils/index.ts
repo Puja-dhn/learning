@@ -21,14 +21,14 @@ const getAllRouteList = (menuData: IDBMenuItem[], routeList: IMenuItem[]) => {
   const allAccessRoutes: IMenuItem[] = [];
 
   allRoutes.forEach((route) => {
-    const filteredMenu = menuData.filter((data) => data.ID === route.id);
+    const filteredMenu = menuData.filter((data) => data.id === route.id);
     if (filteredMenu.length > 0) {
       if (route.children.length > 0) {
         const currRoute = { ...route };
         currRoute.children = [];
         route.children.forEach((subRoute) => {
           const filteredSubMenu = menuData.filter(
-            (data) => data.ID === subRoute.id,
+            (data) => data.id === subRoute.id,
           );
           if (filteredSubMenu.length > 0) {
             currRoute.children.push({

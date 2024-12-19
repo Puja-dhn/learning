@@ -7,13 +7,14 @@ import DocumentMagnifyingGlassIcon from "@heroicons/react/24/outline/DocumentMag
 import DocumentMagnifyingGlassIconSolid from "@heroicons/react/24/solid/DocumentMagnifyingGlassIcon";
 
 import IMenuItem from "../types/IMenuItem";
-import LogAect from "@/pages/aect/LogAect";
-import ViewAect from "@/pages/aect/ViewAect";
-import Dashboard from "@/pages/aect/Dashboard";
+
+import ViewAect from "@/pages/sis/ViewAect";
+import Dashboard from "@/pages/sis/Dashboard";
+import LogSis from "@/pages/sis/LogSis";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
-const AECT_MENU_LIST: IMenuItem[] = [
+const SIS_MENU_LIST: IMenuItem[] = [
   {
     id: 7,
     name: "",
@@ -32,24 +33,24 @@ const AECT_MENU_LIST: IMenuItem[] = [
     iconSelected: <HomeIconSolid className="w-5 h-5" />,
     appId: 2,
     path: "dashboard",
-    element: <Dashboard />,
+    element: <LogSis />,
     children: [],
     menuType: "Normal",
   },
   {
-    id: 8,
-    name: "Log AECT",
+    id: 1,
+    name: "Log SIO",
     icon: <DocumentPlusIcon className="w-5 h-5" />,
     iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
     appId: 2,
-    path: "log-aect",
-    element: <LogAect />,
+    path: "log-sio",
+    element: <LogSis />,
     children: [],
     menuType: "Normal",
   },
   {
-    id: 9,
-    name: "View AECT",
+    id: 2,
+    name: "View SIO",
     icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
     iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
     appId: 2,
@@ -72,4 +73,4 @@ const AECT_MENU_LIST: IMenuItem[] = [
   },
 ];
 
-export default AECT_MENU_LIST;
+export default SIS_MENU_LIST;

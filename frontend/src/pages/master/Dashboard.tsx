@@ -13,7 +13,6 @@ import AppList from "@/features/layout/home/AppList";
 
 import { useAppSelector } from "@/store/hooks";
 import { APP_MENUS } from "@/features/authorization/menu-list";
-// import MobileAppList from "@/features/layout/home/MobileAppList";
 
 function Dashboard() {
   const { t } = useTranslation(["common", "authentication"]);
@@ -52,13 +51,8 @@ function Dashboard() {
   }, [appAccessData, isAppAccessDataLoading, isAppAccessDataError]);
   return (
     <>
-      <div className="items-start justify-start hidden w-full h-full p-6 overflow-auto md:flex">
+      <div className="items-start justify-start w-full h-full p-6 overflow-auto md:flex">
         <AppList screenType="Dashboard" />
-      </div>
-      <div className="flex items-start justify-start w-full h-full p-3 overflow-auto md:hidden ">
-        {/* <AppList screenType="Popup" disableTabFocus /> */}
-        <AppList screenType="Dashboard" />
-        {/* <MobileAppList screenType="Dashboard" /> */}
       </div>
     </>
   );

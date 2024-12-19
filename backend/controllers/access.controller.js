@@ -28,74 +28,71 @@ async function simpleQuery(statement, binds) {
 }
 exports.appaccess = async (req, res) => {
   const { ID } = req.user;
-  
-  const menusQuery = `
-        SELECT DISTINCT
-            t1.id,
-            t1.name,
-            t1.app_id,
-            t1.mas_id
-        FROM
-            t_sis_menus t1,
-            t_sis_role_menus t2,
-            t_sis_user_role t3
-        WHERE
-                t1.id = t2.menu_id
-            AND
-                t2.role_id = t3.role_id
-            AND
-                t1.status = 'Active'
-            AND
-                t3.user_id = ?
-`;
 
-  const resultMenus = await simpleQuery(menusQuery, [ID]);
-  if (!resultMenus || resultMenus.errorMessage || !resultMenus.rows) {
-    return res.status(400).json({
-      errorMessage: "Something went wrong1",
-      errorTransKey: "api_res_unknown_error1",
+  try {
+    // Fetch menus data
+    const menusQuery = `
+      SELECT DISTINCT
+          t1.id,
+          t1.name,
+          t1.app_id,
+          t1.mas_id
+      FROM
+          t_sis_menus t1,
+          t_sis_role_menus t2,
+          t_sis_user_role t3
+      WHERE
+              t1.id = t2.menu_id
+          AND
+              t2.role_id = t3.role_id
+          AND
+              t1.status = 'Active'
+          AND
+              t3.user_id = ?
+    `;
+
+    const resultMenus = await simpleQuery(menusQuery, [ID]);
+
+    // Fetch apps data
+    const appsQuery = `
+      SELECT DISTINCT
+          t1.id,
+          t1.name,
+          t1.sht_name,
+          t1.app_desc,
+          t1.logo_path
+      FROM
+          t_sis_apps t1,
+          t_sis_menus t2,
+          t_sis_role_menus t3,
+          t_sis_user_role t4
+      WHERE
+              t1.status = 'Active'
+          AND
+              t2.app_id = t1.id
+          AND
+              t2.status = 'Active'
+          AND
+              t3.menu_id = t2.id
+          AND
+              t4.role_id = t3.role_id
+          AND
+              t4.user_id = ?  
+      ORDER BY id asc
+    `;
+
+    const resultApps = await simpleQuery(appsQuery, [ID]);
+
+    // Respond with both menus and apps data
+    res.status(200).json({
+      menus: resultMenus,
+      apps: resultApps,
+      appId: 2, // Modify as needed if you want dynamic appId
+    });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      error: "An error occurred while fetching data",
     });
   }
-
-  const appsQuery = `
-        SELECT DISTINCT
-            t1.id,
-            t1.name,
-            t1.sht_name,
-            t1.app_desc,
-            t1.logo_path
-        FROM
-            t_sis_apps t1,
-            t_sis_menus t2,
-            t_sis_role_menus t3,
-            t_sis_user_role t4
-        WHERE
-                t1.status = 'Active'
-            AND
-                t2.app_id = t1.id
-            AND
-                t2.status = 'Active'
-            AND
-                t3.menu_id = t2.id
-            AND
-                t4.role_id = t3.role_id
-            AND
-                t4.user_id = ?  
-       ORDER BY id asc
-`;
-
-const resultApps = await simpleQuery(appsQuery, [ID]);
-if (!resultApps || resultApps.errorMessage || !resultApps.rows) {
-return res.status(400).json({
-errorMessage: "Something went wrong2",
-errorTransKey: "api_res_unknown_error2",
-});
-}
-  
-
-  res.status(200).json({
-    menus: [...resultMenus.rows],
-    apps: [...resultApps.rows],
-    appId: 1,
-  });
 };

@@ -7,9 +7,7 @@ import { useTranslation } from "react-i18next";
 
 import { IAuthForm } from "@/features/authentication/types";
 import { TextField } from "@/features/ui/form";
-// import LoginBg from "@/assets/images/loginbg5.png";
 import LogoText from "@/assets/images/logotext.png";
-import LoginBgMobile from "@/assets/images/loginbgmobile3.png";
 import {
   getLoggedIn,
   setLocalUser,
@@ -55,7 +53,7 @@ function DomainLogin() {
 
   const { handleSubmit, control, formState, setValue } = useForm<IAuthForm>({
     defaultValues: initialFormValues,
-   // resolver: yupResolver(formSchema),
+    // resolver: yupResolver(formSchema),
   });
 
   const [confirmState, setConfirmState] = useState({
@@ -224,43 +222,27 @@ function DomainLogin() {
                     >
                       Sign In
                     </button>
-                    {/* <button
-                      type="button"
-                      className="w-[30%] text-[#646262bf] bg-[#efefefbf] border-[1px] border-[#868080bf]
-                        hover:bg-gradient-to-bl  
-                        font-medium rounded-[30px] text-sm px-5 py-2.5 text-center mt-2 ml-5"
-                      onClick={() => {
-                        navigate("/auth/register", { replace: true });
-                      }}
-                    >
-                      Sign Up
-                    </button> */}
                   </form>
                 </div>
               </div>
-              <div className="grid grid-col-1 bg-gradient-to-r from-[#d1e7fb] to-[#233585] rounded-lg items-center justify-center">
+              <div className="grid grid-col-1 bg-gradient-to-r from-[#d1e7fb] to-[#d1e7fb] rounded-lg items-center justify-center">
                 <img src={LogoText} alt="logo" className="h-[110px]" />
               </div>
             </div>
           </div>
         ) : (
-          <div className="flex justify-center w-full h-[100vh] overflow-auto bg-white ">
-            <div className="">
+          <div className="flex justify-center items-center w-full h-[100vh] bg-white overflow-auto">
+            <div className="w-[100%]">
               <div className="relative">
                 <img
                   src={LogoText}
-                  alt=""
-                  className="absolute top-[45%] left-[50%] -translate-y-[50%] -translate-x-[50%] h-[70px] "
-                />
-                <img
-                  src={LoginBgMobile}
-                  alt=""
-                  className="h-[200px] text-center md:h-24 lg:h-24 w-[100%]"
+                  alt="Logo"
+                  className="absolute top-[45%] left-[50%] -translate-y-[50%] -translate-x-[50%] h-[70px]"
                 />
               </div>
-              <div className="flex flex-col items-center justify-center gap-4 mt-[30px] ">
+              <div className="flex flex-col items-center justify-center gap-4 mt-[30px]">
                 <h2 className="text-lg font-bold text-sky-800 dark:text-cyan-600">
-                  Authentication Requireds
+                  Authentication Required
                 </h2>
                 <form
                   className="max-w-md mx-auto w-[90%]"
@@ -274,8 +256,7 @@ function DomainLogin() {
                       Email ID
                     </span>
                     <TextField
-                      className="block w-full py-2.5 px-3 mt-1 text-sm text-gray-900 bg-transparent border-2  focus:ring-0 appearance-none rounded-lg dark:text-white dark:border-gray-600 
-               dark:focus:border-[#4b8cf1] transition duration-300 ease-in-out hover:border-[#4b8cf1]"
+                      className="block w-full py-2.5 px-3 mt-1 text-sm text-gray-900 bg-transparent border-2 focus:ring-0 appearance-none rounded-lg dark:text-white dark:border-gray-600 dark:focus:border-[#4b8cf1] transition duration-300 ease-in-out hover:border-[#4b8cf1]"
                       label=""
                       name="emailId"
                       control={control}
@@ -288,11 +269,10 @@ function DomainLogin() {
                     </span>
                     <TextField
                       label=""
-                      name="domainPassword"
+                      name="password"
                       control={control}
                       type="password"
-                      className="block py-2.5 px-3 mt-1 text-sm text-gray-900 bg-transparent border-2  focus:ring-0 appearance-none rounded-lg dark:text-white dark:border-gray-600 
-               dark:focus:border-[#4b8cf1] transition duration-300 ease-in-out w-full hover:border-[#4b8cf1]"
+                      className="block py-2.5 px-3 mt-1 text-sm text-gray-900 bg-transparent border-2 focus:ring-0 appearance-none rounded-lg dark:text-white dark:border-gray-600 dark:focus:border-[#4b8cf1] transition duration-300 ease-in-out w-full hover:border-[#4b8cf1]"
                     />
                   </div>
 
@@ -310,24 +290,11 @@ function DomainLogin() {
 
                   <button
                     type="submit"
-                    className="w-[30%] text-white bg-gradient-to-t from-[#06235b] to-[#8b91ad] 
-                        hover:bg-gradient-to-bl focus:ring-2 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 
-                        font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-2"
+                    className="w-[30%] text-white bg-gradient-to-t from-[#06235b] to-[#8b91ad] hover:bg-gradient-to-bl focus:ring-2 focus:outline-none focus:ring-cyan-300 dark:focus:ring-cyan-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center mt-2"
                     disabled={isSubmitting}
                   >
                     Sign In
                   </button>
-                  {/* <button
-                    type="button"
-                    className="w-[30%] text-[#646262bf] bg-[#efefefbf] border-[1px] border-[#868080bf]
-                hover:bg-gradient-to-bl  
-                font-medium rounded-[30px] text-sm px-5 py-2.5 text-center mt-2 ml-5"
-                    onClick={() => {
-                      navigate("/auth/register", { replace: true });
-                    }}
-                  >
-                    Sign Up
-                  </button> */}
                 </form>
               </div>
             </div>

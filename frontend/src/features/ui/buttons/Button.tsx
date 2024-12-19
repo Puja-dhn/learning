@@ -31,8 +31,7 @@ function Button(props: Props) {
     "text-blue-900 bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-300 dark:hover:bg-gray-500 ";
   switch (btnType) {
     case "primary":
-      backgroundClass =
-        "text-blue-900 bg-cyan-400 hover:bg-gray-400 dark:bg-cyan-500 dark:text-blue-900 dark:hover:bg-gray-500";
+      backgroundClass = "bg-[#06235b] text-white";
       break;
     case "reset":
       backgroundClass =
@@ -63,7 +62,7 @@ function Button(props: Props) {
       type="button"
       className={twMerge(`inline-flex items-center gap-2 text-sm font-medium rounded-lg  px-5 py-2 text-center
         focus:ring-2 focus:outline-none focus:ring-blue-300 
-        dark:focus:ring-gray-300 bg-opacity-50
+        dark:focus:ring-gray-300 
        ${backgroundClass}
        ${className}`)}
       onClick={onClick}

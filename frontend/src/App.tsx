@@ -2,7 +2,6 @@ import React from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import PrivateRoutes from "./features/authorization/PrivateRoute";
-import NewUsers from "./pages/master/NewUsers";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -21,12 +20,10 @@ const Success = React.lazy(() => import("@/pages/Success"));
 
 const MasterDashboard = React.lazy(() => import("@/pages/master/Dashboard"));
 
+// SIS Routes
 
-// AECT Routes
-
-const AECTDashboard = React.lazy(() => import("@/pages/aect/Dashboard"));
-const LogAect = React.lazy(() => import("@/pages/aect/LogAect"));
-const ViewAect = React.lazy(() => import("@/pages/aect/ViewAect"));
+const LogSis = React.lazy(() => import("@/pages/sis/LogSis"));
+const ViewAect = React.lazy(() => import("@/pages/sis/ViewAect"));
 
 function App() {
   return (
@@ -48,18 +45,16 @@ function App() {
           >
             <Route index element={<MasterDashboard />} />
             <Route path="dashboard" element={<MasterDashboard />} />
-         
-            <Route path="new-users" element={<NewUsers />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 
           <Route
-            path="aect"
+            path="sio"
             element={<PrivateRoutes outlet={<HomeLayout appId={2} />} />}
           >
-            <Route index element={<AECTDashboard />} />
-            <Route path="dashboard" element={<AECTDashboard />} />
-            <Route path="log-aect" element={<LogAect />} />
+            <Route index element={<LogSis />} />
+            <Route path="dashboard" element={<LogSis />} />
+            <Route path="log-sio" element={<LogSis />} />
             <Route path="view-aect" element={<ViewAect />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>

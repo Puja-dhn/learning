@@ -13,7 +13,7 @@ function HeaderLogo() {
   // const currAppLogoPath =
   //   currApp.length > 0 ? currApp[0].LOGO_PATH : "3_app_logo.png";
   return (
-    <div className="h-[55px] flex flex-col justify-between  mb-2 bg-[#014098]  border-b-[1px] border-gray-600">
+    <div className="h-[55px] flex flex-col justify-between  mb-2 bg-white  border-b-[1px] border-gray-600">
       <div className="relative">
         <img
           src={AppLogo}

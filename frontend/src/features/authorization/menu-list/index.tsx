@@ -1,8 +1,7 @@
 import MASTER_MENU_LIST from "./master";
 
-import AECT_MENU_LIST from "./aect";
-
 import { getFlatMenuList } from "../utils";
+import SIS_MENU_LIST from "./sis";
 
 const APP_MENUS = [
   {
@@ -13,10 +12,10 @@ const APP_MENUS = [
   },
   {
     appId: 2,
-    routeMaster: "aect",
-    menuList: AECT_MENU_LIST,
-    menuFlatList: [...getFlatMenuList(AECT_MENU_LIST)],
+    routeMaster: "sio",
+    menuList: SIS_MENU_LIST,
+    menuFlatList: [...getFlatMenuList(SIS_MENU_LIST)],
   },
 ];
 
-export { MASTER_MENU_LIST, APP_MENUS, AECT_MENU_LIST };
+export { MASTER_MENU_LIST, APP_MENUS, SIS_MENU_LIST };
