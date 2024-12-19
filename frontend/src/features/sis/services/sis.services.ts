@@ -2,12 +2,12 @@ import { AxiosResponse } from "axios";
 import http from "@/features/common/utils/http-common";
 import {
   IAectClosureForm,
-  ILogAectData,
-  ILogAectFilterForm,
+  ILogSioFilterForm,
   ILogSisForm,
   IAECTDashboardData,
 } from "../types";
 import ISIOMasterData from "../types/sis/ISIOMasterData";
+import ILogSioData from "../types/sis/ILogSioData";
 
 const addNewSIOData = (formData: any) => {
   return http.post<ILogSisForm, AxiosResponse<string>>(
@@ -30,11 +30,17 @@ const updateAectStatus = (aectData: IAectClosureForm) => {
   );
 };
 
-const getAECTData = (filterData: ILogAectFilterForm) => {
+const getSIOData = (filterData: ILogSioFilterForm) => {
   return http.post<
-    ILogAectFilterForm,
-    AxiosResponse<{ historyLogAectData: ILogAectData[] }>
-  >("/aect/get-aect-data", filterData);
+    ILogSioFilterForm,
+    AxiosResponse<{ historyLogSioData: ILogSioData[] }>
+  >("/sio/get-sio-data", filterData);
+};
+const getOpenSIOData = (filterData: ILogSioFilterForm) => {
+  return http.post<
+    ILogSioFilterForm,
+    AxiosResponse<{ historyLogSioData: ILogSioData[] }>
+  >("/sio/get-opensio-data", filterData);
 };
 
 const getAECTDashboardData = (
@@ -62,17 +68,18 @@ const getAECTPendingClosureData = (
   division_id: number,
   location_id: number,
 ) => {
-  return http.post<any, AxiosResponse<{ pendingLogAectData: ILogAectData[] }>>(
+  return http.post<any, AxiosResponse<{ pendingLogAectData: ILogSioData[] }>>(
     "/aect/get-aect-pending",
     { team_id, area_id, division_id, location_id },
   );
 };
 
 export {
-  getAECTData,
+  getSIOData,
   addNewSIOData,
   getAECTPendingClosureData,
   updateAectStatus,
   getAECTDashboardData,
   getSIOMasterData,
+  getOpenSIOData
 };

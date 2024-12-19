@@ -1,8 +1,7 @@
 import { useQuery } from "react-query";
 import { removeJSONNull } from "@/features/common/utils/json-util";
 
-import { getAECTData, getSIOMasterData } from "../services/sis.services";
-import { ILogAectFilterForm } from "../types";
+import { getSIOMasterData } from "../services/sis.services";
 
 const useSIOMasterDataQuery = () => {
   return useQuery({

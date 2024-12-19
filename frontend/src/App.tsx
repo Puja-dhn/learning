@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import PrivateRoutes from "./features/authorization/PrivateRoute";
+import AssignPDC from "./pages/sis/AssignPDC";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -23,7 +24,7 @@ const MasterDashboard = React.lazy(() => import("@/pages/master/Dashboard"));
 // SIS Routes
 
 const LogSis = React.lazy(() => import("@/pages/sis/LogSis"));
-const ViewAect = React.lazy(() => import("@/pages/sis/ViewAect"));
+const ViewSio = React.lazy(() => import("@/pages/sis/ViewSio"));
 
 function App() {
   return (
@@ -55,7 +56,8 @@ function App() {
             <Route index element={<LogSis />} />
             <Route path="dashboard" element={<LogSis />} />
             <Route path="log-sio" element={<LogSis />} />
-            <Route path="view-aect" element={<ViewAect />} />
+            <Route path="view-sio" element={<ViewSio />} />
+            <Route path="assign-pdc" element={<AssignPDC />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

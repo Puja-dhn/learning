@@ -8,9 +8,10 @@ import DocumentMagnifyingGlassIconSolid from "@heroicons/react/24/solid/Document
 
 import IMenuItem from "../types/IMenuItem";
 
-import ViewAect from "@/pages/sis/ViewAect";
+import ViewSio from "@/pages/sis/ViewSio";
 import Dashboard from "@/pages/sis/Dashboard";
 import LogSis from "@/pages/sis/LogSis";
+import AssignPDC from "@/pages/sis/AssignPDC";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -54,8 +55,19 @@ const SIS_MENU_LIST: IMenuItem[] = [
     icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
     iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
     appId: 2,
-    path: "view-aect",
-    element: <ViewAect />,
+    path: "view-sio",
+    element: <ViewSio />,
+    children: [],
+    menuType: "Normal",
+  },
+  {
+    id: 3,
+    name: "Assign PDC",
+    icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
+    iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
+    appId: 2,
+    path: "assign-pdc",
+    element: <AssignPDC />,
     children: [],
     menuType: "Normal",
   },

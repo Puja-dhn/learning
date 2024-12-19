@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { shallowEqual } from "react-redux";
-import * as Yup from "yup";
-import { yupResolver } from "@hookform/resolvers/yup";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   FunnelIcon,
@@ -10,108 +8,38 @@ import {
   PencilSquareIcon,
 } from "@heroicons/react/24/solid";
 import { useQueryClient } from "react-query";
-import dayjs from "dayjs";
 // import { utils, writeFile } from "xlsx";
 
+import Paper from "@mui/material/Paper";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   OBS_CATEGORY_LIST,
   OBS_STATUS_LIST,
 } from "@/features/common/constants";
 // import { IOptionList } from "@/features/ui/types";
-import { ILogAectData, ILogAectFilterForm } from "@/features/aect/types";
-import { Button, IconButton } from "@/features/ui/buttons";
+import { IconButton } from "@/features/ui/buttons";
 import { ModalPopup } from "@/features/ui/popup";
 import { DropdownList, TextField } from "@/features/ui/form";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
 import HirarchyFilterAll from "@/features/common/HirarchyFilterAll";
-import { useAectLogDetailQuery } from "@/features/aect/hooks";
-import { useDBDateQuery } from "@/features/common/hooks";
 import ModalPopupMobile from "@/features/ui/popup/ModalPopupMobile";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import Paper from "@mui/material/Paper";
+import ILogSioData from "@/features/sis/types/sis/ILogSioData";
+import { useSisLogDetailQuery } from "@/features/sis/hooks";
+import { ILogSioFilterForm } from "@/features/sis/types";
 
-interface ILogAectTeamData {
-  historyLogAectData: ILogAectData[];
+interface ILogSioTeamData {
+  historyLogSioData: ILogSioData[];
 }
 
-const initialFilterValues: ILogAectFilterForm = {
-  ID: null,
-  TEAM_ID: -1,
-  AREA_ID: -1,
-  DIVISION_ID: -1,
-  LOCATION_ID: -1,
-  OBS_DESC: "",
-  CATEGORY: "All",
-  LOCATION: "",
-  SEVERITY: "All",
-  REPORTED_BY: 0,
-  REPORTED_DATE_FROM: dayjs(new Date()).format("YYYY-MM-DD"),
-  REPORTED_DATE_TO: dayjs(new Date()).format("YYYY-MM-DD"),
-  STATUS: "All",
-  PDC_DATE_FROM: "",
-  PDC_DATE_TO: "",
-  ACTION_CLOSED_DATE_FROM: "",
-  ACTION_CLOSED_DATE_TO: "",
+const initialFilterValues: ILogSioFilterForm = {
+  id: null,
+  department: "",
+  category: "",
+  area: "",
+  severity: "",
 };
 
-const filterSchema = Yup.object().shape({
-  OBS_DESC: Yup.string().max(400, "Maximum 400 characters can be entered"),
-  LOCATION: Yup.string().max(200, "Maximum 200 characters can be entered"),
-  REPORTED_DATE_FROM: Yup.string().required("Reported Date From is required"),
-  REPORTED_DATE_TO: Yup.string().required("Reported Date To is required"),
-});
-
-const tableColumns = [
-  {
-    label: "Log No",
-    minWidth: "min-w-[100px]",
-    dbCol: "ID",
-  },
-  {
-    label: "Reported Date",
-    minWidth: "min-w-[180px]",
-    dbCol: "REPORTED_DATE",
-  },
-  {
-    label: "Reported By",
-    minWidth: "min-w-[200px]",
-    dbCol: "REPORTED_BY_DISP_NAME",
-  },
-  {
-    label: "Observation Description",
-    minWidth: "min-w-[300px]",
-    dbCol: "OBS_DESC",
-  },
-  { label: "Severity", minWidth: "min-w-[140px]", dbCol: "SEVERITY" },
-  { label: "Category", minWidth: "min-w-[140px]", dbCol: "CATEGORY" },
-  { label: "Status", minWidth: "min-w-[140px]", dbCol: "STATUS" },
-  { label: "Closure PDC", minWidth: "min-w-[140px]", dbCol: "PDC_DATE" },
-  {
-    label: "Exact Location",
-    minWidth: "min-w-[200px]",
-    dbCol: "LOCATION",
-  },
-  { label: "Team Name", minWidth: "min-w-[140px]", dbCol: "TEAM_NAME" },
-  { label: "Area Name", minWidth: "min-w-[250px]", dbCol: "AREA_NAME" },
-  { label: "Division Name", minWidth: "min-w-[250px]", dbCol: "DIVISION_NAME" },
-  {
-    label: "Action Planned",
-    minWidth: "min-w-[200px]",
-    dbCol: "ACTION_PLANNED",
-  },
-  { label: "Action Taken", minWidth: "min-w-[250px]", dbCol: "ACTION_TAKEN" },
-  {
-    label: "Action Closed By",
-    minWidth: "min-w-[250px]",
-    dbCol: "ACTION_CLOSED_BY_DISP_NAME",
-  },
-  {
-    label: "Action Closed Date",
-    minWidth: "min-w-[250px]",
-    dbCol: "ACTION_CLOSED_DATE",
-  },
-];
 const handleActionClick = (row: any) => {
   console.log("Action clicked for row:", row);
 };
@@ -129,39 +57,22 @@ const columns: GridColDef[] = [
       </IconButton>
     ),
   },
-  { field: "ID", headerName: "Log No", width: 70 },
-  { field: "REPORTED_DATE", headerName: "Reported Date", width: 180 },
-  { field: "REPORTED_BY_DISP_NAME", headerName: "Reported By", width: 200 },
-  {
-    field: "OBS_DESC",
-    headerName: "Observation Description",
-    width: 300,
-  },
-  { field: "SEVERITY", headerName: "Severity", width: 140 },
-  { field: "CATEGORY", headerName: "Category", width: 140 },
-  { field: "STATUS", headerName: "Status", width: 140 },
-  { field: "PDC_DATE", headerName: "Closure PDC", width: 140 },
-  { field: "LOCATION", headerName: "Exact Location", width: 200 },
-  { field: "TEAM_NAME", headerName: "Team Name", width: 140 },
-  { field: "AREA_NAME", headerName: "Area Name", width: 250 },
-  { field: "DIVISION_NAME", headerName: "Division Name", width: 250 },
-  { field: "ACTION_PLANNED", headerName: "Action Planned", width: 200 },
-  { field: "ACTION_TAKEN", headerName: "Action Taken", width: 250 },
-  {
-    field: "ACTION_CLOSED_BY_DISP_NAME",
-    headerName: "Action Closed By",
-    width: 250,
-  },
-  { field: "ACTION_CLOSED_DATE", headerName: "Action Closed Date", width: 250 },
+  { field: "id", headerName: "Log No", width: 70 },
+  { field: "obs_datetime", headerName: "Observation Date", width: 180 },
+  { field: "department", headerName: "Department", width: 200 },
+  { field: "area", headerName: "Area", width: 200 },
+  { field: "category", headerName: "Category", width: 200 },
+  { field: "severity", headerName: "Severity", width: 200 },
+  { field: "pending_on", headerName: "Pending On", width: 200 },
+  { field: "status", headerName: "Status", width: 200 },
 ];
 
 const paginationModel = { page: 0, pageSize: 5 };
 
-function ViewAect() {
+function ViewSio() {
   const alertToast = useAlertConfig();
   const loader = useLoaderConfig();
   const authState = useAppSelector(({ auth }) => auth, shallowEqual);
-  const globalState = useAppSelector(({ global }) => global, shallowEqual);
   const [isDesktop, setIsDesktop] = useState(false);
   useEffect(() => {
     const handleResize = () => {
@@ -179,12 +90,12 @@ function ViewAect() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  const [teamData, setTeamData] = useState<ILogAectTeamData>({
-    historyLogAectData: [],
+  const [teamData, setTeamData] = useState<ILogSioTeamData>({
+    historyLogSioData: [],
   });
 
-  const [logDetails, setLogDetails] = useState<ILogAectTeamData>({
-    historyLogAectData: [],
+  const [logDetails, setLogDetails] = useState<ILogSioTeamData>({
+    historyLogSioData: [],
   });
 
   const [showLogDetailsDialog, setShowLogDetailsDialog] = useState({
@@ -196,10 +107,7 @@ function ViewAect() {
   // ]);
   const queryClient = useQueryClient();
 
-  const appModePaddingClass =
-    globalState.appMode === "FullScreen" ? "p-0 px-2.5 " : " p-2.5  pb-0 ";
-
-  const [filterList, setFilterList] = useState<ILogAectFilterForm>({
+  const [filterList, setFilterList] = useState<ILogSioFilterForm>({
     ...initialFilterValues,
   });
 
@@ -208,17 +116,16 @@ function ViewAect() {
     authState.ROLES.length > 0 &&
     authState.ROLES.includes(2);
 
-  let CURR_OBS_SEVERITY_LIST = [
+  const CURR_OBS_SEVERITY_LIST = [
     { id: "Minor", name: "Minor" },
     { id: "Serious", name: "Serious" },
   ];
-  
 
   const {
-    data: aectLogHistoryData,
-    isLoading: isAectLogHistoryDataLoading,
-    isError: isAectLogHistoryDataError,
-  } = useAectLogDetailQuery(filterList);
+    data: sioLogHistoryData,
+    isLoading: isSioLogHistoryDataLoading,
+    isError: isSioLogHistoryDataError,
+  } = useSisLogDetailQuery(filterList);
 
   const [showFilterDialog, setShowFilterDialog] = useState({
     status: false,
@@ -230,80 +137,22 @@ function ViewAect() {
     reset: resetFilter,
     control: controlFilter,
     formState: formStateFilter,
-  } = useForm<ILogAectFilterForm>({
+  } = useForm<ILogSioFilterForm>({
     defaultValues: initialFilterValues,
-    resolver: yupResolver(filterSchema),
   });
 
   const { submitCount: submitCountFilter, errors: errorsFilter } =
     formStateFilter;
 
-  const {
-    data: dbDateData,
-    isLoading: isDBDateDataLoading,
-    isError: isDBDateDataError,
-  } = useDBDateQuery();
-
-  useEffect(() => {
-    if (isDBDateDataLoading) {
-      loader.show();
-    } else {
-      loader.hide();
-    }
-
-    if (!isDBDateDataLoading && isDBDateDataError) {
-      alertToast.show("error", "Error Reading API", true);
-    }
-
-    if (!isDBDateDataLoading && !isDBDateDataError && dbDateData) {
-      const currDBDate =
-        !isDBDateDataLoading &&
-        !isDBDateDataError &&
-        dbDateData &&
-        dbDateData.currDate
-          ? new Date(dbDateData.currDate)
-          : new Date();
-
-      initialFilterValues.REPORTED_DATE_FROM =
-        dayjs(currDBDate).format("YYYY-MM-DD");
-      initialFilterValues.REPORTED_DATE_TO =
-        dayjs(currDBDate).format("YYYY-MM-DD");
-      resetFilter({
-        ...initialFilterValues,
-        REPORTED_DATE_FROM: dayjs(currDBDate).format("YYYY-MM-DD"),
-        REPORTED_DATE_TO: dayjs(currDBDate).format("YYYY-MM-DD"),
-      });
-      setShowFilterDialog((oldState) => ({
-        ...oldState,
-        formInitialValues: {
-          ...oldState.formInitialValues,
-          REPORTED_DATE_FROM: dayjs(currDBDate).format("YYYY-MM-DD"),
-          REPORTED_DATE_TO: dayjs(currDBDate).format("YYYY-MM-DD"),
-        },
-      }));
-      setFilterList({
-        ...initialFilterValues,
-        REPORTED_DATE_FROM: dayjs(currDBDate).format("YYYY-MM-DD"),
-        REPORTED_DATE_TO: dayjs(currDBDate).format("YYYY-MM-DD"),
-      });
-    }
-  }, [dbDateData, isDBDateDataError, isDBDateDataLoading]);
-
   const handleReset = () => {
     resetFilter({
       ...initialFilterValues,
-      AREA_ID: globalState.areaId,
-      DIVISION_ID: globalState.divisionId,
-      LOCATION_ID: globalState.locationId,
     });
   };
 
   const handleFilterDialogOpen = () => {
     resetFilter({
       ...filterList,
-      AREA_ID: globalState.areaId,
-      DIVISION_ID: globalState.divisionId,
-      LOCATION_ID: globalState.locationId,
     });
     setShowFilterDialog({
       status: true,
@@ -317,91 +166,59 @@ function ViewAect() {
     setShowFilterDialog((oldState) => ({ ...oldState, status: false }));
   };
 
-  const handleFilterFormSubmit: SubmitHandler<ILogAectFilterForm> = (
-    values,
-  ) => {
+  const handleFilterFormSubmit: SubmitHandler<ILogSioFilterForm> = (values) => {
     setShowFilterDialog((oldState) => ({ ...oldState, status: false }));
     setFilterList({ ...values });
   };
 
   useEffect(() => {
-    if (
-      globalState.locationId >= 0 &&
-      globalState.divisionId >= 0 &&
-      globalState.areaId >= 0
-    ) {
-      resetFilter({
-        ...filterList,
-        AREA_ID: globalState.areaId,
-        DIVISION_ID: globalState.divisionId,
-        LOCATION_ID: globalState.locationId,
-      });
-      setFilterList((oldState) => ({
-        ...oldState,
-        AREA_ID: globalState.areaId,
-        DIVISION_ID: globalState.divisionId,
-        LOCATION_ID: globalState.locationId,
-      }));
-    }
-  }, [globalState]);
-
-  useEffect(() => {
-    if (isAectLogHistoryDataLoading) {
+    if (isSioLogHistoryDataLoading) {
       loader.show();
     } else {
       loader.hide();
     }
 
-    if (!isAectLogHistoryDataLoading && isAectLogHistoryDataError) {
+    if (!isSioLogHistoryDataLoading && isSioLogHistoryDataError) {
       alertToast.show("error", "Error Reading API", true);
     }
 
     if (
-      !isAectLogHistoryDataLoading &&
-      !isAectLogHistoryDataError &&
-      aectLogHistoryData
+      !isSioLogHistoryDataLoading &&
+      !isSioLogHistoryDataError &&
+      sioLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogAectData = !isAdmin
+      const historyLogSioData = !isAdmin
         ? [
-            ...aectLogHistoryData.historyLogAectData.filter(
-              (item) => item.REPORTED_BY === authState.ID,
+            ...sioLogHistoryData.historyLogSioData.filter(
+              (item) => +item.created_by === authState.ID,
             ),
           ]
-        : [...aectLogHistoryData.historyLogAectData];
+        : [...sioLogHistoryData.historyLogSioData];
 
       setTeamData({
-        historyLogAectData,
+        historyLogSioData,
       });
     }
-  }, [
-    aectLogHistoryData,
-    isAectLogHistoryDataLoading,
-    isAectLogHistoryDataError,
-    globalState,
-  ]);
+  }, [sioLogHistoryData, isSioLogHistoryDataLoading, isSioLogHistoryDataError]);
 
   useEffect(() => {
     queryClient.invalidateQueries({
-      predicate: (query) =>
-        query.queryKey[0] === "aectDataQuery" ||
-        query.queryKey[0] === "orgDataAllQuery",
+      predicate: (query) => query.queryKey[0] === "sioDataQuery",
     });
   }, []);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({
-      predicate: (query) =>
-        query.queryKey[0] === "aectDataQuery" ||
-        query.queryKey[0] === "orgDataAllQuery",
+      predicate: (query) => query.queryKey[0] === "sioDataQuery",
     });
   };
 
   const handleShowLogDetails = (logNo: number) => {
-    const historyLogAectData = [
-      ...teamData.historyLogAectData.filter((item) => item.ID === logNo),
+    const historyLogSioData = [
+      ...teamData.historyLogSioData.filter((item) => item.id === logNo),
     ];
-    setLogDetails({ historyLogAectData });
+    setLogDetails({ historyLogSioData });
     setShowLogDetailsDialog({
       status: true,
     });
@@ -424,7 +241,7 @@ function ViewAect() {
   return (
     <div className="flex flex-col w-full h-full gap-2 p-4 overflow-hidden text-sm md:p-6">
       <div className="h-[50px] flex justify-between items-center p-1.5 px-2.5 border-[1px] text-md font-semibold text-center bg-[#f0f8ff] rounded-lg shadow-md dark:bg-gray-600 dark:text-cyan-200 dark:border-gray-500">
-        <div className="flex items-center justify-center gap-2">View AECT</div>
+        <div className="flex items-center justify-center gap-2">View SIO</div>
         <div className="flex items-center justify-end gap-4 ml-20">
           <IconButton onClick={handleFilterDialogOpen}>
             <FunnelIcon className="w-4 h-4" />
@@ -438,7 +255,7 @@ function ViewAect() {
         <div className="h-full overflow-auto border-[1px] dark:border-gray-700 ">
           <Paper sx={{ height: "100%", width: "100%" }}>
             <DataGrid
-              rows={teamData.historyLogAectData}
+              rows={teamData.historyLogSioData}
               columns={columns}
               getRowId={(row) =>
                 row.TEAM_ID || row.ID || Math.random().toString(36).substring(2)
@@ -491,18 +308,18 @@ function ViewAect() {
         </div>
       ) : (
         <div className="flex flex-col h-full gap-2 overflow-auto ">
-          {teamData.historyLogAectData.map((row) => (
+          {teamData.historyLogSioData.map((row) => (
             <button
-              key={row.ID}
+              key={row.id}
               type="button"
-              onClick={() => handleShowLogDetails(row.ID)}
+              onClick={() => handleShowLogDetails(row.id)}
               className="w-full"
             >
               <div className="relative flex items-start bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-gray-700 dark:border-gray-600">
                 {/* Full-Height Vertical Log No */}
                 <div className="absolute top-0 left-0 flex items-center justify-center w-6 h-full font-bold text-center text-white bg-[#6388bd] dark:bg-blue-900">
                   <span className="origin-center transform -rotate-90">
-                    {row.ID}
+                    {row.id}
                   </span>
                 </div>
 
@@ -513,13 +330,13 @@ function ViewAect() {
                     <div className="flex items-center space-x-4 w-[60%]">
                       <span className="font-semibold">Reported Date:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.REPORTED_DATE}
+                        {row.obs_datetime}
                       </span>
                     </div>
                     <div className="flex items-center space-x-4 w-[40%]">
                       <span className="font-semibold">Category:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.CATEGORY}
+                        {row.category}
                       </span>
                     </div>
                   </div>
@@ -529,9 +346,7 @@ function ViewAect() {
                     <div className="flex items-center w-full space-x-4">
                       <span className="font-semibold">Description:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.OBS_DESC.length > 40
-                          ? `${row.OBS_DESC.slice(0, 40)}...`
-                          : row.OBS_DESC}
+                        
                       </span>
                     </div>
                   </div>
@@ -541,13 +356,13 @@ function ViewAect() {
                     <div className="flex items-center space-x-4 w-[60%]">
                       <span className="font-semibold">Reported By:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.REPORTED_BY_DISP_NAME}
+                     
                       </span>
                     </div>
                     <div className="flex items-center space-x-4 w-[40%]">
                       <span className="font-semibold">Severity:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.SEVERITY}
+                       
                       </span>
                     </div>
                   </div>
@@ -557,19 +372,15 @@ function ViewAect() {
                     <div className="flex items-center space-x-4 w-[60%]">
                       <span className="font-semibold">Closure PDC:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.PDC_DATE}
+                      
                       </span>
                     </div>
                     <div className="flex items-center space-x-4 w-[40%]">
                       <span className="font-semibold">Status:</span>
                       <span
-                        className={`text-gray-600 dark:text-gray-400 font-bold ${
-                          row.STATUS === "Open"
-                            ? "text-red-600"
-                            : "text-green-600"
-                        }`}
+                        className="font-bold text-gray-600 dark:text-gray-400 "
                       >
-                        {row.STATUS}
+                     
                       </span>
                     </div>
                   </div>
@@ -577,7 +388,7 @@ function ViewAect() {
                   {/* Chevron Icon for Details */}
                   <div className="absolute top-0 right-0 flex items-center justify-center h-full px-2">
                     <ChevronRightIcon
-                      onClick={() => handleShowLogDetails(row.ID)}
+                      onClick={() => handleShowLogDetails(row.id)}
                       height={20}
                       className="text-[#014098] transition-colors duration-300 cursor-pointer hover:text-blue-700"
                     />
@@ -611,10 +422,7 @@ function ViewAect() {
         }
       >
         <form className="bg-[#ecf3f9] dark:bg-gray-600 grid gap-2.5 p-2.5">
-          <HirarchyFilterAll
-            // hidden={isHiddenHirarchy}
-            className="bg-transparent"
-          />
+          
 
           <div className="flex flex-wrap justify-evenly items-center p-2.5 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500">
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
@@ -744,7 +552,7 @@ function ViewAect() {
         showError
       >
         <div className="p-2 text-sm dark:bg-gray-700 h-[100%]">
-          {logDetails && logDetails.historyLogAectData.length > 0 && (
+          {logDetails && logDetails.historyLogSioData.length > 0 && (
             <div className="p-2 bg-white dark:bg-gray-800 h-[100%]">
               <div className="space-y-4 text-[12px]">
                 <div className="bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800">
@@ -760,7 +568,7 @@ function ViewAect() {
                           Log No:
                         </span>
                         <span className="text-gray-600 dark:text-gray-400">
-                          {logDetails.historyLogAectData[0].ID}
+                          
                         </span>
                       </div>
                       <div className="flex-1">
@@ -768,7 +576,7 @@ function ViewAect() {
                           Date:
                         </span>
                         <span className="text-gray-600 dark:text-gray-400">
-                          {logDetails.historyLogAectData[0].REPORTED_DATE}
+                         
                         </span>
                       </div>
                     </div>
@@ -779,10 +587,7 @@ function ViewAect() {
                             Log By:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {
-                              logDetails.historyLogAectData[0]
-                                .REPORTED_BY_DISP_NAME
-                            }
+                            
                           </span>
                         </div>
                       </div>
@@ -794,7 +599,7 @@ function ViewAect() {
                             Observation Description:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].OBS_DESC}
+                            
                           </span>
                         </div>
                       </div>
@@ -806,7 +611,7 @@ function ViewAect() {
                             Severity:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].SEVERITY}
+                          
                           </span>
                         </div>
                         <div className="flex-1">
@@ -814,7 +619,7 @@ function ViewAect() {
                             Category:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].CATEGORY}
+                           
                           </span>
                         </div>
                       </div>
@@ -826,13 +631,9 @@ function ViewAect() {
                             Status:
                           </span>
                           <span
-                            className={`text-gray-600 dark:text-gray-400 font-bold ${
-                              logDetails.historyLogAectData[0].STATUS === "Open"
-                                ? "text-red-600"
-                                : "text-green-600"
-                            }`}
+                            className="font-bold text-gray-600 dark:text-gray-400 "
                           >
-                            {logDetails.historyLogAectData[0].STATUS}
+                            
                           </span>
                         </div>
                         <div className="flex-1">
@@ -840,7 +641,7 @@ function ViewAect() {
                             Closure PDC:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].PDC_DATE}
+                            
                           </span>
                         </div>
                       </div>
@@ -852,7 +653,7 @@ function ViewAect() {
                             Location:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].LOCATION}
+                           
                           </span>
                         </div>
                         <div className="flex-1">
@@ -860,7 +661,7 @@ function ViewAect() {
                             Team:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].TEAM_NAME}
+                            
                           </span>
                         </div>
                       </div>
@@ -872,7 +673,7 @@ function ViewAect() {
                             Area:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].AREA_NAME}
+                           
                           </span>
                         </div>
                       </div>
@@ -884,7 +685,7 @@ function ViewAect() {
                             Division:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].DIVISION_NAME}
+                            
                           </span>
                         </div>
                       </div>
@@ -896,7 +697,7 @@ function ViewAect() {
                             Action Planned:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].ACTION_PLANNED}
+                          
                           </span>
                         </div>
                       </div>
@@ -908,7 +709,7 @@ function ViewAect() {
                             Action Taken:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {logDetails.historyLogAectData[0].ACTION_TAKEN}
+                           
                           </span>
                         </div>
                       </div>
@@ -920,10 +721,7 @@ function ViewAect() {
                             Action Closed By:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {
-                              logDetails.historyLogAectData[0]
-                                .ACTION_CLOSED_BY_DISP_NAME
-                            }
+                           
                           </span>
                         </div>
                       </div>
@@ -935,10 +733,7 @@ function ViewAect() {
                             Action CLosed Date:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            {
-                              logDetails.historyLogAectData[0]
-                                .ACTION_CLOSED_DATE
-                            }
+                           
                           </span>
                         </div>
                       </div>
@@ -954,4 +749,4 @@ function ViewAect() {
   );
 }
 
-export default ViewAect;
+export default ViewSio;

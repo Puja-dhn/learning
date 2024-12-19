@@ -163,8 +163,12 @@ function LogSis() {
       .then(() => {
         alertToast.show("success", "Data added successfully", true, 2000);
         handleReset();
+        setImagePreviews([]); // Reset imagePreviews
+        setClosureImagePreviews([]); // Reset closureImagePreviews
+  
+        // Invalidate queries
         queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === "aectDataPendingQuery",
+          predicate: (query) => query.queryKey[0] === "sioMasterDataQuery",
         });
       })
       .catch((err) => {
@@ -192,11 +196,7 @@ function LogSis() {
       fileInputRef.current.click();
     }
   };
-  const handleStatusChange = (value: string | number) => {
-    if (value === "Closed") {
-    } else {
-    }
-  };
+  
   const handleClosureFileButtonClick = () => {
     if (closureFileInputRef.current) {
       closureFileInputRef.current.click();
@@ -281,7 +281,7 @@ function LogSis() {
                   label="Observation Status"
                   control={control}
                   optionList={[...CURR_OBS_STATUS]}
-                  changeHandler={handleStatusChange}
+                 
                 />
               </div>
             </div>
@@ -354,7 +354,7 @@ function LogSis() {
             </div>
 
             {watchValues("STATUS") === "Closed" && (
-              <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
+              <div className="mt-2 grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
                 <div className="pb-2 border-b-2 border-gray-200 dark:border-gray-500">
                   <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                     Closure Details
