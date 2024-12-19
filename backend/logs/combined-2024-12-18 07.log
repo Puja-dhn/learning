@@ -1,0 +1,14 @@
+[2024-12-18 07:32:16.448 PM] info: 	DB Initialized
+[2024-12-18 07:32:57.328 PM] info: 	DB Initialized
+[2024-12-18 07:33:44.966 PM] error: 	Autentication Failed false
+[2024-12-18 07:33:45.002 PM] info: 	Autentication Success
+[2024-12-18 07:33:45.003 PM] info: 	BEFORE DB Get Connection
+[2024-12-18 07:33:59.042 PM] error: 	Autentication Failed false
+[2024-12-18 07:33:59.065 PM] info: 	Autentication Success
+[2024-12-18 07:33:59.066 PM] info: 	BEFORE DB Get Connection
+[2024-12-18 07:34:06.359 PM] error: 	DB Execution, {"errorNum":12170,"offset":0}
+[2024-12-18 07:34:20.251 PM] error: 	DB Execution, {"errorNum":12170,"offset":0}
+[2024-12-18 07:36:54.456 PM] error: 	Autentication Failed false
+[2024-12-18 07:36:54.490 PM] info: 	Autentication Success
+[2024-12-18 07:37:43.074 PM] error: 	Autentication Failed false
+[2024-12-18 07:37:43.252 PM] error: 	Autentication Failed false

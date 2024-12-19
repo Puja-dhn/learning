@@ -1,0 +1,70 @@
+{
+  "headings": {
+    "auth_required": "Authentication Required",
+    "please_note_below_points": "Please Note the below points",
+    "new_user_registration": "New User Registration"
+  },
+  "form": {
+    "texts": {
+      "not_registered_yet": "Not registered yet?"
+    },
+    "labels": {
+      "domain_id": "Domain Id",
+      "password": "Password",
+      "name": "Name",
+      "ticket_no": "Ticket No",
+      "location": "Location",
+      "scan_id": "Scan ID"
+    },
+    "yup": {
+      "required_domain_id": "Domain Id cannot be blank",
+      "required_password": "Password cannot be blank",
+      "required_name": "Name cannot be blank",
+      "required_ticket_no": "Ticket No cannot be blank",
+      "required_location": "Location is required",
+      "required_scan_id": "ID Scan is required",
+      "max_domain_id": "Domain Id length cannot be more than {{max}} characters",
+      "max_password": "Password length cannot be more than {{max}} characters",
+      "max_name": "Name length cannot be more than {{max}} characters",
+      "max_ticket_no": "Ticket No length cannot be more than {{max}} characters",
+      "max_scan_id": "Scanned ID length cannot be more than {{max}} characters",
+      "min_password": "Password length cannot be less than {{min}} characters",
+      "min_name": "Name length cannot be less than {{min}} characters",
+      "min_ticket_no": "Ticket No length cannot be less than {{min}} characters",
+      "min_scan_id": "Scanned ID length cannot be less than {{min}} characters",
+      "min_location": "Location must be valid"
+    },
+    "errors": {
+      "invalid_user": "User Credentials is invalid. Login Unsuccessful.",
+      "api_res_invalid_auth_request": "Invalid authentication request. Try again.",
+      "api_res_invalid_id_scanned": "Invalid Id is scanned. Try again.",
+      "api_res_domainid_blank": "Domain Id cannot be blank. Try again.",
+      "api_res_password_blank": "Domain Password cannot be blank. Try again.",
+      "api_res_auth_invalid_credentials": "Invalid Credentials. Try again.",
+      "api_res_auth_noroles": "User found. But no roles found.",
+      "api_res_register_nodata": "Incomplete Data please check. Try again.",
+      "api_res_register_userexists": "User with given Ticket No or Scanned ID already Exists",
+      "api_res_register_usernotexists": "User with given Ticket No not Found, Contact Admin"
+    },
+    "success": {
+      "user_registerd_success": "User Registered Successfully",
+      "login_successfull": "Login Successfully Done"
+    }
+  },
+  "buttons": {
+    "sign_in": "Sign In",
+    "sign_in_domain": "Sign in with Domain",
+    "back_to_login": "Back to Login"
+  },
+  "list": {
+    "for_new_punch_card_registration": "Please contact to your GL, FIC Coordinator & Administrator for new ID card registration.",
+    "access_card_registration": "GL, FIC Coordinator & Administrator can reset team members account for new ID card registration.",
+    "only_registered_user_can_login": "Only registered user can login into the portal.",
+    "click_icon_to_register": "click on icon to register",
+    "do_check_the_above_status_is_not_idle": "Do check the button above is not \"<0>{{status}}</0>\". If so Click on the button and then scan your Card",
+    "system_also_allows_domain_login": "System also allows Domain Login. If required click on \"<0>{{button}}</0>\" button"
+  },
+  "text": {
+    "idle": "Idle"
+  }
+}

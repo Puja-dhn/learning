@@ -1,0 +1,15 @@
+[2024-05-04 08:57:14.515 AM] info: 	DB Initialized
+[2024-05-04 08:59:39.458 AM] error: 	Autentication Failed false
+[2024-05-04 08:59:39.502 AM] error: 	Autentication Failed false
+[2024-05-04 08:59:39.503 AM] info: 	BEFORE DB Get Connection
+[2024-05-04 08:59:39.749 AM] info: 	BEFORE DB Execution
+[2024-05-04 08:59:39.822 AM] info: 	AFTER DB Execution Success
+[2024-05-04 08:59:39.822 AM] info: 	BEFORE DB Connection Close
+[2024-05-04 08:59:39.827 AM] info: 	AFTER DB Connection Close
+[2024-05-04 08:59:52.125 AM] error: 	Autentication Failed false
+[2024-05-04 08:59:52.197 AM] error: 	Autentication Failed false
+[2024-05-04 08:59:52.197 AM] info: 	BEFORE DB Get Connection
+[2024-05-04 08:59:52.225 AM] info: 	BEFORE DB Execution
+[2024-05-04 08:59:52.262 AM] info: 	AFTER DB Execution Success
+[2024-05-04 08:59:52.262 AM] info: 	BEFORE DB Connection Close
+[2024-05-04 08:59:52.277 AM] info: 	AFTER DB Connection Close

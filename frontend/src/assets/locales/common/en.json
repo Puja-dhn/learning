@@ -1,0 +1,21 @@
+{
+  "texts": {
+    "loading_wait": "Loading...! Please Wait"
+  },
+  "buttons": {
+    "submit": "Submit",
+    "clearall": "Clear All"
+  },
+  "form": {
+    "errors": {
+      "defaultError": "Unknown Server Error, Try again",
+      "api_data_fetching": "Error Fetching data from API. Try again.",
+      "api_res_invalid_token": "Invalid Token. Relogin and Try Again",
+      "api_res_oracle_db_error": "Oracle DB Error. Try Again.",
+      "api_res_oracle_already_exists": "Record Already Exists. Try Again.",
+      "api_res_invalid_request": "Invalid Request. Try Again",
+      "api_res_unathorized_update_data": "You are not authorized to update Data",
+      "api_req_network_error": "Cannot connect to API Server, Try again."
+    }
+  }
+}

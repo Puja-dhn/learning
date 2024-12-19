@@ -1,0 +1,67 @@
+[2024-07-30 10:40:14.025 AM] error: 	Autentication Failed false
+[2024-07-30 10:40:14.143 AM] info: 	Autentication Success
+[2024-07-30 10:40:14.143 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.178 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.211 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.211 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.211 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.213 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:40:14.247 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.249 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.250 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.250 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.252 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:40:14.274 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.277 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.277 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.278 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.280 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:40:14.313 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.360 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.360 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.371 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:40:14.464 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.516 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.543 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.543 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.543 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.545 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:40:14.570 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.620 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.620 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.620 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.622 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:40:14.652 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.653 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.653 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.653 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:40:14.655 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:40:14.682 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:40:14.685 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:40:14.685 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:40:14.688 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:41:06.886 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:41:06.918 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:41:06.920 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:41:06.920 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:41:06.924 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:41:06.945 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:41:06.981 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:41:07.011 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:41:07.011 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:41:07.011 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:41:07.013 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:41:07.040 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:41:07.074 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:41:07.075 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:41:07.075 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:41:07.078 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:41:07.104 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:41:07.106 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:41:07.106 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:41:07.106 AM] info: 	BEFORE DB Get Connection
+[2024-07-30 10:41:07.109 AM] info: 	AFTER DB Connection Close
+[2024-07-30 10:41:07.140 AM] info: 	BEFORE DB Execution
+[2024-07-30 10:41:07.143 AM] info: 	AFTER DB Execution Success
+[2024-07-30 10:41:07.144 AM] info: 	BEFORE DB Connection Close
+[2024-07-30 10:41:07.146 AM] info: 	AFTER DB Connection Close

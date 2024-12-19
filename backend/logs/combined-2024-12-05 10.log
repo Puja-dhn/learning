@@ -1,0 +1,783 @@
+[2024-12-05 10:50:10.208 AM] info: 	DB Initialized
+[2024-12-05 10:50:53.839 AM] error: 	Autentication Failed false
+[2024-12-05 10:50:53.900 AM] info: 	Autentication Success
+[2024-12-05 10:50:53.901 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:54.031 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:54.104 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:54.104 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:54.105 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:54.108 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:54.143 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:54.197 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:54.198 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:54.205 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:55.244 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:55.284 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:55.448 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:55.448 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:55.448 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:55.451 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:55.476 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:55.514 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:55.514 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:55.515 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:55.517 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:55.542 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:55.548 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:55.548 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:55.548 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:55.552 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:55.577 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:55.579 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:55.579 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:55.579 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:55.581 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:55.621 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:55.625 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:55.625 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:55.625 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:55.627 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:55.649 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:55.663 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:55.663 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:55.675 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.388 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.417 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.422 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.422 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.422 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.426 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.427 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.460 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.461 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.463 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.463 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.463 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.465 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.466 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.466 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.466 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.471 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.492 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.504 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.506 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.507 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.507 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.509 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.556 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.564 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.564 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.564 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.566 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.577 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.578 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.578 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.580 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.601 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.604 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.610 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.610 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.611 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.613 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.639 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.671 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.671 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.671 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.674 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.690 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.690 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.690 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.692 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.697 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.704 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.704 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.706 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.745 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.750 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.750 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.750 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.753 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.789 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.925 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.925 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.925 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:57.927 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:57.955 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:57.958 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:57.958 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:57.972 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:58.139 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:58.166 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:58.167 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:58.167 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:58.168 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:58.170 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:58.209 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:58.211 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:58.211 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:58.212 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:58.214 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:58.245 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:58.252 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:58.252 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:58.253 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:58.255 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:58.293 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:58.296 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:58.297 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:58.297 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:58.299 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:58.323 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:58.356 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:58.356 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:58.356 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:50:58.358 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:50:58.390 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:50:58.396 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:50:58.396 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:50:58.400 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.797 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.799 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.815 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.826 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.827 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.828 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.828 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.830 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.840 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.841 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.842 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.842 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.844 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.844 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.845 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.845 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.846 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.848 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.853 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.855 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.855 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.856 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.857 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.865 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.866 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.866 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.867 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.869 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.872 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.874 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.874 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.875 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.876 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.893 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.899 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.908 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.916 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.916 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.916 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.918 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.918 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.919 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.919 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.924 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.930 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.940 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.942 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.942 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.942 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.944 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.946 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.950 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.950 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.950 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.953 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.957 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.959 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.959 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.959 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.961 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.964 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.964 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.964 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.966 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.977 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.982 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.985 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:11.987 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:11.987 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:11.987 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:11.990 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:11.997 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.014 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.015 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.015 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.017 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.018 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.026 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.026 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.026 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.028 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.029 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.030 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.030 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.033 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.047 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.050 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.050 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.054 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.061 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.069 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.069 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.070 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.075 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.079 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.084 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.084 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.090 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.093 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.093 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.093 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.095 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.112 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.121 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.122 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.122 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.125 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.131 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.133 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.133 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.134 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.137 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.153 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.162 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.162 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.162 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.164 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.310 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.310 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.310 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:12.313 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:12.343 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:12.345 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:12.345 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:12.361 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.318 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.321 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.336 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.361 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.367 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.367 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.367 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.375 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.379 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.382 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.382 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.383 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.385 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.386 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.386 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.387 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.387 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.392 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.399 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.404 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.404 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.404 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.404 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.407 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.409 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.410 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.411 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.411 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.411 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.413 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.413 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.413 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.414 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.416 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.431 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.432 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.432 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.432 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.434 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.438 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.439 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.439 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.444 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.445 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.446 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.448 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.456 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.456 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.456 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.458 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.459 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.460 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.460 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.461 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.463 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.473 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.475 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.475 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.475 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.477 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.485 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.487 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.487 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.487 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.490 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.494 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.499 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.499 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.499 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.501 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.503 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.513 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.513 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.513 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.515 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.519 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.526 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.530 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.531 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.531 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.533 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.536 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.536 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.536 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.538 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.543 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.558 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.563 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.563 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.564 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.564 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.565 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.571 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.571 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.574 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.574 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.574 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.574 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.576 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.598 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.599 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.606 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.606 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.610 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.611 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.615 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.616 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.649 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.649 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.649 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.651 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.679 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.681 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.681 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.681 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.684 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.712 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.852 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.853 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.853 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:24.856 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:24.879 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:24.881 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:24.881 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:24.910 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:37.012 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:37.058 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:37.060 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:37.060 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:37.060 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:37.062 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:37.084 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:37.086 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:37.086 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:37.086 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:37.089 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:37.130 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:37.199 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:37.199 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:37.199 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:37.201 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:37.226 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:37.314 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:37.314 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:37.314 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:37.316 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:37.373 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:37.375 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:37.375 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:37.375 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:37.377 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:37.397 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:37.523 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:37.523 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:37.523 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:51:37.532 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:51:37.556 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:51:37.557 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:51:37.557 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:51:37.571 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:11.456 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:11.498 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:11.500 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:11.500 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:11.500 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:11.502 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:11.528 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:11.530 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:11.530 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:11.530 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:11.532 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:11.557 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:11.627 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:11.627 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:11.627 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:11.629 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:11.662 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:11.760 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:11.760 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:11.760 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:11.763 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:11.785 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:11.790 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:11.790 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:11.790 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:11.793 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:11.830 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:12.025 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:12.025 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:12.025 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:12.027 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:12.050 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:12.051 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:12.051 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:12.065 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:18.591 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:18.615 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:18.644 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:18.645 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:18.645 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:18.647 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:18.669 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:18.682 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:18.682 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:18.682 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:18.685 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:18.712 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:18.714 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:18.714 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:18.714 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:18.716 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:18.742 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:18.744 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:18.745 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:18.745 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:18.747 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:18.795 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:18.797 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:18.797 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:18.797 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:18.800 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:18.826 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:18.829 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:18.829 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:18.837 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.697 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.705 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.724 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.745 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.745 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.746 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.746 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.746 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.747 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.748 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.748 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.748 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.750 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.754 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.754 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.754 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.754 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.756 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.784 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.785 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.787 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.787 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.787 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.788 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.788 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.788 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.792 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.792 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.797 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.799 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.800 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.800 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.800 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.802 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.813 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.818 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.818 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.818 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.821 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.825 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.826 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.826 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.827 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.828 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.828 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.835 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.857 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.859 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.859 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.859 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.860 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.861 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.862 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.862 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.862 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.864 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.884 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.884 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.884 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.889 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.901 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.904 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.910 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.910 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.911 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.913 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.914 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.914 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.914 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.916 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.919 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.922 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.923 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.923 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.925 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.939 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.944 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.944 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.944 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.946 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.946 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.947 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.947 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:19.947 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.949 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.962 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.982 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.983 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:19.985 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.986 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.990 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:19.991 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:19.991 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:19.991 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:20.002 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:20.017 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:20.018 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:20.018 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:20.021 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:20.027 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:20.032 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:20.032 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:20.035 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:20.041 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:20.042 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:20.042 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:20.044 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:20.047 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:20.050 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:20.050 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:20.052 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:20.067 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:20.069 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:20.069 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:20.069 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:20.072 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:20.115 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:20.252 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:20.253 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:20.253 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:20.256 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:20.282 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:20.284 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:20.284 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:20.318 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.264 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.297 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.318 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.324 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.325 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.325 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.325 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.327 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.327 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.329 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.329 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.329 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.331 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.343 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.344 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.344 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.344 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.346 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.352 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.357 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.358 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.359 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.359 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.359 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.360 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.360 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.362 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.362 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.382 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.386 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.387 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.396 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.399 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.399 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.399 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.401 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.407 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.407 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.408 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.410 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.414 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.415 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.415 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.415 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.417 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.435 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.436 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.438 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.438 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.438 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.440 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.441 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.441 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.441 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.443 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.456 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.457 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.457 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.457 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.459 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.459 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.460 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.460 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.465 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.479 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.481 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.482 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.482 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.483 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.484 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.493 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.498 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.498 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.498 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.501 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.502 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.517 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.526 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.526 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.527 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.529 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.537 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.542 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.542 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.542 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.545 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.555 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.555 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.555 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.558 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.563 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.566 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.566 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.568 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.580 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.587 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.587 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.587 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.589 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.589 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.590 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.590 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.592 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.599 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.602 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.602 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.607 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.613 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.615 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.615 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.615 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.616 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.618 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.622 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.623 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.625 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.643 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.785 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.785 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.785 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:37.788 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:37.812 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:37.814 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:37.814 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:37.829 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:38.924 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:38.926 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:38.950 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:38.963 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:38.966 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:38.966 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:38.967 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:38.968 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:38.969 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:38.973 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:38.973 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:38.973 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:38.977 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:38.986 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:38.988 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:38.988 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:38.988 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:38.991 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:38.996 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:39.002 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:39.002 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:39.006 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:39.018 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:39.020 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:39.020 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:39.020 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:39.023 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:39.027 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:39.039 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:39.039 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:39.042 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:39.045 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:39.058 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:39.058 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:39.062 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:45.762 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:45.798 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:45.801 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:45.801 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:45.801 AM] info: 	BEFORE DB Get Connection
+[2024-12-05 10:52:45.804 AM] info: 	AFTER DB Connection Close
+[2024-12-05 10:52:45.843 AM] info: 	BEFORE DB Execution
+[2024-12-05 10:52:45.859 AM] info: 	AFTER DB Execution Success
+[2024-12-05 10:52:45.859 AM] info: 	BEFORE DB Connection Close
+[2024-12-05 10:52:45.861 AM] info: 	AFTER DB Connection Close

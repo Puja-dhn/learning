@@ -1,0 +1,67 @@
+import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { shallowEqual } from "react-redux";
+
+import {
+  useAccessConfig,
+  useAppAccessQuery,
+  useMenuConfig,
+} from "@/features/authorization/hooks";
+import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
+
+import AppList from "@/features/layout/home/AppList";
+
+import { useAppSelector } from "@/store/hooks";
+import { APP_MENUS } from "@/features/authorization/menu-list";
+// import MobileAppList from "@/features/layout/home/MobileAppList";
+
+function Dashboard() {
+  const { t } = useTranslation(["common", "authentication"]);
+  const authState = useAppSelector(({ auth }) => auth, shallowEqual);
+  const { setAppAccess } = useAccessConfig();
+  const { setSelMenu } = useMenuConfig();
+  const alertToast = useAlertConfig();
+  const loader = useLoaderConfig();
+  const {
+    data: appAccessData,
+    isLoading: isAppAccessDataLoading,
+    isError: isAppAccessDataError,
+  } = useAppAccessQuery(authState.ID);
+
+  useEffect(() => {
+    if (isAppAccessDataLoading) {
+      loader.show();
+    } else {
+      loader.hide();
+    }
+
+    if (!isAppAccessDataLoading && isAppAccessDataError) {
+      alertToast.show(
+        "error",
+        t("form.errors.api_data_fetching", { ns: "common" }),
+        true,
+      );
+    }
+
+    if (!isAppAccessDataLoading && appAccessData) {
+      const currAppData = APP_MENUS.filter((item) => item.appId === 1)[0];
+      const currDashboardMenu = currAppData.menuList[1];
+      setAppAccess(appAccessData);
+      setSelMenu(currDashboardMenu);
+    }
+  }, [appAccessData, isAppAccessDataLoading, isAppAccessDataError]);
+  return (
+    <>
+      <div className="items-start justify-start hidden w-full h-full p-6 overflow-auto md:flex">
+        <AppList screenType="Dashboard" />
+      </div>
+      <div className="flex items-start justify-start w-full h-full p-3 overflow-auto md:hidden ">
+        {/* <AppList screenType="Popup" disableTabFocus /> */}
+        <AppList screenType="Dashboard" />
+        {/* <MobileAppList screenType="Dashboard" /> */}
+      </div>
+    </>
+  );
+}
+
+export default Dashboard;
