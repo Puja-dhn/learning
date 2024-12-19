@@ -179,7 +179,7 @@ function DomainLogin() {
               <div className="grid items-center justify-center w-full h-full grid-col-1">
                 <div className="flex flex-col items-center justify-center gap-4">
                   <h2 className="text-lg font-bold text-sky-800 dark:text-cyan-600">
-                    Authentication Required
+                    Authentication Required.
                   </h2>
                   <form
                     className="max-w-md mx-auto"
