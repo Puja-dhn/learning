@@ -23,6 +23,9 @@ interface ILogSIOData {
   created_by: string;
   updated_at: string;
   updated_by: string;
+  log_by: string;
+  closure_date: string;
+  disp_logno: string;
 }
 
 export default ILogSIOData;

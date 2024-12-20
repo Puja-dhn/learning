@@ -7,6 +7,7 @@ import {
   ChevronRightIcon,
   PencilSquareIcon,
   EyeIcon,
+  ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
 import { useQueryClient } from "react-query";
 // import { utils, writeFile } from "xlsx";
@@ -33,6 +34,7 @@ import useSisLogDetailQuery from "@/features/sis/hooks/useSisLogDetailQuery";
 import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
+import * as XLSX from "xlsx";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -76,6 +78,7 @@ function ViewSio() {
   const [categories, setCategories] = useState<IOptionList[]>([]);
   const [areas, setAreas] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
+  const [modalImage, setModalImage] = useState<string>("");
 
   const {
     data: sioMasterData,
@@ -136,6 +139,9 @@ function ViewSio() {
   const [showPDCAssignDialog, setShowPDCAssignDialog] = useState({
     status: false,
   });
+  const [showImageDialog, setShowImageDialog] = useState({
+    status: false,
+  });
 
   const {
     handleSubmit: handleSubmitActionDetails,
@@ -151,7 +157,6 @@ function ViewSio() {
     setShowPDCAssignDialog((oldState) => ({ ...oldState, status: false }));
   };
   const handleActionClick = (row: ILogSIOData) => {
-    console.log(row);
     resetActionTaken({
       id: row.id,
       obs_datetime: row.obs_datetime,
@@ -193,14 +198,17 @@ function ViewSio() {
         </IconButton>
       ),
     },
-    { field: "id", headerName: "Log No", width: 70 },
+    { field: "disp_logno", headerName: "Log No", width: 70 },
     { field: "obs_datetime", headerName: "Observation Date", width: 250 },
     { field: "department", headerName: "Department", width: 240 },
+    { field: "status", headerName: "Status", width: 120 },
     { field: "area", headerName: "Area", width: 250 },
     { field: "category", headerName: "Category", width: 220 },
     { field: "severity", headerName: "Severity", width: 220 },
-    { field: "pending_on", headerName: "Pending On", width: 250 },
-    { field: "status", headerName: "Status", width: 220 },
+    { field: "pending_on", headerName: "Pending On", width: 200 },
+    { field: "log_by", headerName: "Log By", width: 200 },
+    { field: "target_date", headerName: "PDC Date", width: 200 },
+    { field: "closure_date", headerName: "Closure Date", width: 200 },
   ];
 
   const paginationModel = { page: 0, pageSize: 5 };
@@ -361,11 +369,29 @@ function ViewSio() {
     return `${day}-${month}-${year}`;
   };
 
+  const handleImageDialogClose = () => {
+    setShowImageDialog((oldState) => ({ ...oldState, status: false }));
+    setModalImage("");
+  };
+  const openImageModal = (image: any) => {
+    setModalImage(image);
+    setShowImageDialog({ status: true });
+  };
+  const handleExport = () => {
+    const rows = teamData.historyLogSioData;
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "export.xlsx");
+  };
   return (
     <div className="flex flex-col w-full h-full gap-2 p-4 overflow-hidden text-sm md:p-6">
       <div className="h-[50px] flex justify-between items-center p-1.5 px-2.5 border-[1px] text-md font-semibold text-center bg-[#f0f8ff] rounded-lg shadow-md dark:bg-gray-600 dark:text-cyan-200 dark:border-gray-500">
         <div className="flex items-center justify-center gap-2">View SIO</div>
         <div className="flex items-center justify-end gap-4 ml-20">
+          <IconButton onClick={handleExport}>
+            <ArrowDownTrayIcon className="w-4 h-4" />
+          </IconButton>
           <IconButton onClick={handleFilterDialogOpen}>
             <FunnelIcon className="w-4 h-4" />
           </IconButton>
@@ -440,9 +466,9 @@ function ViewSio() {
             >
               <div className="relative flex items-start bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-gray-700 dark:border-gray-600">
                 {/* Full-Height Vertical Log No */}
-                <div className="absolute top-0 left-0 flex items-center justify-center w-6 h-full font-bold text-center text-white bg-[#6388bd] dark:bg-blue-900">
+                <div className="absolute top-0 left-0 flex items-center justify-center w-6 h-full  text-center text-white bg-[#6388bd] dark:bg-blue-900">
                   <span className="origin-center transform -rotate-90">
-                    {row.id}
+                    {row.disp_logno}
                   </span>
                 </div>
 
@@ -609,7 +635,7 @@ function ViewSio() {
 
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
-                name="STATUS"
+                name="status"
                 label="Status"
                 control={controlFilter}
                 optionList={[
@@ -647,7 +673,7 @@ function ViewSio() {
                           Obs No:
                         </span>
                         <span className="text-gray-600 dark:text-gray-400">
-                          {logDetails.historyLogSioData[0].id}
+                          {logDetails.historyLogSioData[0].disp_logno}
                         </span>
                       </div>
                       <div className="flex-1">
@@ -777,7 +803,8 @@ function ViewSio() {
                                   preview || ""
                                 }`}
                                 alt={`preview-${index}`}
-                                className="object-cover w-full h-20 rounded-lg"
+                                className="object-cover w-full h-20 rounded-lg cursor-pointer"
+                                onClick={() => openImageModal(preview)}
                               />
                             </div>
                           ))}
@@ -870,7 +897,8 @@ function ViewSio() {
                                     preview || ""
                                   }`}
                                   alt={`preview-${index}`}
-                                  className="object-cover w-full h-20 rounded-lg"
+                                  className="object-cover w-full h-20 rounded-lg cursor-pointer"
+                                  onClick={() => openImageModal(preview)}
                                 />
                               </div>
                             ),
@@ -980,7 +1008,8 @@ function ViewSio() {
                       <img
                         src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
                         alt={`preview-${index}`}
-                        className="object-cover w-24 h-24 rounded-lg"
+                        className="object-cover w-24 h-24 rounded-lg cursor-pointer"
+                        onClick={() => openImageModal(preview)}
                       />
                     </div>
                   ))}
@@ -1032,7 +1061,7 @@ function ViewSio() {
                   </div>
 
                   <div className="w-[100%]   gap-4  justify-evenly">
-                    <div className="grid grid-cols-1 md:grid-cols-2">
+                    <div className="grid grid-cols-1 ">
                       <div className="p-1">
                         <TextArea
                           name="closure_desc"
@@ -1049,7 +1078,8 @@ function ViewSio() {
                           <img
                             src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
                             alt={`preview-${index}`}
-                            className="object-cover w-24 h-24 rounded-lg"
+                            className="object-cover w-24 h-24 rounded-lg cursor-pointer"
+                            onClick={() => openImageModal(preview)}
                           />
                         </div>
                       ))}
@@ -1059,6 +1089,21 @@ function ViewSio() {
               </form>
             </div>
           </div>
+        </div>
+      </ModalPopup>
+      <ModalPopup
+        heading="View Image"
+        onClose={handleImageDialogClose}
+        openStatus={showImageDialog.status}
+        hasSubmit={false}
+        size="fullscreen"
+      >
+        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+          <img
+            src={`${ASSET_BASE_URL}sioimages/${modalImage || ""}`}
+            alt="previewimage"
+            className="object-cover w-full h-full rounded-lg"
+          />
         </div>
       </ModalPopup>
     </div>

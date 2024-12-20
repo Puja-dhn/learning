@@ -247,15 +247,15 @@ exports.getSioData = async (req, res) => {
     obs_date_to,
     status,
   } = req.body;
-  console.log(req.body);
 
   const strId = id > 0 ? ` and t1.id=${id}` : "";
   const strDepartment =
     department !== "All" ? ` and t1.department=${department}` : "";
   const strArea = area !== "All" ? ` and t1.area=${area}` : "";
   const strCategory = category !== "All" ? ` and t1.category=${category}` : "";
-  const strSeverity = severity !== "All" ? ` and t1.severity=${severity}` : "";
-  const strStatus = status !== "All" ? ` and t1.status=${status}` : "";
+  const strSeverity =
+    severity !== "All" ? ` and t1.severity='${severity}'` : "";
+  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
   const strFromDate =
     obs_date_from !== ""
       ? ` and DATE(t1.obs_datetime) >='${obs_date_from}'`
@@ -284,7 +284,10 @@ exports.getSioData = async (req, res) => {
     t1.created_at,
     t1.created_by,
     t1.updated_at,
-    t1.updated_by
+    t1.updated_by,
+    t7.name log_by,
+    t1.closure_date,
+    LPAD(t1.id, 6, '0') AS disp_logno
   FROM
     t_sis_log_sio t1
     join t_sis_departments t2 on t1.department = t2.id
@@ -292,6 +295,7 @@ exports.getSioData = async (req, res) => {
     join t_sis_categories t4 on t1.category = t4.id
     left join t_sis_users t5 on t1.pending_on = t5.id
     left join t_sis_users t6 on t1.responsibilities = t6.id
+    join t_sis_users t7 on t1.created_by = t7.id
   WHERE
     1=1
     ${strId}
@@ -303,7 +307,7 @@ exports.getSioData = async (req, res) => {
     ${strFromDate}
     ${strToDate}
 `;
-  console.log(sioQuery);
+
   const resultSio = await simpleQuery(sioQuery, []);
 
   res.status(200).json({
@@ -313,10 +317,34 @@ exports.getSioData = async (req, res) => {
 exports.getOpenSioData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
   const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
-  const { id, department, area, category, severity } = req.body;
+  const {
+    id,
+    department,
+    area,
+    category,
+    severity,
+    obs_date_from,
+    obs_date_to,
+    status,
+  } = req.body;
+
+  const strId = id > 0 ? ` and t1.id=${id}` : "";
+  const strDepartment =
+    department !== "All" ? ` and t1.department=${department}` : "";
+  const strArea = area !== "All" ? ` and t1.area=${area}` : "";
+  const strCategory = category !== "All" ? ` and t1.category=${category}` : "";
+  const strSeverity =
+    severity !== "All" ? ` and t1.severity='${severity}'` : "";
+  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
+  const strFromDate =
+    obs_date_from !== ""
+      ? ` and DATE(t1.obs_datetime) >='${obs_date_from}'`
+      : "";
+  const strToDate =
+    obs_date_to !== "" ? ` and DATE(t1.obs_datetime) <='${obs_date_to}'` : "";
 
   const sioQuery = `
-    SELECT DISTINCT
+    SELECT 
       t1.id,
       t1.obs_datetime,
       t1.department department_id,
@@ -340,7 +368,10 @@ exports.getOpenSioData = async (req, res) => {
       t1.created_at,
       t1.created_by,
       t1.updated_at,
-      t1.updated_by
+      t1.updated_by,
+      t7.name log_by,
+      t1.closure_date,
+      LPAD(t1.id, 6, '0') AS disp_logno
     FROM
       t_sis_log_sio t1
       join t_sis_departments t2 on t1.department = t2.id
@@ -348,10 +379,20 @@ exports.getOpenSioData = async (req, res) => {
       join t_sis_categories t4 on t1.category = t4.id
       join t_sis_users t5 on t1.pending_on = t5.id
       left join t_sis_users t6 on t1.responsibilities = t6.id
+       join t_sis_users t7 on t1.created_by = t7.id
     WHERE
       t1.status = "Open"
+      ${strId}
+      ${strDepartment}
+      ${strArea}
+      ${strCategory}
+      ${strSeverity}
+      ${strStatus}
+      ${strFromDate}
+      ${strToDate}
       and t1.pending_on = ?
   `;
+
   const resultSio = await simpleQuery(sioQuery, [logged_user_id]);
 
   res.status(200).json({
@@ -413,7 +454,31 @@ exports.submitPDCAssign = async (req, res) => {
 exports.getAssignedSioData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
   const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
-  const { id, department, area, category, severity } = req.body;
+  const {
+    id,
+    department,
+    area,
+    category,
+    severity,
+    obs_date_from,
+    obs_date_to,
+    status,
+  } = req.body;
+
+  const strId = id > 0 ? ` and t1.id=${id}` : "";
+  const strDepartment =
+    department !== "All" ? ` and t1.department=${department}` : "";
+  const strArea = area !== "All" ? ` and t1.area=${area}` : "";
+  const strCategory = category !== "All" ? ` and t1.category=${category}` : "";
+  const strSeverity =
+    severity !== "All" ? ` and t1.severity='${severity}'` : "";
+  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
+  const strFromDate =
+    obs_date_from !== ""
+      ? ` and DATE(t1.obs_datetime) >='${obs_date_from}'`
+      : "";
+  const strToDate =
+    obs_date_to !== "" ? ` and DATE(t1.obs_datetime) <='${obs_date_to}'` : "";
 
   const sioQuery = `
     SELECT DISTINCT
@@ -440,7 +505,10 @@ exports.getAssignedSioData = async (req, res) => {
       t1.created_at,
       t1.created_by,
       t1.updated_at,
-      t1.updated_by
+      t1.updated_by,
+      t7.name log_by,
+      t1.closure_date,
+      LPAD(t1.id, 6, '0') AS disp_logno
     FROM
       t_sis_log_sio t1
       join t_sis_departments t2 on t1.department = t2.id
@@ -448,8 +516,17 @@ exports.getAssignedSioData = async (req, res) => {
       join t_sis_categories t4 on t1.category = t4.id
       join t_sis_users t5 on t1.pending_on = t5.id
       left join t_sis_users t6 on t1.responsibilities = t6.id
+       join t_sis_users t7 on t1.created_by = t7.id
     WHERE
       t1.status = "PDC Assigned"
+      ${strId}
+      ${strDepartment}
+      ${strArea}
+      ${strCategory}
+      ${strSeverity}
+      ${strStatus}
+      ${strFromDate}
+      ${strToDate}
       and t1.pending_on = ?
   `;
   const resultSio = await simpleQuery(sioQuery, [logged_user_id]);
@@ -482,9 +559,16 @@ exports.submitActionTaken = async (req, res) => {
     const currentTime = new Date();
 
     const updateQuery = `
-        update t_sis_log_sio set pending_on = 0, closure_desc = ?, closure_photos= ?, updated_at = ?, updated_by = ?, status = "Closed"  where id=?
+        update t_sis_log_sio set pending_on = 0, closure_desc = ?, closure_photos= ?, updated_at = ?, updated_by = ?, status = "Closed", closure_date = ?  where id=?
       `;
-    const updateValues = [closure_desc, closure_photos, currentTime, ID, id];
+    const updateValues = [
+      closure_desc,
+      closure_photos,
+      currentTime,
+      ID,
+      currentTime,
+      id,
+    ];
 
     try {
       await simpleQuery(updateQuery, updateValues);

@@ -276,7 +276,7 @@ function DomainLogin() {
                     />
                   </div>
 
-                  <div>
+                  {/* <div>
                     <button
                       type="button"
                       className="text-[#0a499e]"
@@ -286,7 +286,7 @@ function DomainLogin() {
                     >
                       Forgot Password
                     </button>
-                  </div>
+                  </div> */}
 
                   <button
                     type="submit"
