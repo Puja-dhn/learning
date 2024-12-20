@@ -4,5 +4,6 @@ interface ISIOMasterData {
   DEPARTMENT: IOptionList[];
   CATEGORY: IOptionList[];
   AREA: IOptionList[];
+  USERS: IOptionList[];
 }
 export default ISIOMasterData;

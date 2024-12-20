@@ -1,7 +1,0 @@
-[2024-12-06 12:07:21.529 PM] info: 	DB Initialized
-[2024-12-06 12:07:21.716 PM] info: 	BEFORE DB Get Connection
-[2024-12-06 12:07:21.825 PM] info: 	BEFORE DB Execution
-[2024-12-06 12:07:21.827 PM] info: 	AFTER DB Execution Success
-[2024-12-06 12:07:21.828 PM] info: 	BEFORE DB Connection Close
-[2024-12-06 12:07:21.833 PM] info: 	AFTER DB Connection Close
-[2024-12-06 12:07:39.055 PM] info: 	DB Initialized

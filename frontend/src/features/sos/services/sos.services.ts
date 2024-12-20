@@ -20,6 +20,7 @@ import IAssignPDCData from "../types/IAssignPDCData";
 import ILogAssignPdcForm from "../types/ILogAssignPdcForm";
 import ILogActionTakenForm from "../types/ILogActionTakenForm";
 import ICloseObsForm from "../types/ICloseObsForm";
+import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
 
 const getMasterData = (
   ticketNo: number,
@@ -185,7 +186,7 @@ const getAssignPDCData = (
   >("/sos/fetch-assignpdc-data", { ticketNo, locnId, orgId, unitId });
 };
 
-const submitPDCAssign = (pdcData: ILogAssignPdcForm) => {
+const submitPDCAssign = (pdcData: ISIOPDCAssignData) => {
   return http.post<any, AxiosResponse<string>>("/sos/submit-pdcassign-data", {
     pdcData,
   });

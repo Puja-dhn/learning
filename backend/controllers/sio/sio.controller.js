@@ -67,10 +67,25 @@ exports.getSIOMasterData = async (req, res) => {
   `;
 
     const resultAreas = await simpleQuery(areasQuery, []);
+
+    const usersQuery = `
+    SELECT DISTINCT
+        t1.id,
+        t1.name
+    FROM
+        t_sis_users t1
+    WHERE
+      t1.status = 'active'
+     
+  `;
+
+    const resultUsers = await simpleQuery(usersQuery, []);
+
     const masterDetails = {
       DEPARTMENT: [...resultDepartments],
       CATEGORY: [...resultCategories],
       AREA: [...resultAreas],
+      USERS: [...resultUsers],
     };
 
     res.status(200).json({ historySIOMasterData: masterDetails });
@@ -158,9 +173,6 @@ exports.addNewSIOData = async (req, res) => {
         ID,
       ];
 
-      console.log("Insert Query:", insertQuery);
-      console.log("Insert Values:", insertValues);
-
       try {
         await simpleQuery(insertQuery, insertValues);
         console.log("Data inserted successfully.");
@@ -231,10 +243,28 @@ exports.getSioData = async (req, res) => {
     area,
     category,
     severity,
+    obs_date_from,
+    obs_date_to,
+    status,
   } = req.body;
-  
+  console.log(req.body);
+
+  const strId = id > 0 ? ` and t1.id=${id}` : "";
+  const strDepartment =
+    department !== "All" ? ` and t1.department=${department}` : "";
+  const strArea = area !== "All" ? ` and t1.area=${area}` : "";
+  const strCategory = category !== "All" ? ` and t1.category=${category}` : "";
+  const strSeverity = severity !== "All" ? ` and t1.severity=${severity}` : "";
+  const strStatus = status !== "All" ? ` and t1.status=${status}` : "";
+  const strFromDate =
+    obs_date_from !== ""
+      ? ` and DATE(t1.obs_datetime) >='${obs_date_from}'`
+      : "";
+  const strToDate =
+    obs_date_to !== "" ? ` and DATE(t1.obs_datetime) <='${obs_date_to}'` : "";
+
   const sioQuery = `
-  SELECT DISTINCT
+  SELECT 
     t1.id,
     t1.obs_datetime,
     t2.department_name department,
@@ -247,6 +277,9 @@ exports.getSioData = async (req, res) => {
     t1.closure_desc,
     t1.closure_photos,
     t5.name pending_on,
+    t6.name responsibilities,
+    t1.target_date,
+    t1.action_plan,
     t1.status,
     t1.created_at,
     t1.created_by,
@@ -257,13 +290,22 @@ exports.getSioData = async (req, res) => {
     join t_sis_departments t2 on t1.department = t2.id
     join t_sis_areas t3 on t1.area = t3.id
     join t_sis_categories t4 on t1.category = t4.id
-    join t_sis_users t5 on t1.pending_on = t5.id
+    left join t_sis_users t5 on t1.pending_on = t5.id
+    left join t_sis_users t6 on t1.responsibilities = t6.id
   WHERE
     1=1
+    ${strId}
+    ${strDepartment}
+    ${strArea}
+    ${strCategory}
+    ${strSeverity}
+    ${strStatus}
+    ${strFromDate}
+    ${strToDate}
 `;
-const resultSio = await simpleQuery(sioQuery, []);
- 
-  
+  console.log(sioQuery);
+  const resultSio = await simpleQuery(sioQuery, []);
+
   res.status(200).json({
     historyLogSioData: [...resultSio],
   });
@@ -271,48 +313,190 @@ const resultSio = await simpleQuery(sioQuery, []);
 exports.getOpenSioData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
   const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
-  const {
-    id,
-    department,
-    area,
-    category,
-    severity,
-  } = req.body;
-  
+  const { id, department, area, category, severity } = req.body;
+
   const sioQuery = `
-  SELECT DISTINCT
-    t1.id,
-    t1.obs_datetime,
-    t2.department_name department,
-    t3.name area,
-    t4.name category,
-    t1.severity,
-    t1.obs_desc,
-    t1.obs_sugg,
-    t1.obs_photos,
-    t1.closure_desc,
-    t1.closure_photos,
-    t5.name pending_on,
-    t1.status,
-    t1.created_at,
-    t1.created_by,
-    t1.updated_at,
-    t1.updated_by
-  FROM
-    t_sis_log_sio t1
-    join t_sis_departments t2 on t1.department = t2.id
-    join t_sis_areas t3 on t1.area = t3.id
-    join t_sis_categories t4 on t1.category = t4.id
-    join t_sis_users t5 on t1.pending_on = t5.id
-  WHERE
-    t1.status = "Open"
-    and t1.pending_on = ?
-`;
-const resultSio = await simpleQuery(sioQuery, [logged_user_id]);
- 
-  
+    SELECT DISTINCT
+      t1.id,
+      t1.obs_datetime,
+      t1.department department_id,
+      t2.department_name department,
+      t1.area area_id,
+      t3.name area,
+      t1.category category_id,
+      t4.name category,
+      t1.severity,
+      t1.obs_desc,
+      t1.obs_sugg,
+      t1.obs_photos,
+      t1.closure_desc,
+      t1.closure_photos,
+      t1.pending_on pending_on_id,
+      t5.name pending_on,
+      t6.name responsibilities,
+      t1.target_date,
+      t1.action_plan,
+      t1.status,
+      t1.created_at,
+      t1.created_by,
+      t1.updated_at,
+      t1.updated_by
+    FROM
+      t_sis_log_sio t1
+      join t_sis_departments t2 on t1.department = t2.id
+      join t_sis_areas t3 on t1.area = t3.id
+      join t_sis_categories t4 on t1.category = t4.id
+      join t_sis_users t5 on t1.pending_on = t5.id
+      left join t_sis_users t6 on t1.responsibilities = t6.id
+    WHERE
+      t1.status = "Open"
+      and t1.pending_on = ?
+  `;
+  const resultSio = await simpleQuery(sioQuery, [logged_user_id]);
+
   res.status(200).json({
     historyLogSioData: [...resultSio],
   });
 };
+exports.submitPDCAssign = async (req, res) => {
+  const { ID } = req.user;
+  const {
+    id,
+    obs_datetime,
+    department,
+    area,
+    category,
+    severity,
+    obs_desc,
+    obs_sugg,
+    obs_photos,
+    closure_desc,
+    closure_photos,
+    responsibilities,
+    status,
+    target_date,
+    action_plan,
+  } = req.body.pdcData;
 
+  console.log(req.body);
+
+  try {
+    const currentTime = new Date();
+
+    const updateQuery = `
+        update t_sis_log_sio set pending_on = ?, action_plan = ?, target_date= ?, updated_at = ?, updated_by = ?, status = "PDC Assigned", responsibilities = ?  where id=?
+      `;
+    const updateValues = [
+      responsibilities,
+      action_plan,
+      target_date,
+      currentTime,
+      ID,
+      responsibilities,
+      id,
+    ];
+
+    try {
+      await simpleQuery(updateQuery, updateValues);
+      console.log("PDC Assigned successfully.");
+    } catch (queryError) {
+      console.error("Error executing query:", queryError);
+      return res.status(500).json({ error: "Failed to insert data." });
+    }
+
+    res.status(200).json({ message: "Data processed successfully." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
+  }
+};
+exports.getAssignedSioData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
+  const { id, department, area, category, severity } = req.body;
+
+  const sioQuery = `
+    SELECT DISTINCT
+      t1.id,
+      t1.obs_datetime,
+      t1.department department_id,
+      t2.department_name department,
+      t1.area area_id,
+      t3.name area,
+      t1.category category_id,
+      t4.name category,
+      t1.severity,
+      t1.obs_desc,
+      t1.obs_sugg,
+      t1.obs_photos,
+      t1.closure_desc,
+      t1.closure_photos,
+      t1.pending_on pending_on_id,
+      t5.name pending_on,
+      t6.name responsibilities,
+      t1.target_date,
+      t1.action_plan,
+      t1.status,
+      t1.created_at,
+      t1.created_by,
+      t1.updated_at,
+      t1.updated_by
+    FROM
+      t_sis_log_sio t1
+      join t_sis_departments t2 on t1.department = t2.id
+      join t_sis_areas t3 on t1.area = t3.id
+      join t_sis_categories t4 on t1.category = t4.id
+      join t_sis_users t5 on t1.pending_on = t5.id
+      left join t_sis_users t6 on t1.responsibilities = t6.id
+    WHERE
+      t1.status = "PDC Assigned"
+      and t1.pending_on = ?
+  `;
+  const resultSio = await simpleQuery(sioQuery, [logged_user_id]);
+
+  res.status(200).json({
+    historyLogSioData: [...resultSio],
+  });
+};
+exports.submitActionTaken = async (req, res) => {
+  const { ID } = req.user;
+  const {
+    id,
+    obs_datetime,
+    department,
+    area,
+    category,
+    severity,
+    obs_desc,
+    obs_sugg,
+    obs_photos,
+    closure_desc,
+    closure_photos,
+    pending_on,
+    status,
+    target_date,
+    action_plan,
+  } = req.body.pdcData;
+
+  try {
+    const currentTime = new Date();
+
+    const updateQuery = `
+        update t_sis_log_sio set pending_on = 0, closure_desc = ?, closure_photos= ?, updated_at = ?, updated_by = ?, status = "Closed"  where id=?
+      `;
+    const updateValues = [closure_desc, closure_photos, currentTime, ID, id];
+
+    try {
+      await simpleQuery(updateQuery, updateValues);
+      console.log("SIO Closed Successfully.");
+    } catch (queryError) {
+      console.error("Error executing query:", queryError);
+      return res.status(500).json({ error: "Failed to insert data." });
+    }
+
+    res.status(200).json({ message: "Data processed successfully." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
+  }
+};

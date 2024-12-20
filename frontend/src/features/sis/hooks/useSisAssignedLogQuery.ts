@@ -1,14 +1,14 @@
 import { useQuery } from "react-query";
 import { removeJSONNull } from "@/features/common/utils/json-util";
 
-import { getOpenSIOData } from "../services/sis.services";
+import { getAssignedSIOData, getOpenSIOData } from "../services/sis.services";
 import { ILogSioFilterForm } from "../types";
 
-const useSisOpenLogQuery = (filterData: ILogSioFilterForm) => {
+const useSisAssignedLogQuery = (filterData: ILogSioFilterForm) => {
   return useQuery({
-    queryKey: ["sioOpenDataQuery", JSON.stringify(filterData)],
+    queryKey: ["sioAssignedDataQuery", JSON.stringify(filterData)],
     queryFn: async () => {
-      const data = await getOpenSIOData(filterData)
+      const data = await getAssignedSIOData(filterData)
         .then((res) => res.data)
         .catch(() => {
           throw new Error("Error Fetching Data");
@@ -20,4 +20,4 @@ const useSisOpenLogQuery = (filterData: ILogSioFilterForm) => {
   });
 };
 
-export default useSisOpenLogQuery;
+export default useSisAssignedLogQuery;

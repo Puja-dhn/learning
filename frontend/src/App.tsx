@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 
 import PrivateRoutes from "./features/authorization/PrivateRoute";
 import AssignPDC from "./pages/sis/AssignPDC";
+import ActionTaken from "./pages/sis/ActionTaken";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -58,6 +59,7 @@ function App() {
             <Route path="log-sio" element={<LogSis />} />
             <Route path="view-sio" element={<ViewSio />} />
             <Route path="assign-pdc" element={<AssignPDC />} />
+            <Route path="action-taken" element={<ActionTaken />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

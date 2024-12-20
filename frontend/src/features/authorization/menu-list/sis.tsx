@@ -12,6 +12,7 @@ import ViewSio from "@/pages/sis/ViewSio";
 import Dashboard from "@/pages/sis/Dashboard";
 import LogSis from "@/pages/sis/LogSis";
 import AssignPDC from "@/pages/sis/AssignPDC";
+import ActionTaken from "@/pages/sis/ActionTaken";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -68,6 +69,17 @@ const SIS_MENU_LIST: IMenuItem[] = [
     appId: 2,
     path: "assign-pdc",
     element: <AssignPDC />,
+    children: [],
+    menuType: "Normal",
+  },
+  {
+    id: 4,
+    name: "Action Taken",
+    icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
+    iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
+    appId: 2,
+    path: "action-taken",
+    element: <ActionTaken />,
     children: [],
     menuType: "Normal",
   },

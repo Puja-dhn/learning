@@ -8,6 +8,7 @@ import {
 } from "../types";
 import ISIOMasterData from "../types/sis/ISIOMasterData";
 import ILogSioData from "../types/sis/ILogSioData";
+import ISIOPDCAssignData from "../types/sis/ISIOPDCAssignData";
 
 const addNewSIOData = (formData: any) => {
   return http.post<ILogSisForm, AxiosResponse<string>>(
@@ -43,43 +44,30 @@ const getOpenSIOData = (filterData: ILogSioFilterForm) => {
   >("/sio/get-opensio-data", filterData);
 };
 
-const getAECTDashboardData = (
-  area_id: number,
-  division_id: number,
-  location_id: number,
-) => {
-  return http.post<
-    {
-      area_id: number;
-      division_id: number;
-      location_id: number;
-    },
-    AxiosResponse<IAECTDashboardData>
-  >("/aect/get-dashboard-data", {
-    area_id,
-    division_id,
-    location_id,
+const submitPDCAssign = (pdcData: ISIOPDCAssignData) => {
+  return http.post<any, AxiosResponse<string>>("/sio/submit-pdcassign-data", {
+    pdcData,
   });
 };
-
-const getAECTPendingClosureData = (
-  team_id: number,
-  area_id: number,
-  division_id: number,
-  location_id: number,
-) => {
-  return http.post<any, AxiosResponse<{ pendingLogAectData: ILogSioData[] }>>(
-    "/aect/get-aect-pending",
-    { team_id, area_id, division_id, location_id },
-  );
+const getAssignedSIOData = (filterData: ILogSioFilterForm) => {
+  return http.post<
+    ILogSioFilterForm,
+    AxiosResponse<{ historyLogSioData: ILogSioData[] }>
+  >("/sio/get-assignedsio-data", filterData);
+};
+const submitActionTaken = (pdcData: ISIOPDCAssignData) => {
+  return http.post<any, AxiosResponse<string>>("/sio/submit-action-taken", {
+    pdcData,
+  });
 };
 
 export {
   getSIOData,
   addNewSIOData,
-  getAECTPendingClosureData,
   updateAectStatus,
-  getAECTDashboardData,
   getSIOMasterData,
-  getOpenSIOData
+  getOpenSIOData,
+  submitPDCAssign,
+  getAssignedSIOData,
+  submitActionTaken,
 };

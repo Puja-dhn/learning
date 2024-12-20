@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { shallowEqual } from "react-redux";
+import * as Yup from "yup";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   FunnelIcon,
@@ -13,6 +14,7 @@ import { useQueryClient } from "react-query";
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
+  ASSET_BASE_URL,
   OBS_CATEGORY_LIST,
   OBS_STATUS_LIST,
 } from "@/features/common/constants";
@@ -24,8 +26,14 @@ import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
 import ModalPopupMobile from "@/features/ui/popup/ModalPopupMobile";
 import ILogSioData from "@/features/sis/types/sis/ILogSioData";
-import {  useSisOpenLogQuery } from "@/features/sis/hooks";
+import { useSisOpenLogQuery } from "@/features/sis/hooks";
 import { ILogSIOData, ILogSioFilterForm } from "@/features/sis/types";
+import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
+import { IOptionList } from "@/features/ui/types";
+import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
+import { submitPDCAssign } from "@/features/sis/services/sis.services";
+import IAssignPDCData from "@/features/sos/types/IAssignPDCData";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -33,37 +41,76 @@ interface ILogSioTeamData {
 
 const initialFilterValues: ILogSioFilterForm = {
   id: null,
-  department: "",
-  category: "",
-  area: "",
+  department: "All",
+  category: "All",
+  area: "All",
   severity: "",
+  obs_date_from: "",
+  obs_date_to: "",
+  status: "All",
 };
 
-const initialPDCAssignValues: ILogSIOData = {
-    id: 0,
-    obs_datetime: "",
-    department: "",
-    area: 0,
-    category: "",
-    severity: 0,
-    obs_desc: "",
-    obs_sugg: "",
-    obs_photos: "",
-    closure_desc: "",
-    closure_photos: "",
-    pending_on: "",
-    status: "",
-    created_at: "",
-    created_by: "",
-    updated_at: "",
-    updated_by: "",
-  };
+const initialPDCAssignValues: ISIOPDCAssignData = {
+  id: 0,
+  obs_datetime: "",
+  department: "",
+  area: 0,
+  category: "",
+  severity: 0,
+  obs_desc: "",
+  obs_sugg: "",
+  obs_photos: "",
+  closure_desc: "",
+  closure_photos: "",
+  pending_on: "",
+  responsibilities: "",
+  status: "",
+  target_date: "",
+  action_plan: "",
+};
+
+const assignPDCFormSchema = Yup.object().shape({
+  target_date: Yup.string().required("Target date is required"),
+  action_plan: Yup.string().required("Action plan is required"),
+  responsibilities: Yup.string().required("Responsible persion required"),
+});
 
 function AssignPDC() {
   const alertToast = useAlertConfig();
   const loader = useLoaderConfig();
   const authState = useAppSelector(({ auth }) => auth, shallowEqual);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [departments, setDepartments] = useState<IOptionList[]>([]);
+  const [categories, setCategories] = useState<IOptionList[]>([]);
+  const [areas, setAreas] = useState<IOptionList[]>([]);
+  const [users, setUsers] = useState<IOptionList[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<any>([]);
+  const {
+    data: sioMasterData,
+    isLoading: isSIOMasterDataLoading,
+    isError: isSIOMasterDataError,
+  } = useSIOMasterDataQuery();
+
+  useEffect(() => {
+    if (isSIOMasterDataLoading) {
+      loader.show();
+    } else {
+      loader.hide();
+    }
+
+    if (!isSIOMasterDataLoading && isSIOMasterDataError) {
+      alertToast.show("error", "Error Reading API", true);
+    }
+
+    if (!isSIOMasterDataLoading && !isSIOMasterDataError && sioMasterData) {
+      const historySIOMasterData = [sioMasterData.historySIOMasterData];
+
+      setDepartments(historySIOMasterData[0].DEPARTMENT);
+      setCategories(historySIOMasterData[0].CATEGORY);
+      setAreas(historySIOMasterData[0].AREA);
+      setUsers(historySIOMasterData[0].USERS);
+    }
+  }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
   useEffect(() => {
     const handleResize = () => {
       setIsDesktop(window.innerWidth > 768);
@@ -93,7 +140,6 @@ function AssignPDC() {
   });
   const [showPDCAssignDialog, setShowPDCAssignDialog] = useState({
     status: false,
-    formInitialValues: initialPDCAssignValues,
   });
 
   const {
@@ -101,21 +147,88 @@ function AssignPDC() {
     reset: resetPDCData,
     control: controlPDC,
     formState: formStatePDC,
-  } = useForm<ILogSioData>({
+  } = useForm<ISIOPDCAssignData>({
     defaultValues: initialPDCAssignValues,
+    resolver: yupResolver(assignPDCFormSchema),
   });
-  
+
+  const { submitCount, errors } = formStatePDC;
   const handlePDCAssignDialogClose = () => {
     setShowPDCAssignDialog((oldState) => ({ ...oldState, status: false }));
   };
   const handleActionClick = (row: ILogSIOData) => {
     resetPDCData({
-        obs_datetime: row.obs_datetime
-    })
-    setShowPDCAssignDialog({
-        status: true,
-      formInitialValues: { ...row },
+      id: row.id,
+      obs_datetime: row.obs_datetime,
+      department: row.department_id,
+      area: +row.area_id,
+      category: row.category_id,
+      severity: row.severity,
+      obs_desc: row.obs_desc,
+      obs_sugg: row.obs_sugg,
+      obs_photos: row.obs_photos,
+      closure_desc: row.closure_desc,
+      closure_photos: row.closure_photos,
+      status: row.status,
     });
+    setImagePreviews(JSON.parse(row.obs_photos));
+    setShowPDCAssignDialog({
+      status: true,
+    });
+  };
+  const handleAssignPDCSubmit: SubmitHandler<ISIOPDCAssignData> = (values) => {
+    loader.show();
+    submitPDCAssign(values)
+      .then(() => {
+        alertToast.show(
+          "success",
+          "Responsible Person Assigned Succesfully",
+          true,
+          2000,
+        );
+        setShowPDCAssignDialog((oldState) => ({
+          ...oldState,
+          status: false,
+        }));
+        handleRefresh();
+      })
+
+      .catch((err) => {
+        if (err.response && err.response.status) {
+          alertToast.show("warning", err.response.data.errorMessage, true);
+        }
+      })
+      .finally(() => {
+        loader.hide();
+      });
+  };
+  const handleAssignPDCSubmitMobile: SubmitHandler<ISIOPDCAssignData> = (
+    values,
+  ) => {
+    loader.show();
+    submitPDCAssign(values)
+      .then(() => {
+        alertToast.show(
+          "success",
+          "Responsible Person Assigned Succesfully",
+          true,
+          2000,
+        );
+        setShowLogDetailsDialog((oldState) => ({
+          ...oldState,
+          status: false,
+        }));
+        handleRefresh();
+      })
+
+      .catch((err) => {
+        if (err.response && err.response.status) {
+          alertToast.show("warning", err.response.data.errorMessage, true);
+        }
+      })
+      .finally(() => {
+        loader.hide();
+      });
   };
   const columns: GridColDef[] = [
     {
@@ -131,16 +244,16 @@ function AssignPDC() {
         </IconButton>
       ),
     },
-    { field: "id", headerName: "Observation No", width: 70 },
-    { field: "obs_datetime", headerName: "Observation Date", width: 180 },
-    { field: "department", headerName: "Department", width: 200 },
-    { field: "area", headerName: "Area", width: 200 },
-    { field: "category", headerName: "Category", width: 200 },
-    { field: "severity", headerName: "Severity", width: 200 },
-    { field: "pending_on", headerName: "Pending On", width: 200 },
-    { field: "status", headerName: "Status", width: 200 },
+    { field: "id", headerName: "Log No", width: 70 },
+    { field: "obs_datetime", headerName: "Observation Date", width: 250 },
+    { field: "department", headerName: "Department", width: 240 },
+    { field: "area", headerName: "Area", width: 250 },
+    { field: "category", headerName: "Category", width: 220 },
+    { field: "severity", headerName: "Severity", width: 220 },
+    { field: "pending_on", headerName: "Pending On", width: 250 },
+    { field: "status", headerName: "Status", width: 220 },
   ];
-  
+
   const paginationModel = { page: 0, pageSize: 5 };
 
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
@@ -245,21 +358,35 @@ function AssignPDC() {
 
   useEffect(() => {
     queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === "sioDataQuery",
+      predicate: (query) => query.queryKey[0] === "sioOpenDataQuery",
     });
   }, []);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === "sioDataQuery",
+      predicate: (query) => query.queryKey[0] === "sioOpenDataQuery",
     });
   };
+
+  const {
+    control: controlAssignForm,
+    handleSubmit,
+    formState,
+    reset: resetAssignPDC,
+  } = useForm<ISIOPDCAssignData>({
+    defaultValues: initialPDCAssignValues,
+    resolver: yupResolver(assignPDCFormSchema),
+  });
 
   const handleShowLogDetails = (logNo: number) => {
     const historyLogSioData = [
       ...teamData.historyLogSioData.filter((item) => item.id === logNo),
     ];
+    resetAssignPDC({
+      id: logNo,
+    });
     setLogDetails({ historyLogSioData });
+    setImagePreviews(JSON.parse(historyLogSioData[0].obs_photos));
     setShowLogDetailsDialog({
       status: true,
     });
@@ -277,6 +404,13 @@ function AssignPDC() {
         No Data Available
       </div>
     );
+  };
+  const formatDate = (date: any) => {
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = d.toLocaleString("en-US", { month: "short" });
+    const year = d.getFullYear();
+    return `${day}-${month}-${year}`;
   };
 
   return (
@@ -368,60 +502,54 @@ function AssignPDC() {
                 <div className="w-full p-2 ml-5 text-xs text-gray-700 dark:text-gray-300">
                   {/* First Row (Reported Date and Category) */}
                   <div className="flex justify-between mb-2">
-                    <div className="flex items-center space-x-4 w-[60%]">
-                      <span className="font-semibold">Reported Date:</span>
+                    <div className="flex items-center space-x-4 w-[50%]">
+                      <span className="font-semibold">Date:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.obs_datetime}
+                        {formatDate(row.obs_datetime)}
                       </span>
                     </div>
                     <div className="flex items-center space-x-4 w-[40%]">
-                      <span className="font-semibold">Category:</span>
+                      <span className="font-semibold">Severity:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {row.category}
+                        {row.severity}
                       </span>
                     </div>
                   </div>
 
-                  {/* Description */}
                   <div className="flex justify-between mb-2">
                     <div className="flex items-center w-full space-x-4">
-                      <span className="font-semibold">Description:</span>
+                      <span className="font-semibold">Area:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        
+                        {" "}
+                        {row.area}
                       </span>
                     </div>
                   </div>
 
                   {/* Second Row (Reported By and Severity) */}
                   <div className="flex justify-between mb-2">
-                    <div className="flex items-center space-x-4 w-[60%]">
+                    <div className="flex items-center space-x-4 ">
                       <span className="font-semibold">Reported By:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                     
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 w-[40%]">
-                      <span className="font-semibold">Severity:</span>
-                      <span className="text-gray-600 dark:text-gray-400">
-                       
+                        {row.pending_on}
                       </span>
                     </div>
                   </div>
-
-                  {/* Third Row (Closure PDC and Status) */}
                   <div className="flex justify-between mb-2">
-                    <div className="flex items-center space-x-4 w-[60%]">
-                      <span className="font-semibold">Closure PDC:</span>
-                      <span className="text-gray-600 dark:text-gray-400">
-                      
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 w-[40%]">
+                    <div className="flex items-center space-x-4 ">
                       <span className="font-semibold">Status:</span>
                       <span
-                        className="font-bold text-gray-600 dark:text-gray-400 "
+                        className={`${
+                          row.status === "Open"
+                            ? "text-red-500" // red color for "Open"
+                            : row.status === "Closed"
+                            ? "text-green-500" // green color for "Closed"
+                            : row.status === "PDC Assigned"
+                            ? "text-orange-500" // orange color for "PDC Assigned"
+                            : "text-gray-600" // default gray if no match
+                        } dark:text-gray-400`}
                       >
-                     
+                        {row.status}
                       </span>
                     </div>
                   </div>
@@ -463,8 +591,6 @@ function AssignPDC() {
         }
       >
         <form className="bg-[#ecf3f9] dark:bg-gray-600 grid gap-2.5 p-2.5">
-          
-
           <div className="flex flex-wrap justify-evenly items-center p-2.5 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500">
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <TextField
@@ -590,7 +716,7 @@ function AssignPDC() {
         openStatus={showPDCAssignDialog.status}
         hasSubmit
         onSubmit={() => {
-          handleSubmitFilter(handleFilterFormSubmit)();
+          handleSubmitPDCDetails(handleAssignPDCSubmit)();
         }}
         size="fullscreen"
         showError
@@ -599,97 +725,153 @@ function AssignPDC() {
         }
       >
         <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
-              <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
-                <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
+          <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
+            <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
+              <div className="pb-2 border-b-2 border-gray-200 dark:border-gray-500">
+                <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  Observation Details
+                </h2>
+              </div>
+
+              <form className="w-[100%]   gap-4  justify-evenly">
+                <div className="grid grid-cols-1 md:grid-cols-3">
+                  <div className="p-1">
+                    <TextField
+                      type="text"
+                      name="obs_datetime"
+                      label="Observation Date Time"
+                      control={controlPDC}
+                      disabled
+                    />
+                  </div>
+                  <div className="p-1">
+                    <DropdownList
+                      name="department"
+                      label="Department"
+                      control={controlPDC}
+                      optionList={[
+                        { id: "", name: "Select Department" },
+                        ...departments,
+                      ]}
+                      disabled
+                    />
+                  </div>
+                  <div className="p-1">
+                    <DropdownList
+                      name="area"
+                      label="Area"
+                      control={controlPDC}
+                      optionList={[{ id: "", name: "Select Area" }, ...areas]}
+                      disabled
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3">
+                  <div className="p-1">
+                    <DropdownList
+                      name="category"
+                      label="Category"
+                      control={controlPDC}
+                      optionList={[
+                        { id: "", name: "Select Category" },
+                        ...categories,
+                      ]}
+                      disabled
+                    />
+                  </div>
+                  <div className="p-1">
+                    <DropdownList
+                      name="severity"
+                      label="Severity"
+                      control={controlPDC}
+                      optionList={[...CURR_OBS_SEVERITY_LIST]}
+                      disabled
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                  <div className="p-1">
+                    <TextArea
+                      name="obs_desc"
+                      label="Observation Description"
+                      control={controlPDC}
+                      disabled
+                    />
+                  </div>
+                  <div className="p-1">
+                    <TextArea
+                      name="obs_sugg"
+                      label="Observation Suggestion"
+                      control={controlPDC}
+                      disabled
+                    />
+                  </div>
+                </div>
+                <div className="flex mt-4 space-x-4 overflow-x-auto">
+                  {imagePreviews.map((preview: any, index: any) => (
+                    <div key={index} className="relative">
+                      <img
+                        src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
+                        alt={`preview-${index}`}
+                        className="object-cover w-24 h-24 rounded-lg"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-2 grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
                   <div className="pb-2 border-b-2 border-gray-200 dark:border-gray-500">
                     <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                      Observation Details
+                      Assigning Responsibilities
                     </h2>
                   </div>
-        
-                  <form className="w-[100%]   gap-4  justify-evenly">
-                    <div className="grid grid-cols-1 md:grid-cols-3">
-                      <div className="p-1">
-                        <TextField
-                          type="datetime-local"
-                          name="OBS_DATE_TIME"
-                          label="Observation Date Time"
-                          control={controlPDC}
-                        />
-                      </div>
-                      <div className="p-1">
-                        <DropdownList
-                          name="DEPARTMENT"
-                          label="Department"
-                          control={controlPDC}
-                          optionList={[
-                            { id: "", name: "Select Department" },
-                           
-                          ]}
-                        />
-                      </div>
-                      <div className="p-1">
-                        <DropdownList
-                          name="AREA"
-                          label="Area"
-                          control={controlPDC}
-                          optionList={[{ id: "", name: "Select Area" },]}
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3">
-                      <div className="p-1">
-                        <DropdownList
-                          name="CATEGORY"
-                          label="Category"
-                          control={controlPDC}
-                          optionList={[
-                            { id: "", name: "Select Category" },
-                           
-                          ]}
-                        />
-                      </div>
-                      <div className="p-1">
-                        <DropdownList
-                          name="SEVERITY"
-                          label="Severity"
-                          control={controlPDC}
-                          optionList={[...CURR_OBS_SEVERITY_LIST]}
-                        />
-                      </div>
-                      
-                    </div>
-        
+
+                  <div className="w-[100%]   gap-4  justify-evenly">
                     <div className="grid grid-cols-1 md:grid-cols-2">
                       <div className="p-1">
-                        <TextArea
-                          name="OBS_DESC"
-                          label="Observation Description"
+                        <DropdownList
+                          name="responsibilities"
+                          label="Responsible Person"
                           control={controlPDC}
+                          optionList={[
+                            { id: "", name: "Select Responsible Person" },
+                            ...users,
+                          ]}
                         />
                       </div>
                       <div className="p-1">
-                        <TextArea
-                          name="OBS_SUGG"
-                          label="Observation Suggestion"
+                        <TextField
+                          type="date"
+                          name="target_date"
+                          label="Target Date"
                           control={controlPDC}
                         />
                       </div>
                     </div>
-                    
-        
-                    
-                 
-                  </form>
+                    <div className="grid grid-cols-1 md:grid-cols-1">
+                      <div className="p-1">
+                        <TextArea
+                          name="action_plan"
+                          label="Action Plan"
+                          control={controlPDC}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </form>
             </div>
+          </div>
+        </div>
       </ModalPopup>
       <ModalPopupMobile
-        heading="Log Details"
+        heading="Assign PDC"
         onClose={handleLogDetailsDialogClose}
         openStatus={showLogDetailsDialog.status}
-        hasSubmit={false}
+        hasSubmit
+        onSubmit={() => {
+          handleSubmit(handleAssignPDCSubmitMobile)();
+        }}
         hasReset={false}
         size="fullscreen"
         showError
@@ -701,17 +883,17 @@ function AssignPDC() {
                 <div className="bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800">
                   <div className="p-2 bg-[#dee9ff] rounded-t-lg dark:bg-gray-600">
                     <h2 className="font-semibold text-gray-800 text-md dark:text-gray-200">
-                      Log Information
+                      Observation Details
                     </h2>
                   </div>
                   <div className="p-3 ">
                     <div className="flex border-b-[#00000036] border-b-[1px]">
                       <div className="flex-1">
                         <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                          Log No:
+                          Obs No:
                         </span>
                         <span className="text-gray-600 dark:text-gray-400">
-                          
+                          {logDetails.historyLogSioData[0].id}
                         </span>
                       </div>
                       <div className="flex-1">
@@ -719,7 +901,9 @@ function AssignPDC() {
                           Date:
                         </span>
                         <span className="text-gray-600 dark:text-gray-400">
-                         
+                          {formatDate(
+                            logDetails.historyLogSioData[0].obs_datetime,
+                          )}
                         </span>
                       </div>
                     </div>
@@ -730,7 +914,8 @@ function AssignPDC() {
                             Log By:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            
+                            {" "}
+                            {logDetails.historyLogSioData[0].pending_on}
                           </span>
                         </div>
                       </div>
@@ -742,7 +927,21 @@ function AssignPDC() {
                             Observation Description:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            
+                            {" "}
+                            {logDetails.historyLogSioData[0].obs_desc}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="py-1">
+                      <div className="flex border-b-[#00000036] border-b-[1px]">
+                        <div className="flex-1">
+                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
+                            Observation Suggestion:
+                          </span>
+                          <span className="text-gray-600 dark:text-gray-400">
+                            {" "}
+                            {logDetails.historyLogSioData[0].obs_sugg}
                           </span>
                         </div>
                       </div>
@@ -754,15 +953,21 @@ function AssignPDC() {
                             Severity:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                          
+                            {" "}
+                            {logDetails.historyLogSioData[0].severity}
                           </span>
                         </div>
+                      </div>
+                    </div>
+                    <div className="py-1">
+                      <div className="flex border-b-[#00000036] border-b-[1px]">
                         <div className="flex-1">
                           <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
                             Category:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                           
+                            {" "}
+                            {logDetails.historyLogSioData[0].category}
                           </span>
                         </div>
                       </div>
@@ -771,40 +976,11 @@ function AssignPDC() {
                       <div className="flex border-b-[#00000036] border-b-[1px]">
                         <div className="flex-1">
                           <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Status:
-                          </span>
-                          <span
-                            className="font-bold text-gray-600 dark:text-gray-400 "
-                          >
-                            
-                          </span>
-                        </div>
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Closure PDC:
+                            Department:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                            
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Location:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                           
-                          </span>
-                        </div>
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Team:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            
+                            {" "}
+                            {logDetails.historyLogSioData[0].department}
                           </span>
                         </div>
                       </div>
@@ -816,7 +992,8 @@ function AssignPDC() {
                             Area:
                           </span>
                           <span className="text-gray-600 dark:text-gray-400">
-                           
+                            {" "}
+                            {logDetails.historyLogSioData[0].area}
                           </span>
                         </div>
                       </div>
@@ -825,60 +1002,71 @@ function AssignPDC() {
                       <div className="flex border-b-[#00000036] border-b-[1px]">
                         <div className="flex-1">
                           <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Division:
+                            Status:
                           </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Action Planned:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                          
+                          <span className="font-bold text-gray-600 dark:text-gray-400 ">
+                            {logDetails.historyLogSioData[0].status}
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Action Taken:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                           
-                          </span>
+                      <div className="border-b-[#00000036] border-b-[1px] pb-2">
+                        <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
+                          Obs. Photos:
+                        </span>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          {imagePreviews.map((preview: any, index: any) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={`${ASSET_BASE_URL}sioimages/${
+                                  preview || ""
+                                }`}
+                                alt={`preview-${index}`}
+                                className="object-cover w-full h-20 rounded-lg"
+                              />
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Action Closed By:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                           
-                          </span>
-                        </div>
+                  </div>
+                </div>
+                <div className="bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800">
+                  <div className="p-2 bg-[#dee9ff] rounded-t-lg dark:bg-gray-600">
+                    <h2 className="font-semibold text-gray-800 text-md dark:text-gray-200">
+                      Assigning Responsibilities
+                    </h2>
+                  </div>
+                  <div className="p-3 ">
+                    <div className="grid grid-cols-1 md:grid-cols-2">
+                      <div className="p-1">
+                        <DropdownList
+                          name="responsibilities"
+                          label="Responsible Person"
+                          control={controlAssignForm}
+                          optionList={[
+                            { id: "", name: "Select Responsible Person" },
+                            ...users,
+                          ]}
+                        />
+                      </div>
+                      <div className="p-1">
+                        <TextField
+                          type="date"
+                          name="target_date"
+                          label="Target Date"
+                          control={controlAssignForm}
+                        />
                       </div>
                     </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Action CLosed Date:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                           
-                          </span>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-1">
+                      <div className="p-1">
+                        <TextArea
+                          name="action_plan"
+                          label="Action Plan"
+                          control={controlAssignForm}
+                        />
                       </div>
                     </div>
                   </div>

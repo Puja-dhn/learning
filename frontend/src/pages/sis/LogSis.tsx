@@ -15,6 +15,7 @@ import ILogSisForm from "@/features/sis/types/sis/ILogSisForm";
 import { addNewSIOData } from "@/features/sis/services/sis.services";
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
+import { API_BASE_URL, ASSET_BASE_URL } from "@/features/common/constants";
 
 const initialFormValues: ILogSisForm = {
   OBS_DATE_TIME: "",
@@ -153,9 +154,9 @@ function LogSis() {
         return;
       }
     }
-    values.OBS_PHOTOS = imagePreviews.join(",");
+    values.OBS_PHOTOS = JSON.stringify(imagePreviews);
     if (values.STATUS === "Closed") {
-      values.CLOSE_PHOTOS = closureImagePreviews.join(",");
+      values.CLOSE_PHOTOS = JSON.stringify(closureImagePreviews);
     }
     loader.show();
 
@@ -165,7 +166,7 @@ function LogSis() {
         handleReset();
         setImagePreviews([]); // Reset imagePreviews
         setClosureImagePreviews([]); // Reset closureImagePreviews
-  
+
         // Invalidate queries
         queryClient.invalidateQueries({
           predicate: (query) => query.queryKey[0] === "sioMasterDataQuery",
@@ -183,20 +184,68 @@ function LogSis() {
 
   const handleFileChange = (e: any) => {
     const files = Array.from(e.target.files);
-    const previews = files.map((file: any) => URL.createObjectURL(file));
-    setImagePreviews((prevPreviews: any) => [...prevPreviews, ...previews]);
-  };
-  const handleDelete = (index: any) => {
-    setImagePreviews((prevPreviews: any[]) =>
-      prevPreviews.filter((_, i) => i !== index),
+    const filenames = files.map((file: any, index: number) => {
+      const now = new Date();
+      const date = now.toISOString().slice(0, 10).replace(/-/g, "");
+      const time = now.toTimeString().slice(0, 8).replace(/:/g, "");
+      return `${date}_${time}_${index + 1}_${file.name}`;
+    });
+
+    const formData = new FormData();
+    formData.append("filenames", JSON.stringify(filenames));
+    formData.append(
+      "orginalnames",
+      JSON.stringify(files.map((file: any) => file.name)),
     );
+    files.forEach((file: any) => {
+      formData.append("files[]", file);
+    });
+
+    fetch(`${API_BASE_URL}uploadObsImage`, {
+      method: "POST",
+      body: formData,
+    })
+      .then(async (res) => {
+        setImagePreviews(() => [...filenames]);
+      })
+      .catch(() => {
+        alertToast.show("error", "Error Uploading Image", true);
+      });
   };
+
+  const handleDelete = (image: string) => {
+    setImagePreviews((prevPreviews: any) =>
+      prevPreviews.filter((item: any) => item !== image),
+    );
+
+    fetch(`${API_BASE_URL}deleteObsImage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        imageName: image, // The image name that needs to be deleted
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alertToast.show("success", "Image deleted successfully", true);
+        } else {
+          alertToast.show("error", "Error deleting image", true);
+        }
+      })
+      .catch(() => {
+        alertToast.show("error", "Error deleting image", true);
+      });
+  };
+
   const handleButtonClick = () => {
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
-  
+
   const handleClosureFileButtonClick = () => {
     if (closureFileInputRef.current) {
       closureFileInputRef.current.click();
@@ -210,10 +259,32 @@ function LogSis() {
       ...previews,
     ]);
   };
-  const handleDeleteClosureImage = (index: any) => {
-    setClosureImagePreviews((prevPreviews: any[]) =>
-      prevPreviews.filter((_, i) => i !== index),
+
+  const handleDeleteClosureImage = (image: string) => {
+    setClosureImagePreviews((prevPreviews: any) =>
+      prevPreviews.filter((item: any) => item !== image),
     );
+
+    fetch(`${API_BASE_URL}deleteObsClosureImage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        imageName: image, // The image name that needs to be deleted
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alertToast.show("success", "Image deleted successfully", true);
+        } else {
+          alertToast.show("error", "Error deleting image", true);
+        }
+      })
+      .catch(() => {
+        alertToast.show("error", "Error deleting image", true);
+      });
   };
   return (
     <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
@@ -281,7 +352,6 @@ function LogSis() {
                   label="Observation Status"
                   control={control}
                   optionList={[...CURR_OBS_STATUS]}
-                 
                 />
               </div>
             </div>
@@ -302,7 +372,7 @@ function LogSis() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-3 ">
+            <div className="grid grid-cols-1 ">
               <div className="p-1">
                 <button
                   type="button"
@@ -331,6 +401,7 @@ function LogSis() {
                   onChange={handleFileChange}
                   style={{ display: "none" }}
                   ref={fileInputRef}
+                  accept=".jpg,.jpeg,.png"
                 />
               </div>
             </div>
@@ -338,12 +409,12 @@ function LogSis() {
               {imagePreviews.map((preview: any, index: any) => (
                 <div key={index} className="relative">
                   <img
-                    src={preview}
+                    src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
                     alt={`preview-${index}`}
                     className="object-cover w-24 h-24 rounded-lg"
                   />
                   <button
-                    onClick={() => handleDelete(index)}
+                    onClick={() => handleDelete(preview)}
                     className="absolute top-0 right-0 p-1 text-xs text-white bg-red-500 rounded-full hover:bg-red-700"
                     type="button"
                   >
@@ -371,7 +442,7 @@ function LogSis() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-3 ">
+                  <div className="grid grid-cols-1 ">
                     <div className="p-1">
                       <button
                         type="button"
