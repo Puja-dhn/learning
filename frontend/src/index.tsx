@@ -6,7 +6,6 @@ import { BrowserRouter } from "react-router-dom";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 
-import "@/features/localization/config";
 import App from "./App";
 import store from "./store";
 

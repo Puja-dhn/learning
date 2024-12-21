@@ -36,7 +36,6 @@ import {
   submitActionTaken,
   submitPDCAssign,
 } from "@/features/sis/services/sis.services";
-import IAssignPDCData from "@/features/sos/types/IAssignPDCData";
 import { yupResolver } from "@hookform/resolvers/yup";
 import useSisAssignedLogQuery from "@/features/sis/hooks/useSisAssignedLogQuery";
 

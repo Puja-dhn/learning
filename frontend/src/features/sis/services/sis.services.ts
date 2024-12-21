@@ -1,10 +1,8 @@
 import { AxiosResponse } from "axios";
 import http from "@/features/common/utils/http-common";
 import {
-  IAectClosureForm,
   ILogSioFilterForm,
   ILogSisForm,
-  IAECTDashboardData,
 } from "../types";
 import ISIOMasterData from "../types/sis/ISIOMasterData";
 import ILogSioData from "../types/sis/ILogSioData";
@@ -24,12 +22,7 @@ const getSIOMasterData = () => {
   >("/sio/get-sio-master-data");
 };
 
-const updateAectStatus = (aectData: IAectClosureForm) => {
-  return http.post<IAectClosureForm, AxiosResponse<string>>(
-    "/aect/udpate-aect-status",
-    aectData,
-  );
-};
+
 
 const getSIOData = (filterData: ILogSioFilterForm) => {
   return http.post<
@@ -64,7 +57,6 @@ const submitActionTaken = (pdcData: ISIOPDCAssignData) => {
 export {
   getSIOData,
   addNewSIOData,
-  updateAectStatus,
   getSIOMasterData,
   getOpenSIOData,
   submitPDCAssign,

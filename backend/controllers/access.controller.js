@@ -38,9 +38,9 @@ exports.appaccess = async (req, res) => {
           t1.app_id,
           t1.mas_id
       FROM
-          t_sis_menus t1,
-          t_sis_role_menus t2,
-          t_sis_user_role t3
+          t_inshe_menus t1,
+          t_inshe_role_menus t2,
+          t_inshe_user_role t3
       WHERE
               t1.id = t2.menu_id
           AND
@@ -62,10 +62,10 @@ exports.appaccess = async (req, res) => {
           t1.app_desc,
           t1.logo_path
       FROM
-          t_sis_apps t1,
-          t_sis_menus t2,
-          t_sis_role_menus t3,
-          t_sis_user_role t4
+          t_inshe_apps t1,
+          t_inshe_menus t2,
+          t_inshe_role_menus t3,
+          t_inshe_user_role t4
       WHERE
               t1.status = 'Active'
           AND

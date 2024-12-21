@@ -120,7 +120,7 @@ exports.login = async (req, res) => {
             t1.password,
             t1.location
         FROM
-            t_sis_users t1
+            t_inshe_users t1
         WHERE
             t1.email = ?
 `;
@@ -128,9 +128,9 @@ exports.login = async (req, res) => {
   const results = await simpleQuery(query, [decEmail]);
   const userData = results[0];
   if (results.length > 0) {
-    const updatequery = `update t_sis_users set logged_in=1 where id=?`;
+    const updatequery = `update t_inshe_users set logged_in=1 where id=?`;
     const updateresults = await simpleQuery(updatequery, [userData.id]);
-    const queryRoles = `SELECT role_id FROM t_sis_user_role WHERE user_id = ?`;
+    const queryRoles = `SELECT role_id FROM t_inshe_user_role WHERE user_id = ?`;
     const resultRoles = await simpleQuery(queryRoles, [userData.id]);
     roleRows = Array.isArray(resultRoles.rows)
       ? resultRoles.rows.map((item) => item.ROLE_ID)
@@ -180,7 +180,7 @@ exports.login = async (req, res) => {
 exports.logout = async (req, res) => {
   const { id } = req.body;
 
-  const updatequery = `update t_sis_users set logged_in=0 where id=?`;
+  const updatequery = `update t_inshe_users set logged_in=0 where id=?`;
   const updateresults = await simpleQuery(updatequery, [id]);
   return res.status(200).json("success");
 };

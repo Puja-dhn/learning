@@ -9,7 +9,7 @@ import DocumentMagnifyingGlassIconSolid from "@heroicons/react/24/solid/Document
 import IMenuItem from "../types/IMenuItem";
 
 import ViewSio from "@/pages/sis/ViewSio";
-import Dashboard from "@/pages/sis/Dashboard";
+
 import LogSis from "@/pages/sis/LogSis";
 import AssignPDC from "@/pages/sis/AssignPDC";
 import ActionTaken from "@/pages/sis/ActionTaken";
@@ -24,7 +24,7 @@ const SIS_MENU_LIST: IMenuItem[] = [
     iconSelected: <HomeIconSolid className="w-5 h-5" />,
     appId: 2,
     path: "",
-    element: <Dashboard />,
+    element: <LogSis />,
     children: [],
     menuType: "Static",
   },

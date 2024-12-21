@@ -32,7 +32,6 @@ import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 import { submitPDCAssign } from "@/features/sis/services/sis.services";
-import IAssignPDCData from "@/features/sos/types/IAssignPDCData";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 interface ILogSioTeamData {

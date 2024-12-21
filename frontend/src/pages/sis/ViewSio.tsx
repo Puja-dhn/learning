@@ -25,7 +25,7 @@ import { ModalPopup } from "@/features/ui/popup";
 import { DropdownList, TextArea, TextField } from "@/features/ui/form";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
-import HirarchyFilterAll from "@/features/common/HirarchyFilterAll";
+
 import ModalPopupMobile from "@/features/ui/popup/ModalPopupMobile";
 import ILogSioData from "@/features/sis/types/sis/ILogSioData";
 
@@ -378,7 +378,19 @@ function ViewSio() {
     setShowImageDialog({ status: true });
   };
   const handleExport = () => {
-    const rows = teamData.historyLogSioData;
+    const rows = teamData.historyLogSioData.map((item) => ({
+      "Log No": item.disp_logno,
+      "Observation Date": item.obs_datetime,
+      Department: item.department,
+      Status: item.status,
+      Area: item.area,
+      Category: item.category,
+      Severity: item.severity,
+      "Pending On": item.pending_on,
+      "Log By": item.log_by,
+      "PDC Date": item.target_date,
+      "Closure date": item.closure_date,
+    }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");

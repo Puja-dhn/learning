@@ -34,7 +34,7 @@ exports.getSIOMasterData = async (req, res) => {
           t1.id,
           t1.department_name name
       FROM
-          t_sis_departments t1
+          t_inshe_departments t1
       WHERE
               t1.status = 'Active'
        
@@ -47,7 +47,7 @@ exports.getSIOMasterData = async (req, res) => {
           t1.id,
           t1.name
       FROM
-          t_sis_categories t1
+          t_inshe_categories t1
       WHERE
         t1.status = 'Active'
        
@@ -60,7 +60,7 @@ exports.getSIOMasterData = async (req, res) => {
         t1.id,
         t1.name
     FROM
-        t_sis_areas t1
+        t_inshe_areas t1
     WHERE
       t1.status = 'Active'
      
@@ -73,7 +73,7 @@ exports.getSIOMasterData = async (req, res) => {
         t1.id,
         t1.name
     FROM
-        t_sis_users t1
+        t_inshe_users t1
     WHERE
       t1.status = 'active'
      
@@ -122,7 +122,7 @@ exports.addNewSIOData = async (req, res) => {
         t1.department_name name,
         t1.head_id
       FROM
-        t_sis_departments t1
+        t_inshe_departments t1
       WHERE
         t1.status = 'Active' AND t1.id = ?
     `;
@@ -135,7 +135,7 @@ exports.addNewSIOData = async (req, res) => {
 
     if (STATUS === "Closed") {
       const insertQuery = `
-        INSERT INTO t_sis_log_sio (
+        INSERT INTO t_inshe_log_sio (
           obs_date_time,
           department,
           area,
@@ -182,7 +182,7 @@ exports.addNewSIOData = async (req, res) => {
       }
     } else {
       const insertQuery = `
-        INSERT INTO t_sis_log_sio (
+        INSERT INTO t_inshe_log_sio (
           obs_datetime,
           department,
           area,
@@ -289,13 +289,13 @@ exports.getSioData = async (req, res) => {
     t1.closure_date,
     LPAD(t1.id, 6, '0') AS disp_logno
   FROM
-    t_sis_log_sio t1
-    join t_sis_departments t2 on t1.department = t2.id
-    join t_sis_areas t3 on t1.area = t3.id
-    join t_sis_categories t4 on t1.category = t4.id
-    left join t_sis_users t5 on t1.pending_on = t5.id
-    left join t_sis_users t6 on t1.responsibilities = t6.id
-    join t_sis_users t7 on t1.created_by = t7.id
+    t_inshe_log_sio t1
+    join t_inshe_departments t2 on t1.department = t2.id
+    join t_inshe_areas t3 on t1.area = t3.id
+    join t_inshe_categories t4 on t1.category = t4.id
+    left join t_inshe_users t5 on t1.pending_on = t5.id
+    left join t_inshe_users t6 on t1.responsibilities = t6.id
+    join t_inshe_users t7 on t1.created_by = t7.id
   WHERE
     1=1
     ${strId}
@@ -373,13 +373,13 @@ exports.getOpenSioData = async (req, res) => {
       t1.closure_date,
       LPAD(t1.id, 6, '0') AS disp_logno
     FROM
-      t_sis_log_sio t1
-      join t_sis_departments t2 on t1.department = t2.id
-      join t_sis_areas t3 on t1.area = t3.id
-      join t_sis_categories t4 on t1.category = t4.id
-      join t_sis_users t5 on t1.pending_on = t5.id
-      left join t_sis_users t6 on t1.responsibilities = t6.id
-       join t_sis_users t7 on t1.created_by = t7.id
+      t_inshe_log_sio t1
+      join t_inshe_departments t2 on t1.department = t2.id
+      join t_inshe_areas t3 on t1.area = t3.id
+      join t_inshe_categories t4 on t1.category = t4.id
+      join t_inshe_users t5 on t1.pending_on = t5.id
+      left join t_inshe_users t6 on t1.responsibilities = t6.id
+       join t_inshe_users t7 on t1.created_by = t7.id
     WHERE
       t1.status = "Open"
       ${strId}
@@ -425,7 +425,7 @@ exports.submitPDCAssign = async (req, res) => {
     const currentTime = new Date();
 
     const updateQuery = `
-        update t_sis_log_sio set pending_on = ?, action_plan = ?, target_date= ?, updated_at = ?, updated_by = ?, status = "PDC Assigned", responsibilities = ?  where id=?
+        update t_inshe_log_sio set pending_on = ?, action_plan = ?, target_date= ?, updated_at = ?, updated_by = ?, status = "PDC Assigned", responsibilities = ?  where id=?
       `;
     const updateValues = [
       responsibilities,
@@ -510,13 +510,13 @@ exports.getAssignedSioData = async (req, res) => {
       t1.closure_date,
       LPAD(t1.id, 6, '0') AS disp_logno
     FROM
-      t_sis_log_sio t1
-      join t_sis_departments t2 on t1.department = t2.id
-      join t_sis_areas t3 on t1.area = t3.id
-      join t_sis_categories t4 on t1.category = t4.id
-      join t_sis_users t5 on t1.pending_on = t5.id
-      left join t_sis_users t6 on t1.responsibilities = t6.id
-       join t_sis_users t7 on t1.created_by = t7.id
+      t_inshe_log_sio t1
+      join t_inshe_departments t2 on t1.department = t2.id
+      join t_inshe_areas t3 on t1.area = t3.id
+      join t_inshe_categories t4 on t1.category = t4.id
+      join t_inshe_users t5 on t1.pending_on = t5.id
+      left join t_inshe_users t6 on t1.responsibilities = t6.id
+       join t_inshe_users t7 on t1.created_by = t7.id
     WHERE
       t1.status = "PDC Assigned"
       ${strId}
@@ -559,7 +559,7 @@ exports.submitActionTaken = async (req, res) => {
     const currentTime = new Date();
 
     const updateQuery = `
-        update t_sis_log_sio set pending_on = 0, closure_desc = ?, closure_photos= ?, updated_at = ?, updated_by = ?, status = "Closed", closure_date = ?  where id=?
+        update t_inshe_log_sio set pending_on = 0, closure_desc = ?, closure_photos= ?, updated_at = ?, updated_by = ?, status = "Closed", closure_date = ?  where id=?
       `;
     const updateValues = [
       closure_desc,
