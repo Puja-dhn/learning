@@ -26,6 +26,7 @@ const MasterDashboard = React.lazy(() => import("@/pages/master/Dashboard"));
 
 const LogSis = React.lazy(() => import("@/pages/sis/LogSis"));
 const ViewSio = React.lazy(() => import("@/pages/sis/ViewSio"));
+const LogPtw = React.lazy(() => import("@/pages/ptw/LogPtw"));
 
 function App() {
   return (
@@ -60,6 +61,15 @@ function App() {
             <Route path="view-sio" element={<ViewSio />} />
             <Route path="assign-pdc" element={<AssignPDC />} />
             <Route path="action-taken" element={<ActionTaken />} />
+            <Route path="*" element={<PageNotFound />} />
+          </Route>
+          <Route
+            path="ptw"
+            element={<PrivateRoutes outlet={<HomeLayout appId={3} />} />}
+          >
+            <Route index element={<LogPtw />} />
+            <Route path="dashboard" element={<LogPtw />} />
+            <Route path="log-ptw" element={<LogPtw />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 
