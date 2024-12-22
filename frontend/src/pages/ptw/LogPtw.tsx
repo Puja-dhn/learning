@@ -25,14 +25,51 @@ import {
   PlusIcon,
   TrashIcon,
 } from "@heroicons/react/24/solid";
+import { InputText } from "@/features/ui/elements";
 
 const initialFormValues: ILogPTWForm = {
   department: "",
   area: "",
   work_location: "",
+  datetime_from: "",
+  datetime_to: "",
+  nearest_firealarm: "",
+  job_description: "",
   moc_required: "",
   moc_title: "",
   moc_no: "",
+  supervisor_name: "",
+  contractor: "",
+  esic_no: "",
+  associated_permit: "",
+  hazard_identification: "",
+  other_hazards: "",
+  risk_assessment: "",
+  ppe_required: "",
+  ei_panel_name: "",
+  ei_loto_no: "",
+  ei_checked_by: "",
+  ei_date_time: "",
+  si_panel_name: "",
+  si_loto_no: "",
+  si_checked_by: "",
+  si_date_time: "",
+  general_work_dtls: "",
+  annexture_v: "",
+  work_height_checklist: "",
+  work_height_supervision: "",
+  confined_space_checklist: "",
+  confined_space_supervision: "",
+  confined_space_atmospheric: "",
+  confined_space_oxygen_level: "",
+  confined_space_lel: "",
+  confined_space_toxic: "",
+  confined_space_detector: "",
+  lifting_work_checklist: "",
+  esms_checklist: "",
+  hot_work_checklist: "",
+  pending_on: "",
+  status: "",
 };
 
 const formSchema = Yup.object().shape({
@@ -93,20 +130,44 @@ function LogPtw() {
   const [assLiftingChecklist, setAssLiftingChecklist] = useState<IOptionList[]>(
     [],
   );
+  const [isAssEsmsSectionOpen, setIsAssEsmsSectionOpen] = useState(false);
+  const [assEsmsChecklist, setAssEsmsChecklist] = useState<IOptionList[]>([]);
   const [isAssHotWrkSectionOpen, setIsAssHotWrkSectionOpen] = useState(false);
   const [assHotWrkChecklist, setAssHotWrkChecklist] = useState<IOptionList[]>(
     [],
   );
-  const [anxRows, setAnxRows] = useState<IAnxPerson[]>([
-    { name: "", contractor: "", trade: "", ticketNo: "" }, // Initial row
-  ]);
+
+  const [attPerName, setAttPername] = useState<string>("");
+  const [attContractor, setAttContractor] = useState<string>("");
+  const [attTrade, setAttTrade] = useState<string>("");
+  const [attTicketNo, setAttTicketNo] = useState<string>("");
+  const [departmentHeadName, setDepartmentHeadName] = useState<string>("");
+
+  const [anxRows, setAnxRows] = useState<IAnxPerson[]>([]);
 
   // Handle adding a new row
   const addRow = () => {
-    setAnxRows([
-      ...anxRows,
-      { name: "", contractor: "", trade: "", ticketNo: "" }, // New empty row
-    ]);
+    if (attPerName === "") {
+      alertToast.show("warning", "Name of person required", true);
+    } else if (attContractor === "") {
+      alertToast.show("warning", "Contractor required", true);
+    } else if (attTrade === "") {
+      alertToast.show("warning", "Trade is required", true);
+    } else if (attTicketNo === "") {
+      alertToast.show("warning", "Ticket No is required", true);
+    } else {
+      const newRow: IAnxPerson = {
+        name: attPerName,
+        contractor: attContractor,
+        trade: attTrade,
+        ticketNo: attTicketNo,
+      };
+      setAnxRows([...anxRows, newRow]);
+      setAttPername("");
+      setAttContractor("");
+      setAttTrade("");
+      setAttTicketNo("");
+    }
   };
 
   // Handle removing a row
@@ -140,7 +201,6 @@ function LogPtw() {
     watch: watchValues,
   } = useForm<ILogPTWForm>({
     defaultValues: initialFormValues,
-    resolver: yupResolver(formSchema),
   });
 
   const { isSubmitting, submitCount, errors } = formState;
@@ -158,85 +218,96 @@ function LogPtw() {
 
     if (!isPTWMasterDataLoading && !isPTWMasterDataError && ptwMasterData) {
       const historyPTWMasterData = [ptwMasterData.historyPTWMasterData];
-      const ownDepartment = historyPTWMasterData[0].DEPARTMENT.filter(
-        (item: any) => +item.id === +authState.DEPARTMENT,
-      );
-      setDepartments(historyPTWMasterData[0].DEPARTMENT);
-      setConfigs(historyPTWMasterData[0].CONFIG);
-      setAreas(historyPTWMasterData[0].AREA);
-      const filtercontractors = historyPTWMasterData[0].CONTRACTORS.map(
-        (contractor: any) => ({
-          id: contractor.id,
-          name: contractor.contractor_name,
-        }),
-      );
-      setContractors(filtercontractors);
-      const filterhazards = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "Hazard Identification",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
-      setHazardsChecklist(filterhazards);
-      const filterRisks = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "Risk Assessment",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
+      if (historyPTWMasterData && historyPTWMasterData.length > 0) {
+        const ownDepartment = historyPTWMasterData[0].DEPARTMENT.filter(
+          (item: any) => +item.id === +authState.DEPARTMENT,
+        );
+        setDepartmentHeadName(ownDepartment[0].head_name);
+        //setDepartments(historyPTWMasterData[0].DEPARTMENT);
+        setConfigs(historyPTWMasterData[0].CONFIG);
+        setAreas(historyPTWMasterData[0].AREA);
 
-      setRiskChecklist(filterRisks);
-      const filterPPE = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "PPE Required",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
-      setPPEChecklist(filterPPE);
+        const filtercontractors = historyPTWMasterData[0].CONTRACTORS.map(
+          (contractor: any) => ({
+            id: contractor.id,
+            name: contractor.contractor_name,
+          }),
+        );
+        setContractors(filtercontractors);
+        const filterhazards = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Hazard Identification",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setHazardsChecklist(filterhazards);
+        const filterRisks = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Risk Assessment",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
 
-      const filterAssGen = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "General Work",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
-      setAssGenChecklist(filterAssGen);
+        setRiskChecklist(filterRisks);
+        const filterPPE = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "PPE Required",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setPPEChecklist(filterPPE);
 
-      const filterAssWH = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "Work at Height",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
-      setAssWHChecklist(filterAssWH);
+        const filterAssGen = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "General Work",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setAssGenChecklist(filterAssGen);
 
-      const filterAssConfined = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "Confined Space",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
-      setAssConfinedChecklist(filterAssConfined);
+        const filterAssWH = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Work at Height",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setAssWHChecklist(filterAssWH);
 
-      const filterAssLifting = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "Lifiting Work",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
-      setAssLiftingChecklist(filterAssLifting);
+        const filterAssConfined = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Confined Space",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setAssConfinedChecklist(filterAssConfined);
 
-      const filterAssHotWrk = historyPTWMasterData[0].CONFIG.filter(
-        (item: any) => item.type === "Hot Work",
-      ).map((check: any) => ({
-        id: check.id,
-        name: check.checklist,
-      }));
-      setAssHotWrkChecklist(filterAssHotWrk);
+        const filterAssLifting = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Lifiting Work",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setAssLiftingChecklist(filterAssLifting);
 
-      reset({
-        department: ownDepartment[0].name,
-      });
+        const filterAssEsms = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "ESMS Work Permit",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setAssEsmsChecklist(filterAssEsms);
+
+        const filterAssHotWrk = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Hot Work",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setAssHotWrkChecklist(filterAssHotWrk);
+        loader.hide();
+      } else {
+        loader.show();
+      }
     }
   }, [ptwMasterData, isPTWMasterDataLoading, isPTWMasterDataError]);
 
@@ -262,55 +333,39 @@ function LogPtw() {
   const handleCollpaseToggle = () => {
     setCollapseFilter(!collapseFilter);
   };
-
-  const handleFormSubmit: SubmitHandler<ILogSisForm> = (values) => {
-    if (imagePreviews.length === 0) {
-      alertToast.show("warning", "Observation photos are required", true, 5000);
-      return;
-    }
-
-    if (values.STATUS === "Closed") {
-      if (!values.CLOSE_DESC || values.CLOSE_DESC.trim() === "") {
-        alertToast.show(
-          "warning",
-          "Closure description is required",
-          true,
-          5000,
-        );
-        return;
+  const [hazardCheckboxState, setHazardCheckboxState] = useState([]);
+  const handleHazardsChecklistChange = (event: any, itemId: any) => {
+    setHazardCheckboxState((prevState: any) => {
+      if (event.target.checked) {
+        return [...prevState, itemId];
+      } else {
+        return prevState.filter((id: any) => id !== itemId);
       }
+    });
+  };
 
-      if (closureImagePreviews.length === 0) {
-        alertToast.show("warning", "Closure images are required", true, 5000);
-        return;
-      }
-    }
-    values.OBS_PHOTOS = JSON.stringify(imagePreviews);
-    if (values.STATUS === "Closed") {
-      values.CLOSE_PHOTOS = JSON.stringify(closureImagePreviews);
-    }
-    loader.show();
+  const handleFormSubmit: SubmitHandler<ILogPTWForm> = (values: any) => {
+    const jsonCheckedHazards = JSON.stringify(hazardCheckboxState);
+    console.log(jsonCheckedHazards);
+    // loader.show();
 
-    addNewSIOData(values)
-      .then(() => {
-        alertToast.show("success", "Data added successfully", true, 2000);
-        handleReset();
-        setImagePreviews([]); // Reset imagePreviews
-        setClosureImagePreviews([]); // Reset closureImagePreviews
-
-        // Invalidate queries
-        queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === "sioMasterDataQuery",
-        });
-      })
-      .catch((err) => {
-        if (err.response && err.response.status) {
-          alertToast.show("warning", err.response.data.errorMessage, true);
-        }
-      })
-      .finally(() => {
-        loader.hide();
-      });
+    // addNewPTWData(values)
+    //   .then(() => {
+    //     alertToast.show("success", "Data added successfully", true, 2000);
+    //     handleReset();
+    //     // Invalidate queries
+    //     queryClient.invalidateQueries({
+    //       predicate: (query) => query.queryKey[0] === "sioMasterDataQuery",
+    //     });
+    //   })
+    //   .catch((err) => {
+    //     if (err.response && err.response.status) {
+    //       alertToast.show("warning", err.response.data.errorMessage, true);
+    //     }
+    //   })
+    //   .finally(() => {
+    //     loader.hide();
+    //   });
   };
 
   const handleFileChange = (e: any) => {
@@ -439,7 +494,7 @@ function LogPtw() {
               </div>
               <div className="p-1">
                 <DropdownList
-                  name="AREA"
+                  name="area"
                   label="Area"
                   control={control}
                   optionList={[{ id: "", name: "Select Area" }, ...areas]}
@@ -447,7 +502,7 @@ function LogPtw() {
               </div>
               <div className="p-1">
                 <TextField
-                  name="WORK_LOCATION"
+                  name="work_location"
                   label="Work Location"
                   control={control}
                 />
@@ -457,7 +512,7 @@ function LogPtw() {
               <div className="p-1">
                 <TextField
                   type="datetime-local"
-                  name="time_from"
+                  name="datetime_from"
                   label="Date Time From"
                   control={control}
                 />
@@ -465,7 +520,7 @@ function LogPtw() {
               <div className="p-1">
                 <TextField
                   type="datetime-local"
-                  name="time_to"
+                  name="datetime_to"
                   label="Date Time To"
                   control={control}
                 />
@@ -473,7 +528,7 @@ function LogPtw() {
               <div className="p-1">
                 <TextField
                   type="text"
-                  name="fire_alarm_point"
+                  name="nearest_firealarm"
                   label="Nearest Fire Alarm Point"
                   control={control}
                 />
@@ -550,7 +605,7 @@ function LogPtw() {
               </div>
               <div className="p-1">
                 <TextField
-                  name="contractor_esic"
+                  name="esic_no"
                   label="ESIC Reg No"
                   control={control}
                 />
@@ -558,17 +613,8 @@ function LogPtw() {
             </div>
           </div>
           <div>
-            <span className="text-red-800">Precautions to be taken</span>
-            <div className="grid grid-cols-1 md:grid-cols-6">
-              <div className="p-1">
-                General Work/Cold Work &nbsp;
-                <input
-                  type="checkbox"
-                  value="Yes"
-                  onChange={() => setIsAssGenSectionOpen((prev) => !prev)}
-                  checked={isAssGenSectionOpen}
-                />
-              </div>
+            <div className="grid grid-cols-1 p-4 md:grid-cols-6">
+              Associated Permit(s) &nbsp;&nbsp;
               <div className="p-1">
                 Work at Height &nbsp;
                 <input
@@ -597,6 +643,15 @@ function LogPtw() {
                 />
               </div>
               <div className="p-1">
+                ESMS Work Permit &nbsp;
+                <input
+                  type="checkbox"
+                  value="Yes"
+                  onChange={() => setIsAssEsmsSectionOpen((prev) => !prev)}
+                  checked={isAssEsmsSectionOpen}
+                />
+              </div>
+              <div className="p-1">
                 Hot Work &nbsp;
                 <input
                   type="checkbox"
@@ -615,7 +670,7 @@ function LogPtw() {
                 </h3>
                 <input
                   type="radio"
-                  name="hazard_identification"
+                  name="hazard_identifications"
                   value="Yes"
                   onChange={() => setIsHazardSectionOpen(true)}
                   checked={isHazardSectionOpen}
@@ -623,7 +678,7 @@ function LogPtw() {
                 &nbsp;&nbsp;Yes&nbsp;&nbsp;
                 <input
                   type="radio"
-                  name="hazard_identification"
+                  name="hazard_identifications"
                   value="No"
                   onChange={() => setIsHazardSectionOpen(false)}
                   checked={!isHazardSectionOpen}
@@ -655,6 +710,12 @@ function LogPtw() {
                                     type="checkbox"
                                     name={`hazard_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
+                                    onChange={(event: any) =>
+                                      handleHazardsChecklistChange(
+                                        event,
+                                        item2.id,
+                                      )
+                                    }
                                   />
                                 </label>
                               </div>
@@ -663,6 +724,13 @@ function LogPtw() {
                         ))}
                     </div>
                   )}
+                  <div className="p-1">
+                    <TextField
+                      name="other_specific_hazards"
+                      label="Any other specific hazards"
+                      control={control}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -896,7 +964,7 @@ function LogPtw() {
               )}
             </div>
           </div>
-          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
+          {/* <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
             <div className="p-1">
               <div className="flex items-center">
                 <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
@@ -940,6 +1008,60 @@ function LogPtw() {
                 </div>
               )}
             </div>
+          </div> */}
+          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
+            <div className="p-1">
+              <div className="flex items-center">
+                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  General Work/Cold Work &nbsp;
+                </h3>
+                {/* <input
+                  type="checkbox"
+                  value="Yes"
+                  onChange={() => setIsAssGenSectionOpen((prev) => !prev)}
+                  checked={isAssGenSectionOpen}
+                /> */}
+              </div>
+
+              <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                {assGenChecklist && assGenChecklist.length > 0 && (
+                  <div>
+                    {assGenChecklist
+                      .reduce((rows: any, item: any, index: any) => {
+                        if (index % 4 === 0) rows.push([]);
+                        rows[rows.length - 1].push(item);
+                        return rows;
+                      }, [])
+                      .map((row: any, rowIndex: any) => (
+                        <div
+                          className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                          key={rowIndex}
+                        >
+                          {row.map((item2: any, index: any) => (
+                            <div className="p-1" key={index}>
+                              <label>
+                                {item2.name}&nbsp;
+                                <input
+                                  type="checkbox"
+                                  name={`risk_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                  value="Yes"
+                                />
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                      ))}
+                  </div>
+                )}
+                <div className="grid grid-cols-1">
+                  <TextField
+                    name="ass_gen_supervision"
+                    label="Supervision provided by"
+                    control={control}
+                  />
+                </div>
+              </div>
+            </div>
           </div>
           <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
             <div className="p-1">
@@ -958,53 +1080,38 @@ function LogPtw() {
                         Name of Person
                       </th>
                       <th className="px-4 py-2 text-left border-b">
-                        Contractor
+                        Own / Contractor
                       </th>
                       <th className="px-4 py-2 text-left border-b">Trade</th>
-                      <th className="px-4 py-2 text-left border-b">
-                        Ticket No.
-                      </th>
+                      <th className="px-4 py-2 text-left border-b">ESIC No.</th>
                       <th className="px-4 py-2 text-left border-b">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {/* First row containing input fields and Add icon */}
                     <tr>
+                      <td className="px-4 py-2 border-b">1</td>
                       <td className="px-4 py-2 border-b">
-                        1 {/* Static Sl. No. for the first row */}
-                      </td>
-                      <td className="px-4 py-2 border-b">
-                        <input
-                          type="text"
-                          value={anxRows[0]?.name}
-                          onChange={(e) => handleInputChange(e, 0, "name")}
-                          className="p-2 border rounded"
+                        <InputText
+                          value={attPerName}
+                          changeHandler={(e: any) => setAttPername(e)}
                         />
                       </td>
                       <td className="px-4 py-2 border-b">
-                        <input
-                          type="text"
-                          value={anxRows[0]?.contractor}
-                          onChange={(e) =>
-                            handleInputChange(e, 0, "contractor")
-                          }
-                          className="p-2 border rounded"
+                        <InputText
+                          value={attContractor}
+                          changeHandler={(e: any) => setAttContractor(e)}
                         />
                       </td>
                       <td className="px-4 py-2 border-b">
-                        <input
-                          type="text"
-                          value={anxRows[0]?.trade}
-                          onChange={(e) => handleInputChange(e, 0, "trade")}
-                          className="p-2 border rounded"
+                        <InputText
+                          value={attTrade}
+                          changeHandler={(e: any) => setAttTrade(e)}
                         />
                       </td>
                       <td className="px-4 py-2 border-b">
-                        <input
-                          type="text"
-                          value={anxRows[0]?.ticketNo}
-                          onChange={(e) => handleInputChange(e, 0, "ticketNo")}
-                          className="p-2 border rounded"
+                        <InputText
+                          value={attTicketNo}
+                          changeHandler={(e: any) => setAttTicketNo(e)}
                         />
                       </td>
                       <td className="px-4 py-2 border-b">
@@ -1043,7 +1150,7 @@ function LogPtw() {
               </div>
             </div>
           </div>
-          {isAssGenSectionOpen && (
+          {/* {isAssGenSectionOpen && (
             <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
               <div className="p-1">
                 <div className="flex items-center">
@@ -1091,7 +1198,7 @@ function LogPtw() {
                 </div>
               </div>
             </div>
-          )}
+          )} */}
           {isAssWHSectionOpen && (
             <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
               <div className="p-1">
@@ -1130,7 +1237,7 @@ function LogPtw() {
                         ))}
                     </div>
                   )}
-                  <div className="grid grid-cols-1">
+                  <div className="grid grid-cols-1 md:grid-cols-4">
                     <TextField
                       name="ass_wh_supervision"
                       label="Supervision provided by(Atomberg's Emp)"
@@ -1180,6 +1287,40 @@ function LogPtw() {
                     </div>
                   )}
                 </div>
+                <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
+                  <TextField
+                    name="ass_wh_supervision"
+                    label="Supervision provided by(Atomberg's Emp)"
+                    control={control}
+                  />
+                  <TextField
+                    name="ass_wh_atmospheric_check"
+                    label="Atmospheric Checks done by"
+                    control={control}
+                  />
+                  <TextField
+                    name="ass_wh_oxygen_level"
+                    label="Oxygen level (19% - 21%)"
+                    control={control}
+                  />
+                  <TextField
+                    name="ass_wh_lel_uel"
+                    label="Explosive LEL & UEL"
+                    control={control}
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
+                  <TextField
+                    name="ass_wh_toxic"
+                    label="Toxic"
+                    control={control}
+                  />
+                  <TextField
+                    name="ass_wh_detector_details"
+                    label="Detector Details"
+                    control={control}
+                  />
+                </div>
               </div>
             </div>
           )}
@@ -1212,6 +1353,48 @@ function LogPtw() {
                                   <input
                                     type="checkbox"
                                     name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                    value="Yes"
+                                  />
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+          {isAssEsmsSectionOpen && (
+            <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
+              <div className="p-1">
+                <div className="flex items-center">
+                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                    ESMS Work Permit
+                  </h3>
+                </div>
+                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                  {assEsmsChecklist && assEsmsChecklist.length > 0 && (
+                    <div>
+                      {assEsmsChecklist
+                        .reduce((rows: any, item: any, index: any) => {
+                          if (index % 4 === 0) rows.push([]);
+                          rows[rows.length - 1].push(item);
+                          return rows;
+                        }, [])
+                        .map((row: any, rowIndex: any) => (
+                          <div
+                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            key={rowIndex}
+                          >
+                            {row.map((item2: any, index: any) => (
+                              <div className="p-1" key={index}>
+                                <label>
+                                  {item2.name}&nbsp;
+                                  <input
+                                    type="checkbox"
+                                    name={`ass_esms_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
                                   />
                                 </label>
@@ -1267,6 +1450,33 @@ function LogPtw() {
               </div>
             </div>
           )}
+          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
+            <div className="font-bold">
+              I Certified that the above check points have been verified and
+              found satisfactory.
+            </div>
+            <div>
+              <span className="font-semibold">Name Of Initiator:</span>{" "}
+              {authState.NAME}
+            </div>
+            <div>
+              <span className="font-semibold">Custodian:</span>{" "}
+              {departmentHeadName}
+            </div>
+            <div className="grid grid-cols-1 mt-2">
+              <div className="p-1">
+                <Button
+                  disabled={isSubmitting}
+                  onClick={() => {
+                    handleSubmit(handleFormSubmit)();
+                  }}
+                  btnType="primary"
+                >
+                  Submit
+                </Button>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
     </div>

@@ -33,6 +33,17 @@ const MASTER_MENU_LIST: IMenuItem[] = [
     children: [],
     menuType: "Normal",
   },
+  {
+    id: 6,
+    name: "Users",
+    icon: <HomeIcon className="w-5 h-5" />,
+    iconSelected: <HomeIconSolid className="w-5 h-5" />,
+    appId: 1,
+    path: "users",
+    element: <Dashboard />,
+    children: [],
+    menuType: "Normal",
+  },
 
   {
     id: 1,

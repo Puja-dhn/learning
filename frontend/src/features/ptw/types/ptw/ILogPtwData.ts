@@ -1,15 +1,21 @@
-interface ILogPTWForm {
+interface ILogPTWData {
+    id: number;
     department: string;
-    area: string;
+    department_id: string;
+    area_id: string;
+    area: number;
     work_location: string;
     datetime_from: string;
     datetime_to: string;
     nearest_firealarm: string;
     job_description: string;
-    moc_required: string,
-  moc_title: string;
-    moc_no: string,
+    moc_required: string;
+    moc_title: string;
+    moc_no: string;
     supervisor_name: string;
+    pending_on_id: string;
+    pending_on: string;
+    status: string;
     contractor: string;
     esic_no: string;
     associated_permit: string;
@@ -39,7 +45,13 @@ interface ILogPTWForm {
     lifting_work_checklist: string;
     esms_checklist: string;
     hot_work_checklist: string;
-    pending_on: string;
-    status: string;
+    created_at: string;
+    created_by: string;
+    updated_at: string;
+    updated_by: string;
+    log_by: string;
+    disp_logno: string;
   }
-  export default ILogPTWForm;
+  
+  export default ILogPTWData;
+  

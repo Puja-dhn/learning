@@ -27,6 +27,8 @@ const MasterDashboard = React.lazy(() => import("@/pages/master/Dashboard"));
 const LogSis = React.lazy(() => import("@/pages/sis/LogSis"));
 const ViewSio = React.lazy(() => import("@/pages/sis/ViewSio"));
 const LogPtw = React.lazy(() => import("@/pages/ptw/LogPtw"));
+const ViewPtw = React.lazy(() => import("@/pages/ptw/ViewPtw"));
+const ApprovePtw = React.lazy(() => import("@/pages/ptw/ApprovePtw"));
 
 function App() {
   return (
@@ -70,6 +72,8 @@ function App() {
             <Route index element={<LogPtw />} />
             <Route path="dashboard" element={<LogPtw />} />
             <Route path="log-ptw" element={<LogPtw />} />
+            <Route path="view-ptw" element={<ViewPtw />} />
+            <Route path="approve-ptw" element={<ApprovePtw />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

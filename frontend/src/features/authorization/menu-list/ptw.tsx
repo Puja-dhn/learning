@@ -7,40 +7,64 @@ import DocumentPlusIconSolid from "@heroicons/react/24/solid/DocumentPlusIcon";
 import IMenuItem from "../types/IMenuItem";
 
 import LogPtw from "@/pages/ptw/LogPtw";
+import ViewPtw from "@/pages/ptw/ViewPtw";
+import ApprovePtw from "@/pages/ptw/ApprovePtw";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
 const PTW_MENU_LIST: IMenuItem[] = [
   {
-    id: 7,
+    id: 5,
     name: "",
     icon: <HomeIcon className="w-5 h-5" />,
     iconSelected: <HomeIconSolid className="w-5 h-5" />,
-    appId: 2,
+    appId: 3,
     path: "",
     element: <LogPtw />,
     children: [],
     menuType: "Static",
   },
   {
-    id: 7,
+    id: 5,
     name: "Dashboard",
     icon: <HomeIcon className="w-5 h-5" />,
     iconSelected: <HomeIconSolid className="w-5 h-5" />,
-    appId: 2,
+    appId: 3,
     path: "dashboard",
     element: <LogPtw />,
     children: [],
     menuType: "Normal",
   },
   {
-    id: 1,
+    id: 5,
     name: "Log PTW",
     icon: <DocumentPlusIcon className="w-5 h-5" />,
     iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
-    appId: 2,
+    appId: 3,
     path: "log-ptw",
     element: <LogPtw />,
+    children: [],
+    menuType: "Normal",
+  },
+  {
+    id: 8,
+    name: "View PTW",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 3,
+    path: "view-ptw",
+    element: <ViewPtw />,
+    children: [],
+    menuType: "Normal",
+  },
+  {
+    id: 9,
+    name: "Approve PTW",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 3,
+    path: "approve-ptw",
+    element: <ApprovePtw />,
     children: [],
     menuType: "Normal",
   },
