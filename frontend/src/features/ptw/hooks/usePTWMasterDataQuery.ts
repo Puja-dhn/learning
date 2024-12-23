@@ -5,7 +5,7 @@ import { getPTWMasterData } from "../services/ptw.services";
 
 const usePTWMasterDataQuery = () => {
   return useQuery({
-    queryKey: ["sioMasterdataQuery"],
+    queryKey: ["ptwMasterdataQuery"],
     queryFn: async () => {
       const data = await getPTWMasterData()
         .then((res) => res.data)

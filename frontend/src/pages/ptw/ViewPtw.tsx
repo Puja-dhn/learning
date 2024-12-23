@@ -36,6 +36,8 @@ import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 import * as XLSX from "xlsx";
 import usePtwLogDetailQuery from "@/features/ptw/hooks/usePtwLogDetailQuery";
+import { usePTWMasterDataQuery } from "@/features/ptw/hooks";
+import PdfIcon from "@/assets/images/pdficon.png";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -82,35 +84,34 @@ function ViewPtw() {
   const [modalImage, setModalImage] = useState<string>("");
 
   const {
-    data: sioMasterData,
-    isLoading: isSIOMasterDataLoading,
-    isError: isSIOMasterDataError,
-  } = useSIOMasterDataQuery();
+    data: ptwMasterData,
+    isLoading: isPTWMasterDataLoading,
+    isError: isPTWMasterDataError,
+  } = usePTWMasterDataQuery();
 
   useEffect(() => {
-    if (isSIOMasterDataLoading) {
+    if (isPTWMasterDataLoading) {
       loader.show();
     } else {
       loader.hide();
     }
 
-    if (!isSIOMasterDataLoading && isSIOMasterDataError) {
+    if (!isPTWMasterDataLoading && isPTWMasterDataError) {
       alertToast.show("error", "Error Reading API", true);
     }
 
-    if (!isSIOMasterDataLoading && !isSIOMasterDataError && sioMasterData) {
-      const historySIOMasterData = [sioMasterData.historySIOMasterData];
-      if (historySIOMasterData.length > 0) {
-        setDepartments(historySIOMasterData[0].DEPARTMENT);
-        setCategories(historySIOMasterData[0].CATEGORY);
-        setAreas(historySIOMasterData[0].AREA);
-        setUsers(historySIOMasterData[0].USERS);
+    if (!isPTWMasterDataLoading && !isPTWMasterDataError && ptwMasterData) {
+      const historyPTWMasterData = [ptwMasterData.historyPTWMasterData];
+      if (historyPTWMasterData.length > 0) {
+        setDepartments(historyPTWMasterData[0].DEPARTMENT);
+        setAreas(historyPTWMasterData[0].AREA);
+        setUsers(historyPTWMasterData[0].USERS);
         loader.hide();
       } else {
         loader.show();
       }
     }
-  }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
+  }, [ptwMasterData, isPTWMasterDataLoading, isPTWMasterDataError]);
 
   const [closureImagePreviews, setClosureImagePreviews] = useState<any>([]);
   useEffect(() => {
@@ -195,9 +196,14 @@ function ViewPtw() {
       headerName: "Action",
       width: 100,
       renderCell: (params) => (
-        <IconButton className="ml-2">
-          <EyeIcon className="w-4 h-4" />
-        </IconButton>
+        <>
+          <IconButton className="ml-2">
+            <EyeIcon className="w-4 h-4" />
+          </IconButton>
+          <IconButton className="ml-2">
+            <ArrowDownTrayIcon className="w-4 h-4" />
+          </IconButton>
+        </>
       ),
     },
     { field: "disp_logno", headerName: "Log No", width: 70 },

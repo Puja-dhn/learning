@@ -15,6 +15,7 @@ interface IProps {
   disableDoubleQuotes?: boolean;
   mandatory?: boolean;
   minimum?: string;
+  maximum?: string;
 }
 
 const defaultProps = {
@@ -27,6 +28,7 @@ const defaultProps = {
   disableDoubleQuotes: false,
   mandatory: false,
   minimum: "",
+  maximum: "",
 };
 
 function TextField(props: IProps) {
@@ -43,6 +45,7 @@ function TextField(props: IProps) {
     disableDoubleQuotes,
     mandatory,
     minimum,
+    maximum,
   } = props;
   const disabledClass = disabled
     ? "bg-gray-200 dark:bg-gray-500 dark:text-gray-300"
@@ -111,6 +114,7 @@ function TextField(props: IProps) {
                 value={value}
                 disabled={disabled}
                 min={minimum}
+                max={maximum}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   let currValue = e.target.value;
                   if (currValue && currValue.length > 0) {
@@ -162,6 +166,7 @@ function TextField(props: IProps) {
               value={value}
               disabled={disabled}
               min={minimum}
+              max={maximum}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 let currValue = e.target.value;
                 if (currValue && currValue.length > 0) {

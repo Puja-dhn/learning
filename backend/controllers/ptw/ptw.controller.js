@@ -313,3 +313,29 @@ exports.getOpenPtwData = async (req, res) => {
     historyLogPtwData: [...resultPtw],
   });
 };
+exports.submitPTWApprovalData = async (req, res) => {
+  const { ID } = req.user;
+  const { id, comments } = req.body.pdcData;
+
+  try {
+    const currentTime = new Date();
+
+    const updateQuery = `
+        update t_inshe_log_ptw set custodian_comments = ?,  updated_at = ?, updated_by = ?, status = "Closed", pending_on = 0 where id=?
+      `;
+    const updateValues = [, comments, currentTime, ID, id];
+
+    try {
+      await simpleQuery(updateQuery, updateValues);
+      console.log("Custodian Approved Successfully.");
+    } catch (queryError) {
+      console.error("Error executing query:", queryError);
+      return res.status(500).json({ error: "Failed to insert data." });
+    }
+
+    res.status(200).json({ message: "Data processed successfully." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
+  }
+};

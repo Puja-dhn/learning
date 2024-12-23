@@ -26,6 +26,23 @@ import {
   TrashIcon,
 } from "@heroicons/react/24/solid";
 import { InputText } from "@/features/ui/elements";
+import { min } from "lodash";
+
+const today = new Date();
+
+// Get the start of the current week (Monday)
+const startOfWeek = new Date(today);
+startOfWeek.setDate(today.getDate() - today.getDay() + 1); // Set to Monday (getDay() returns 0 for Sunday)
+startOfWeek.setHours(0, 0, 0, 0); // Set time to midnight
+
+// Get the end of the current week (Sunday)
+const endOfWeek = new Date(startOfWeek);
+endOfWeek.setDate(startOfWeek.getDate() + 6); // Add 6 days to get to Sunday
+endOfWeek.setHours(23, 59, 59, 999); // Set time to the end of the day
+
+// Format the dates to "YYYY-MM-DDThh:mm" format to match the "datetime-local" input type
+const minDate = startOfWeek.toISOString().slice(0, 16); // "YYYY-MM-DDThh:mm"
+const maxDate = endOfWeek.toISOString().slice(0, 16); // "YYYY-MM-DDThh:mm"
 
 const initialFormValues: ILogPTWForm = {
   department: "",
@@ -224,6 +241,7 @@ function LogPtw() {
         );
         setDepartmentHeadName(ownDepartment[0].head_name);
         //setDepartments(historyPTWMasterData[0].DEPARTMENT);
+        setValue("department", ownDepartment[0].name, { shouldValidate: true });
         setConfigs(historyPTWMasterData[0].CONFIG);
         setAreas(historyPTWMasterData[0].AREA);
 
@@ -475,10 +493,10 @@ function LogPtw() {
   return (
     <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
       <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
-        <form className="w-[100%]   gap-column-2  justify-evenly">
+        <form className="w-[100%]   flex gap-2 flex-col  justify-evenly">
           <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
             <div className="pb-2 border-b-2 border-gray-200 dark:border-gray-500">
-              <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+              <h2 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                 General Information
               </h2>
             </div>
@@ -514,6 +532,8 @@ function LogPtw() {
                   type="datetime-local"
                   name="datetime_from"
                   label="Date Time From"
+                  minimum={minDate}
+                  maximum={maxDate}
                   control={control}
                 />
               </div>
@@ -522,6 +542,8 @@ function LogPtw() {
                   type="datetime-local"
                   name="datetime_to"
                   label="Date Time To"
+                  minimum={minDate}
+                  maximum={maxDate}
                   control={control}
                 />
               </div>
@@ -662,10 +684,10 @@ function LogPtw() {
               </div>
             </div>
           </div>
-          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-            <div className="p-1">
-              <div className="flex items-center">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          <div className="grid border-[1px] border-gray-200 rounded-lg dark:border-gray-500 dark:bg-gray-800">
+            <div className="">
+              <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                   Hazard Identification &nbsp;
                 </h3>
                 <input
@@ -688,7 +710,7 @@ function LogPtw() {
 
               {/* Conditionally render collapsible section */}
               {isHazardSectionOpen && (
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1 ">
                   {hazardsChecklist && hazardsChecklist.length > 0 && (
                     <div>
                       {hazardsChecklist
@@ -699,13 +721,12 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
-                              <div className="p-1" key={index}>
+                              <div className="p-1 " key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`hazard_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
@@ -717,6 +738,8 @@ function LogPtw() {
                                       )
                                     }
                                   />
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}
@@ -735,10 +758,10 @@ function LogPtw() {
               )}
             </div>
           </div>
-          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-            <div className="p-1">
-              <div className="flex items-center">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+            <div className="">
+              <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                   Risk Assessment &nbsp;
                 </h3>
                 <input
@@ -761,7 +784,7 @@ function LogPtw() {
 
               {/* Conditionally render collapsible section */}
               {isRiskSectionOpen && (
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1 border-2 ">
                   {riskChecklist && riskChecklist.length > 0 && (
                     <div>
                       {riskChecklist
@@ -772,18 +795,19 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
                               <div className="p-1" key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`risk_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
-                                  />
+                                  />{" "}
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}
@@ -795,10 +819,10 @@ function LogPtw() {
               )}
             </div>
           </div>
-          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-            <div className="p-1">
-              <div className="flex items-center">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+            <div className="">
+              <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                   PPE Required &nbsp;
                 </h3>
                 <input
@@ -821,7 +845,7 @@ function LogPtw() {
 
               {/* Conditionally render collapsible section */}
               {isPPESectionOpen && (
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1 ">
                   {ppeChecklist && ppeChecklist.length > 0 && (
                     <div>
                       {ppeChecklist
@@ -832,18 +856,19 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
                               <div className="p-1" key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`risk_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
                                   />
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}
@@ -855,10 +880,10 @@ function LogPtw() {
               )}
             </div>
           </div>
-          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-            <div className="p-1">
-              <div className="flex items-center">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+            <div className="">
+              <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                   Isolation Details &nbsp;
                 </h3>
                 <input
@@ -880,10 +905,91 @@ function LogPtw() {
               </div>
 
               {isIsolationSectionOpen && (
-                <div className="grid grid-cols-1 p-2 mt-4 border-2 border-gray-200 rounded-lg md:grid-cols-2 dark:border-gray-500">
+                // <div className="grid grid-cols-1 p-2 mt-1 md:grid-cols-2 ">
+                //   {/* Electrical Isolation Section */}
+                //   <div className="mb-4">
+                //     <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                //       Electrical Isolation
+                //     </h3>
+                //     {/* Content for Electrical Isolation */}
+                //     <div className="grid grid-cols-1 p-2 md:grid-cols-2">
+                //       <div className="p-1">
+                //         <TextField
+                //           name="drive_panel_name"
+                //           label="Drive/Panel Name"
+                //           control={control}
+                //         />
+                //       </div>
+                //       <div className="p-1">
+                //         <TextField
+                //           name="loto_no"
+                //           label="LOTO No"
+                //           control={control}
+                //         />
+                //       </div>
+                //     </div>
+                //     <div className="grid grid-cols-1 p-2 md:grid-cols-2">
+                //       <div className="p-1">
+                //         <TextField
+                //           name="checked_by"
+                //           label="Checked By"
+                //           control={control}
+                //         />
+                //       </div>
+                //       <div className="p-1">
+                //         <TextField
+                //           name="date_time"
+                //           label="Date & Time"
+                //           control={control}
+                //         />
+                //       </div>
+                //     </div>
+                //   </div>
+
+                //   {/* Service Isolation Section */}
+                //   <div>
+                //     <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                //       Service Isolation
+                //     </h3>
+                //     {/* Content for Service Isolation */}
+                //     <div className="grid grid-cols-1 p-2 md:grid-cols-2">
+                //       <div className="p-1">
+                //         <TextField
+                //           name="drive_panel_name_service"
+                //           label="Steam/Air/Water/Gas"
+                //           control={control}
+                //         />
+                //       </div>
+                //       <div className="p-1">
+                //         <TextField
+                //           name="loto_no_service"
+                //           label="LOTO No"
+                //           control={control}
+                //         />
+                //       </div>
+                //     </div>
+                //     <div className="grid grid-cols-1 p-2 md:grid-cols-2">
+                //       <div className="p-1">
+                //         <TextField
+                //           name="checked_by_service"
+                //           label="Checked By"
+                //           control={control}
+                //         />
+                //       </div>
+                //       <div className="p-1">
+                //         <TextField
+                //           name="date_time_service"
+                //           label="Date & Time"
+                //           control={control}
+                //         />
+                //       </div>
+                //     </div>
+                //   </div>
+                // </div>
+                <div className="grid grid-cols-1 gap-4 p-2 mt-1 md:grid-cols-2">
                   {/* Electrical Isolation Section */}
-                  <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  <div className="p-1 mb-4 border-r-2 md:col-span-1">
+                    <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                       Electrical Isolation
                     </h3>
                     {/* Content for Electrical Isolation */}
@@ -921,9 +1027,12 @@ function LogPtw() {
                     </div>
                   </div>
 
+                  {/* Vertical Divider (Visible only on desktop) */}
+                  {/* <div className="hidden md:block border-l border-gray-300 w-[10px]" /> */}
+
                   {/* Service Isolation Section */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  <div className="p-1 md:col-span-1">
+                    <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                       Service Isolation
                     </h3>
                     {/* Content for Service Isolation */}
@@ -967,7 +1076,7 @@ function LogPtw() {
           {/* <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
             <div className="p-1">
               <div className="flex items-center">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                   Trail & Energisation Details &nbsp;
                 </h3>
                 <input
@@ -1009,10 +1118,10 @@ function LogPtw() {
               )}
             </div>
           </div> */}
-          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-            <div className="p-1">
-              <div className="flex items-center">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          <div className="grid border-[1px] border-gray-200 rounded-lg dark:border-gray-500 dark:bg-gray-800">
+            <div className="">
+              <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                   General Work/Cold Work &nbsp;
                 </h3>
                 {/* <input
@@ -1023,7 +1132,7 @@ function LogPtw() {
                 /> */}
               </div>
 
-              <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+              <div className="p-2 mt-1">
                 {assGenChecklist && assGenChecklist.length > 0 && (
                   <div>
                     {assGenChecklist
@@ -1034,18 +1143,19 @@ function LogPtw() {
                       }, [])
                       .map((row: any, rowIndex: any) => (
                         <div
-                          className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                          className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                           key={rowIndex}
                         >
                           {row.map((item2: any, index: any) => (
                             <div className="p-1" key={index}>
                               <label>
-                                {item2.name}&nbsp;
                                 <input
                                   type="checkbox"
                                   name={`risk_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                   value="Yes"
                                 />
+                                &nbsp;
+                                {item2.name}
                               </label>
                             </div>
                           ))}
@@ -1063,15 +1173,15 @@ function LogPtw() {
               </div>
             </div>
           </div>
-          <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-            <div className="p-1">
-              <div className="flex items-center">
-                <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+          <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+            <div className="">
+              <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                   List of persons attached to this permit (Annexure V) &nbsp;
                 </h3>
               </div>
 
-              <div className="mt-4">
+              <div className="mt-1">
                 <table className="min-w-full border-collapse table-auto">
                   <thead>
                     <tr>
@@ -1154,7 +1264,7 @@ function LogPtw() {
             <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
               <div className="p-1">
                 <div className="flex items-center">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                  <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                     General Work/Cold Work
                   </h3>
                 </div>
@@ -1200,14 +1310,14 @@ function LogPtw() {
             </div>
           )} */}
           {isAssWHSectionOpen && (
-            <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-              <div className="p-1">
-                <div className="flex items-center">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+            <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+              <div className="">
+                <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                  <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                     Work at Height
                   </h3>
                 </div>
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1 ">
                   {assWHChecklist && assWHChecklist.length > 0 && (
                     <div>
                       {assWHChecklist
@@ -1218,18 +1328,19 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
                               <div className="p-1" key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`ass_wh_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
                                   />
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}
@@ -1249,14 +1360,14 @@ function LogPtw() {
             </div>
           )}
           {isAssConfinedSectionOpen && (
-            <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-              <div className="p-1">
-                <div className="flex items-center">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+            <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+              <div className="">
+                <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                  <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                     Confined Space
                   </h3>
                 </div>
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1 ">
                   {assConfinedChecklist && assConfinedChecklist.length > 0 && (
                     <div>
                       {assConfinedChecklist
@@ -1267,18 +1378,19 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
                               <div className="p-1" key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
                                   />
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}
@@ -1325,14 +1437,14 @@ function LogPtw() {
             </div>
           )}
           {isAssLiftingSectionOpen && (
-            <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-              <div className="p-1">
-                <div className="flex items-center">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+            <div className="grid border-[1px] border-gray-200 rounded-lg dark:border-gray-500 dark:bg-gray-800">
+              <div className="">
+                <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                  <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                     Lifiting Work
                   </h3>
                 </div>
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1 ">
                   {assLiftingChecklist && assLiftingChecklist.length > 0 && (
                     <div>
                       {assLiftingChecklist
@@ -1343,18 +1455,19 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
                               <div className="p-1" key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
                                   />
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}
@@ -1367,14 +1480,14 @@ function LogPtw() {
             </div>
           )}
           {isAssEsmsSectionOpen && (
-            <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-              <div className="p-1">
-                <div className="flex items-center">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+            <div className="grid border-[1px] border-gray-200 rounded-lg dark:border-gray-500 dark:bg-gray-800">
+              <div className="">
+                <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                  <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                     ESMS Work Permit
                   </h3>
                 </div>
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1 ">
                   {assEsmsChecklist && assEsmsChecklist.length > 0 && (
                     <div>
                       {assEsmsChecklist
@@ -1385,18 +1498,19 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
                               <div className="p-1" key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`ass_esms_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
                                   />
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}
@@ -1409,14 +1523,14 @@ function LogPtw() {
             </div>
           )}
           {isAssHotWrkSectionOpen && (
-            <div className="grid border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
-              <div className="p-1">
-                <div className="flex items-center">
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+            <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+              <div className="">
+                <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                  <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                     Hot Work
                   </h3>
                 </div>
-                <div className="p-2 mt-4 border-2 border-gray-200 rounded-lg dark:border-gray-500">
+                <div className="p-2 mt-1">
                   {assHotWrkChecklist && assHotWrkChecklist.length > 0 && (
                     <div>
                       {assHotWrkChecklist
@@ -1427,18 +1541,19 @@ function LogPtw() {
                         }, [])
                         .map((row: any, rowIndex: any) => (
                           <div
-                            className="grid grid-cols-1 gap-2 mb-4 md:grid-cols-4"
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
                             key={rowIndex}
                           >
                             {row.map((item2: any, index: any) => (
                               <div className="p-1" key={index}>
                                 <label>
-                                  {item2.name}&nbsp;
                                   <input
                                     type="checkbox"
                                     name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
                                     value="Yes"
                                   />
+                                  &nbsp;
+                                  {item2.name}
                                 </label>
                               </div>
                             ))}

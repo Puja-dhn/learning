@@ -43,7 +43,7 @@ const initialFilterValues: ILogSioFilterForm = {
   department: "All",
   category: "All",
   area: "All",
-  severity: "All",
+  severity: "",
   obs_date_from: "",
   obs_date_to: "",
   status: "All",
@@ -84,7 +84,6 @@ function AssignPDC() {
   const [areas, setAreas] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
-  const [modalImage, setModalImage] = useState<string>("");
   const {
     data: sioMasterData,
     isLoading: isSIOMasterDataLoading,
@@ -139,9 +138,6 @@ function AssignPDC() {
     status: false,
   });
   const [showPDCAssignDialog, setShowPDCAssignDialog] = useState({
-    status: false,
-  });
-  const [showImageDialog, setShowImageDialog] = useState({
     status: false,
   });
 
@@ -247,17 +243,14 @@ function AssignPDC() {
         </IconButton>
       ),
     },
-    { field: "disp_logno", headerName: "Log No", width: 70 },
+    { field: "id", headerName: "Log No", width: 70 },
     { field: "obs_datetime", headerName: "Observation Date", width: 250 },
     { field: "department", headerName: "Department", width: 240 },
-    { field: "status", headerName: "Status", width: 120 },
     { field: "area", headerName: "Area", width: 250 },
     { field: "category", headerName: "Category", width: 220 },
     { field: "severity", headerName: "Severity", width: 220 },
-    { field: "pending_on", headerName: "Pending On", width: 200 },
-    { field: "log_by", headerName: "Log By", width: 200 },
-    { field: "target_date", headerName: "PDC Date", width: 200 },
-    { field: "closure_date", headerName: "Closure Date", width: 200 },
+    { field: "pending_on", headerName: "Pending On", width: 250 },
+    { field: "status", headerName: "Status", width: 220 },
   ];
 
   const paginationModel = { page: 0, pageSize: 5 };
@@ -279,11 +272,6 @@ function AssignPDC() {
   const CURR_OBS_SEVERITY_LIST = [
     { id: "Minor", name: "Minor" },
     { id: "Serious", name: "Serious" },
-  ];
-  const CURR_OBS_STATUS_LIST = [
-    { id: "Open", name: "Open" },
-    { id: "PDC Assigned", name: "PDC Assigned" },
-    { id: "Closed", name: "Closed" },
   ];
 
   const {
@@ -423,14 +411,6 @@ function AssignPDC() {
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
   };
-  const handleImageDialogClose = () => {
-    setShowImageDialog((oldState) => ({ ...oldState, status: false }));
-    setModalImage("");
-  };
-  const openImageModal = (image: any) => {
-    setModalImage(image);
-    setShowImageDialog({ status: true });
-  };
 
   return (
     <div className="flex flex-col w-full h-full gap-2 p-4 overflow-hidden text-sm md:p-6">
@@ -511,9 +491,9 @@ function AssignPDC() {
             >
               <div className="relative flex items-start bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-gray-700 dark:border-gray-600">
                 {/* Full-Height Vertical Log No */}
-                <div className="absolute top-0 left-0 flex items-center justify-center w-6 h-full  text-center text-white bg-[#6388bd] dark:bg-blue-900">
+                <div className="absolute top-0 left-0 flex items-center justify-center w-6 h-full font-bold text-center text-white bg-[#6388bd] dark:bg-blue-900">
                   <span className="origin-center transform -rotate-90">
-                    {row.disp_logno}
+                    {row.id}
                   </span>
                 </div>
 
@@ -592,7 +572,7 @@ function AssignPDC() {
       {/* Mobile Layout - Button view for log details (only visible on mobile) */}
 
       <ModalPopup
-        heading="Search Observation Data"
+        heading="Search Aect Data"
         onClose={handleFilterDialogClose}
         openStatus={showFilterDialog.status}
         hasSubmit
@@ -614,38 +594,76 @@ function AssignPDC() {
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <TextField
                 type="number"
-                name="id"
-                label="Obs No"
+                name="ID"
+                label="Log No"
+                control={controlFilter}
+              />
+            </div>
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-3/4">
+              <TextField
+                name="OBS_DESC"
+                label="Observation"
+                control={controlFilter}
+              />
+            </div>
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+              <TextField
+                type="date"
+                name="REPORTED_DATE_FROM"
+                label="Reported Date From"
+                control={controlFilter}
+              />
+            </div>
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+              <TextField
+                type="date"
+                name="REPORTED_DATE_TO"
+                label="Reported Date To"
+                control={controlFilter}
+              />
+            </div>
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+              <TextField
+                name="LOCATION"
+                label="Exact Location"
                 control={controlFilter}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
-                name="department"
-                label="Department"
+                name="STATUS"
+                label="Status"
                 control={controlFilter}
                 optionList={[
-                  { id: "All", name: "All Departments" },
-                  ...departments,
+                  { id: "All", name: "All Status" },
+                  ...OBS_STATUS_LIST,
                 ]}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <DropdownList
-                name="area"
-                label="Area"
+              <TextField
+                type="date"
+                name="PDC_DATE_FROM"
+                label="PDC Date From"
                 control={controlFilter}
-                optionList={[{ id: "All", name: "All Area" }, ...areas]}
+              />
+            </div>
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+              <TextField
+                type="date"
+                name="PDC_DATE_TO"
+                label="PDC Date To"
+                control={controlFilter}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
-                name="category"
+                name="CATEGORY"
                 label="Category"
                 control={controlFilter}
                 optionList={[
                   { id: "All", name: "All Category" },
-                  ...categories,
+                  ...OBS_CATEGORY_LIST,
                 ]}
               />
             </div>
@@ -660,35 +678,33 @@ function AssignPDC() {
                 ]}
               />
             </div>
-
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/2">
               <TextField
                 type="date"
-                name="obs_date_from"
-                label="Obs Date From"
+                name="ACTION_CLOSED_DATE_FROM"
+                label="Closure Date From"
                 control={controlFilter}
               />
             </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/2">
               <TextField
                 type="date"
-                name="obs_date_to"
-                label="Obs Date To"
+                name="ACTION_CLOSED_DATE_TO"
+                label="Closure Date To"
                 control={controlFilter}
               />
             </div>
-
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            {/* <div className="p-2 basis-full lg:basis-2/4">
               <DropdownList
-                name="status"
-                label="Status"
+                name="REPORTED_BY"
+                label="Reported By"
                 control={controlFilter}
-                optionList={[
-                  { id: "All", name: "All Status" },
-                  ...CURR_OBS_STATUS_LIST,
-                ]}
+                optionList={reportedByList}
+                changeHandler={(value) => {
+                  setValueFilter("REPORTED_BY", +value);
+                }}
               />
-            </div>
+            </div> */}
           </div>
         </form>
       </ModalPopup>
@@ -797,8 +813,7 @@ function AssignPDC() {
                       <img
                         src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
                         alt={`preview-${index}`}
-                        className="object-cover w-24 h-24 rounded-lg cursor-pointer"
-                        onClick={() => openImageModal(preview)}
+                        className="object-cover w-24 h-24 rounded-lg"
                       />
                     </div>
                   ))}
@@ -877,7 +892,7 @@ function AssignPDC() {
                           Obs No:
                         </span>
                         <span className="text-gray-600 dark:text-gray-400">
-                          {logDetails.historyLogSioData[0].disp_logno}
+                          {logDetails.historyLogSioData[0].id}
                         </span>
                       </div>
                       <div className="flex-1">
@@ -1007,8 +1022,7 @@ function AssignPDC() {
                                   preview || ""
                                 }`}
                                 alt={`preview-${index}`}
-                                className="object-cover w-full h-20 rounded-lg cursor-pointer"
-                                onClick={() => openImageModal(preview)}
+                                className="object-cover w-full h-20 rounded-lg"
                               />
                             </div>
                           ))}
@@ -1061,21 +1075,6 @@ function AssignPDC() {
           )}
         </div>
       </ModalPopupMobile>
-      <ModalPopup
-        heading="View Image"
-        onClose={handleImageDialogClose}
-        openStatus={showImageDialog.status}
-        hasSubmit={false}
-        size="fullscreen"
-      >
-        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
-          <img
-            src={`${ASSET_BASE_URL}sioimages/${modalImage || ""}`}
-            alt="previewimage"
-            className="object-cover w-full h-full rounded-lg"
-          />
-        </div>
-      </ModalPopup>
     </div>
   );
 }
