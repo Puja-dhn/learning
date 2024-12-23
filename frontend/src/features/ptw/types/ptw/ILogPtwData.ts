@@ -1,5 +1,5 @@
 interface ILogPTWData {
-  id: number;
+  id: string;
   department: string;
   department_id: string;
   area_id: string;

@@ -31,35 +31,19 @@ import ILogSioData from "@/features/sis/types/sis/ILogSioData";
 
 import { ILogSIOData, ILogSioFilterForm } from "@/features/sis/types";
 import useSisLogDetailQuery from "@/features/sis/hooks/useSisLogDetailQuery";
-import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
+
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 import * as XLSX from "xlsx";
 import usePtwLogDetailQuery from "@/features/ptw/hooks/usePtwLogDetailQuery";
 import { usePTWMasterDataQuery } from "@/features/ptw/hooks";
 import PdfIcon from "@/assets/images/pdficon.png";
+import ILogPTWData from "@/features/ptw/types/ptw/ILogPtwData";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
 }
-const initialActionTakenValues: ISIOPDCAssignData = {
-  id: 0,
-  obs_datetime: "",
-  department: "",
-  area: 0,
-  category: "",
-  severity: 0,
-  obs_desc: "",
-  obs_sugg: "",
-  obs_photos: "",
-  closure_desc: "",
-  closure_photos: "",
-  pending_on: "",
-  responsibilities: "",
-  status: "",
-  target_date: "",
-  action_plan: "",
-};
+
 const initialFilterValues: ILogSioFilterForm = {
   id: null,
   department: "All",
@@ -151,40 +135,39 @@ function ViewPtw() {
 
   const {
     handleSubmit: handleSubmitActionDetails,
-    reset: resetActionTaken,
+    reset: resetViewDetails,
     control: controlAction,
     formState: formStatePDC,
-  } = useForm<ISIOPDCAssignData>({
-    defaultValues: initialActionTakenValues,
-  });
+  } = useForm<ILogPTWData>({});
 
   const { submitCount, errors } = formStatePDC;
   const handlePDCAssignDialogClose = () => {
     setShowPDCAssignDialog((oldState) => ({ ...oldState, status: false }));
   };
-  const handleActionClick = (row: ILogSIOData) => {
-    resetActionTaken({
+
+  const handleViewClick = (row: ILogPTWData) => {
+    resetViewDetails({
       id: row.id,
-      obs_datetime: row.obs_datetime,
       department: row.department,
+      department_id: row.department_id,
+      area_id: row.area_id,
       area: row.area,
-      category: row.category,
-      severity: row.severity,
-      obs_desc: row.obs_desc,
-      obs_sugg: row.obs_sugg,
-      obs_photos: row.obs_photos,
-      closure_desc: row.closure_desc,
-      closure_photos: row.closure_photos,
-      status: row.status,
+      work_location: row.work_location,
+      datetime_from: row.datetime_from,
+      datetime_to: row.datetime_to,
+      nearest_firealarm: row.nearest_firealarm,
+      job_description: row.job_description,
+      moc_required: row.moc_required,
+      moc_title: row.moc_title,
+      moc_no: row.moc_no,
+      supervisor_name: row.supervisor_name,
+      pending_on_id: row.pending_on_id,
       pending_on: row.pending_on,
-      responsibilities: row.responsibilities,
-      target_date: row.target_date,
-      action_plan: row.action_plan,
+      status: row.status,
+      contractor: row.contractor,
+      esic_no: row.esic_no,
+      associated_permit: row.associated_permit,
     });
-    setImagePreviews(JSON.parse(row.obs_photos));
-    if (row.closure_photos !== "") {
-      setClosureImagePreviews(JSON.parse(row.closure_photos));
-    }
 
     setShowPDCAssignDialog({
       status: true,
@@ -197,7 +180,10 @@ function ViewPtw() {
       width: 100,
       renderCell: (params) => (
         <>
-          <IconButton className="ml-2">
+          <IconButton
+            className="ml-2"
+            onClick={() => handleViewClick(params.row)}
+          >
             <EyeIcon className="w-4 h-4" />
           </IconButton>
           <IconButton className="ml-2">

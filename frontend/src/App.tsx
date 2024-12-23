@@ -21,6 +21,9 @@ const Success = React.lazy(() => import("@/pages/Success"));
 // Master Routes
 
 const MasterDashboard = React.lazy(() => import("@/pages/master/Dashboard"));
+const ContextDefinations = React.lazy(
+  () => import("@/pages/master/ContextDefinations"),
+);
 
 // SIS Routes
 
@@ -50,6 +53,10 @@ function App() {
           >
             <Route index element={<MasterDashboard />} />
             <Route path="dashboard" element={<MasterDashboard />} />
+            <Route
+              path="context-definations"
+              element={<ContextDefinations />}
+            />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

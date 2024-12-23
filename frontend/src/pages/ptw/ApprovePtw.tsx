@@ -140,12 +140,12 @@ function ApprovePtw() {
   };
   const handleActionClick = (row: ILogPtwData) => {
     const currPtw = teamData.historyLogPtwData.filter(
-      (item: ILogPtwData) => item.id === row.id,
+      (item: ILogPtwData) => +item.id === +row.id,
     );
     setIssuerName(currPtw[0].log_by);
     setCustodianName(currPtw[0].pending_on);
     resetApproveForm({
-      id: row.id,
+      id: +row.id,
     });
     setShowApproveDialog({
       status: true,
@@ -302,7 +302,7 @@ function ApprovePtw() {
 
   const handleShowLogDetails = (logNo: number) => {
     const historyLogPtwData = [
-      ...teamData.historyLogPtwData.filter((item) => item.id === logNo),
+      ...teamData.historyLogPtwData.filter((item) => +item.id === +logNo),
     ];
     setLogDetails({ historyLogPtwData });
 

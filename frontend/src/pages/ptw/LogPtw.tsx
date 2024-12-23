@@ -20,13 +20,10 @@ import { usePTWMasterDataQuery } from "@/features/ptw/hooks";
 import IConfigsList from "@/features/ptw/types/ptw/IConfigsList";
 import ILogPTWForm from "@/features/ptw/types/ptw/ILogPTWForm";
 import IContractorList from "@/features/ptw/types/ptw/IContractorList";
-import {
-  ArrowDownTrayIcon,
-  PlusIcon,
-  TrashIcon,
-} from "@heroicons/react/24/solid";
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { InputText } from "@/features/ui/elements";
 import { min } from "lodash";
+import { addNewPTWData } from "@/features/ptw/services/ptw.services";
 
 const today = new Date();
 
@@ -92,14 +89,20 @@ const initialFormValues: ILogPTWForm = {
 };
 
 const formSchema = Yup.object().shape({
-  OBS_DATE_TIME: Yup.string().required("Observation Date time is required"),
-  DEPARTMENT: Yup.string().required("Department is required"),
-  AREA: Yup.string().required("Area is required"),
-  CATEGORY: Yup.string().required("Category is required"),
-  SEVERITY: Yup.string().required("Severity is required"),
-  STATUS: Yup.string().required("Status is required"),
-  OBS_DESC: Yup.string().required("Observation Description is required"),
-  OBS_SUGG: Yup.string().required("Observation Suggestion is required"),
+  department: Yup.string().required("Department is required"),
+  area: Yup.string().required("Area is required"),
+  work_location: Yup.string().required("Work location is required"),
+  datetime_from: Yup.string().required("Date time from is required"),
+  datetime_to: Yup.string().required("Date time to is required"),
+  nearest_firealarm: Yup.string().required(
+    "Nearest Fire Alarm Point is required",
+  ),
+  job_description: Yup.string().required("Job Description is required"),
+  moc_required: Yup.string().required("Select MOC is required or not"),
+  equipment: Yup.string().required("Equipment is required"),
+  supervisor_name: Yup.string().required("name of Supervisor is required"),
+  contractor: Yup.string().required("Contractor is required"),
+  esic_no: Yup.string().required("ESIC Reg No is required"),
 });
 
 interface IAnxPerson {
@@ -173,7 +176,9 @@ function LogPtw() {
     watch: watchValues,
   } = useForm<ILogPTWForm>({
     defaultValues: initialFormValues,
+    resolver: yupResolver(formSchema),
   });
+  const { isSubmitting, submitCount, errors } = formState;
   // Handle adding a new row
   const addRow = () => {
     if (attPerName === "") {
@@ -222,8 +227,6 @@ function LogPtw() {
     isLoading: isPTWMasterDataLoading,
     isError: isPTWMasterDataError,
   } = usePTWMasterDataQuery();
-
-  const { isSubmitting, submitCount, errors } = formState;
 
   useEffect(() => {
     if (isPTWMasterDataLoading) {
@@ -349,11 +352,6 @@ function LogPtw() {
     }
   }, [globalState]);
 
-  const isHiddenHirarchy = collapseFilter;
-
-  const handleCollpaseToggle = () => {
-    setCollapseFilter(!collapseFilter);
-  };
   const [hazardCheckboxState, setHazardCheckboxState] = useState([]);
   const handleHazardsChecklistChange = (event: any, itemId: any) => {
     setHazardCheckboxState((prevState: any) => {
@@ -545,130 +543,23 @@ function LogPtw() {
   };
 
   const handleFormSubmit: SubmitHandler<ILogPTWForm> = (values: any) => {
-    console.log(values);
-    // loader.show();
-
-    // addNewPTWData(values)
-    //   .then(() => {
-    //     alertToast.show("success", "Data added successfully", true, 2000);
-    //     handleReset();
-    //     // Invalidate queries
-    //     queryClient.invalidateQueries({
-    //       predicate: (query) => query.queryKey[0] === "sioMasterDataQuery",
-    //     });
-    //   })
-    //   .catch((err) => {
-    //     if (err.response && err.response.status) {
-    //       alertToast.show("warning", err.response.data.errorMessage, true);
-    //     }
-    //   })
-    //   .finally(() => {
-    //     loader.hide();
-    //   });
-  };
-
-  const handleFileChange = (e: any) => {
-    const files = Array.from(e.target.files);
-    const filenames = files.map((file: any, index: number) => {
-      const now = new Date();
-      const date = now.toISOString().slice(0, 10).replace(/-/g, "");
-      const time = now.toTimeString().slice(0, 8).replace(/:/g, "");
-      return `${date}_${time}_${index + 1}_${file.name}`;
-    });
-
-    const formData = new FormData();
-    formData.append("filenames", JSON.stringify(filenames));
-    formData.append(
-      "orginalnames",
-      JSON.stringify(files.map((file: any) => file.name)),
-    );
-    files.forEach((file: any) => {
-      formData.append("files[]", file);
-    });
-
-    fetch(`${API_BASE_URL}uploadObsImage`, {
-      method: "POST",
-      body: formData,
-    })
-      .then(async (res) => {
-        setImagePreviews(() => [...filenames]);
+    loader.show();
+    addNewPTWData(values)
+      .then(() => {
+        alertToast.show("success", "Data added successfully", true, 2000);
+        handleReset();
+        // Invalidate queries
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] === "ptwMasterDataQuery",
+        });
       })
-      .catch(() => {
-        alertToast.show("error", "Error Uploading Image", true);
-      });
-  };
-
-  const handleDelete = (image: string) => {
-    setImagePreviews((prevPreviews: any) =>
-      prevPreviews.filter((item: any) => item !== image),
-    );
-
-    fetch(`${API_BASE_URL}deleteObsImage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        imageName: image, // The image name that needs to be deleted
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          alertToast.show("success", "Image deleted successfully", true);
-        } else {
-          alertToast.show("error", "Error deleting image", true);
+      .catch((err: any) => {
+        if (err.response && err.response.status) {
+          alertToast.show("warning", err.response.data.errorMessage, true);
         }
       })
-      .catch(() => {
-        alertToast.show("error", "Error deleting image", true);
-      });
-  };
-
-  const handleButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleClosureFileButtonClick = () => {
-    if (closureFileInputRef.current) {
-      closureFileInputRef.current.click();
-    }
-  };
-  const handleClosureFileChange = (e: any) => {
-    const files = Array.from(e.target.files);
-    const previews = files.map((file: any) => URL.createObjectURL(file));
-    setClosureImagePreviews((prevPreviews: any) => [
-      ...prevPreviews,
-      ...previews,
-    ]);
-  };
-
-  const handleDeleteClosureImage = (image: string) => {
-    setClosureImagePreviews((prevPreviews: any) =>
-      prevPreviews.filter((item: any) => item !== image),
-    );
-
-    fetch(`${API_BASE_URL}deleteObsClosureImage`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        imageName: image, // The image name that needs to be deleted
-      }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          alertToast.show("success", "Image deleted successfully", true);
-        } else {
-          alertToast.show("error", "Error deleting image", true);
-        }
-      })
-      .catch(() => {
-        alertToast.show("error", "Error deleting image", true);
+      .finally(() => {
+        loader.hide();
       });
   };
 
@@ -1633,34 +1524,34 @@ function LogPtw() {
                 </div>
                 <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                   <TextField
-                    name="ass_wh_supervision"
+                    name="confined_space_supervision"
                     label="Supervision provided by(Atomberg's Emp)"
                     control={control}
                   />
                   <TextField
-                    name="ass_wh_atmospheric_check"
+                    name="confined_space_atmospheric"
                     label="Atmospheric Checks done by"
                     control={control}
                   />
                   <TextField
-                    name="ass_wh_oxygen_level"
+                    name="confined_space_oxygen_level"
                     label="Oxygen level (19% - 21%)"
                     control={control}
                   />
                   <TextField
-                    name="ass_wh_lel_uel"
+                    name="confined_space_lel"
                     label="Explosive LEL & UEL"
                     control={control}
                   />
                 </div>
                 <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                   <TextField
-                    name="ass_wh_toxic"
+                    name="confined_space_toxic"
                     label="Toxic"
                     control={control}
                   />
                   <TextField
-                    name="ass_wh_detector_details"
+                    name="confined_space_detector"
                     label="Detector Details"
                     control={control}
                   />

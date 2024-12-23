@@ -339,3 +339,148 @@ exports.submitPTWApprovalData = async (req, res) => {
     res.status(500).json({ error: "An error occurred while processing data." });
   }
 };
+exports.addNewPTWData = async (req, res) => {
+  const { ID, DEPARTMENT } = req.user;
+  const {
+    department,
+    area,
+    work_location,
+    datetime_from,
+    datetime_to,
+    nearest_firealarm,
+    job_description,
+    moc_required,
+    moc_title,
+    moc_no,
+    why_moc_remarks,
+    equipment,
+    supervisor_name,
+    contractor,
+    esic_no,
+    associated_permit,
+    hazard_identification,
+    other_hazards,
+    risk_assessment,
+    ppe_required,
+    ei_panel_name,
+    ei_loto_no,
+    ei_checked_by,
+    ei_date_time,
+    si_panel_name,
+    si_loto_no,
+    si_checked_by,
+    si_date_time,
+    general_work_dtls,
+    annexture_v,
+    work_height_checklist,
+    work_height_supervision,
+    confined_space_checklist,
+    confined_space_supervision,
+    confined_space_atmospheric,
+    confined_space_oxygen_level,
+    confined_space_lel,
+    confined_space_toxic,
+    confined_space_detector,
+    lifting_work_checklist,
+    esms_checklist,
+    hot_work_checklist,
+    pending_on,
+    status,
+  } = req.body;
+
+  try {
+    const currentTime = new Date();
+
+    // Fetch Department Head
+    const departmentQuery = `
+      SELECT DISTINCT
+        t1.id,
+        t1.department_name name,
+        t1.head_id
+      FROM
+        t_inshe_departments t1
+      WHERE
+        t1.status = 'Active' AND t1.id = ?
+    `;
+    const resultDepartments = await simpleQuery(departmentQuery, [DEPARTMENT]);
+    if (!resultDepartments.length) {
+      return res.status(404).json({ message: "Department not found." });
+    }
+
+    const departmentHead = resultDepartments[0].id;
+    const query = `
+      INSERT INTO t_inshe_log_ptw (
+        department, area, work_location, datetime_from, datetime_to, 
+        nearest_firealarm, job_description, moc_required, moc_title, moc_no, 
+        why_moc_remarks, equipment, supervisor_name, contractor, esic_no, 
+        associated_permit, hazard_identification, other_hazards, risk_assessment, 
+        ppe_required, ei_panel_name, ei_loto_no, ei_checked_by, ei_date_time, 
+        si_panel_name, si_loto_no, si_checked_by, si_date_time, general_work_dtls, 
+        annexture_v, work_height_checklist, work_height_supervision, confined_space_checklist, 
+        confined_space_supervision, confined_space_atmospheric, confined_space_oxygen_level, 
+        confined_space_lel, confined_space_toxic, confined_space_detector, 
+        lifting_work_checklist, esms_checklist, hot_work_checklist, pending_on, status,
+        created_at,created_by,updated_at,updated_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+      DEPARTMENT,
+      area,
+      work_location,
+      datetime_from,
+      datetime_to,
+      nearest_firealarm,
+      job_description,
+      moc_required,
+      moc_title,
+      moc_no,
+      why_moc_remarks,
+      equipment,
+      supervisor_name,
+      contractor,
+      esic_no,
+      associated_permit,
+      hazard_identification,
+      other_hazards,
+      risk_assessment,
+      ppe_required,
+      ei_panel_name,
+      ei_loto_no,
+      ei_checked_by,
+      ei_date_time,
+      si_panel_name,
+      si_loto_no,
+      si_checked_by,
+      si_date_time,
+      general_work_dtls,
+      annexture_v,
+      work_height_checklist,
+      work_height_supervision,
+      confined_space_checklist,
+      confined_space_supervision,
+      confined_space_atmospheric,
+      confined_space_oxygen_level,
+      confined_space_lel,
+      confined_space_toxic,
+      confined_space_detector,
+      lifting_work_checklist,
+      esms_checklist,
+      hot_work_checklist,
+      departmentHead,
+      "Open",
+      currentTime,
+      ID,
+      currentTime,
+      ID,
+    ];
+
+    // Execute the query
+    await simpleQuery(query, values);
+
+    res.status(200).json({ message: "Data added successfully." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
+  }
+};

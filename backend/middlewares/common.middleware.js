@@ -10,36 +10,36 @@ const interceptReq = (req, res, next) => {
       Object.keys(currConfigData).forEach((key) => {
         if (key !== "refresh") {
           const decKey = decryptData(key);
-          
+
           if (decKey === "encPayload") {
             const value = decryptData(currConfigData[key]);
             decConfigData = JSON.parse(value);
-            
 
             Object.keys(decConfigData).forEach((dataKey) => {
               const dataValue = decConfigData[dataKey];
               // console.log(dataKey);
-              if (
-                dataKey !== "domainPassword" &&
-                dataKey !== "emailId" &&
-                dataKey !== "password" &&
-                dataKey !== "domainId" &&
-                dataKey !== "loginType" &&
-                dataKey !== "scannedType" &&
-                dataKey !== "EMAIL_ID" &&
-                dataKey !== "PASSWORD"
-              ) {
-                if (
-                  /(<([^>]+)>)/gi.test(dataValue) ||
-                  /['{}<>|=]/.test(dataValue)
-                ) {
-                  hasError = true;
-                } else {
-                  decConfigData[dataKey] = dataValue;
-                }
-              } else {
-                decConfigData[dataKey] = dataValue;
-              }
+              decConfigData[dataKey] = dataValue;
+              // if (
+              //   dataKey !== "domainPassword" &&
+              //   dataKey !== "emailId" &&
+              //   dataKey !== "password" &&
+              //   dataKey !== "domainId" &&
+              //   dataKey !== "loginType" &&
+              //   dataKey !== "scannedType" &&
+              //   dataKey !== "EMAIL_ID" &&
+              //   dataKey !== "PASSWORD"
+              // ) {
+              //   if (
+              //     /(<([^>]+)>)/gi.test(dataValue) ||
+              //     /['{}<>|=]/.test(dataValue)
+              //   ) {
+              //     hasError = true;
+              //   } else {
+              //     decConfigData[dataKey] = dataValue;
+              //   }
+              // } else {
+              //   decConfigData[dataKey] = dataValue;
+              // }
             });
           } else {
             hasError = true;
