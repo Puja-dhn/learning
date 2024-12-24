@@ -88,22 +88,22 @@ const initialFormValues: ILogPTWForm = {
   status: "",
 };
 
-const formSchema = Yup.object().shape({
-  department: Yup.string().required("Department is required"),
-  area: Yup.string().required("Area is required"),
-  work_location: Yup.string().required("Work location is required"),
-  datetime_from: Yup.string().required("Date time from is required"),
-  datetime_to: Yup.string().required("Date time to is required"),
-  nearest_firealarm: Yup.string().required(
-    "Nearest Fire Alarm Point is required",
-  ),
-  job_description: Yup.string().required("Job Description is required"),
-  moc_required: Yup.string().required("Select MOC is required or not"),
-  equipment: Yup.string().required("Equipment is required"),
-  supervisor_name: Yup.string().required("name of Supervisor is required"),
-  contractor: Yup.string().required("Contractor is required"),
-  esic_no: Yup.string().required("ESIC Reg No is required"),
-});
+// const formSchema = Yup.object().shape({
+//   department: Yup.string().required("Department is required"),
+//   area: Yup.string().required("Area is required"),
+//   work_location: Yup.string().required("Work location is required"),
+//   datetime_from: Yup.string().required("Date time from is required"),
+//   datetime_to: Yup.string().required("Date time to is required"),
+//   nearest_firealarm: Yup.string().required(
+//     "Nearest Fire Alarm Point is required",
+//   ),
+//   job_description: Yup.string().required("Job Description is required"),
+//   moc_required: Yup.string().required("Select MOC is required or not"),
+//   equipment: Yup.string().required("Equipment is required"),
+//   supervisor_name: Yup.string().required("name of Supervisor is required"),
+//   contractor: Yup.string().required("Contractor is required"),
+//   esic_no: Yup.string().required("ESIC Reg No is required"),
+// });
 
 interface IAnxPerson {
   name: string;
@@ -176,7 +176,7 @@ function LogPtw() {
     watch: watchValues,
   } = useForm<ILogPTWForm>({
     defaultValues: initialFormValues,
-    resolver: yupResolver(formSchema),
+    // resolver: yupResolver(formSchema),
   });
   const { isSubmitting, submitCount, errors } = formState;
   // Handle adding a new row
@@ -190,14 +190,20 @@ function LogPtw() {
     } else if (attTicketNo === "") {
       alertToast.show("warning", "Ticket No is required", true);
     } else {
+      let oldRows = [];
+      if (watchValues("annexture_v") !== "") {
+        oldRows = JSON.parse(watchValues("annexture_v"));
+      }
+
       const newRow: IAnxPerson = {
         name: attPerName,
         contractor: attContractor,
         trade: attTrade,
         ticketNo: attTicketNo,
       };
-      setAnxRows([...anxRows, newRow]);
-      setValue("annexture_v", JSON.stringify(anxRows), {
+      oldRows.push(newRow);
+      setAnxRows(oldRows);
+      setValue("annexture_v", JSON.stringify(oldRows), {
         shouldValidate: true,
       });
       setAttPername("");
@@ -209,7 +215,13 @@ function LogPtw() {
 
   // Handle removing a row
   const removeRow = (index: number) => {
-    setAnxRows(anxRows.filter((_, i) => i !== index));
+    const currAnxRows = JSON.parse(watchValues("annexture_v"));
+    const currRowIndex = currAnxRows.findIndex((item: any) => item === index);
+    currAnxRows.splice(currRowIndex, 1);
+    setAnxRows(currAnxRows);
+    setValue("annexture_v", JSON.stringify(currAnxRows), {
+      shouldValidate: true,
+    });
   };
 
   const handleInputChange = (
@@ -354,190 +366,255 @@ function LogPtw() {
 
   const [hazardCheckboxState, setHazardCheckboxState] = useState([]);
   const handleHazardsChecklistChange = (event: any, itemId: any) => {
-    setHazardCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("hazard_identification", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let hazardChecklist = [];
+    if (watchValues("hazard_identification") !== "") {
+      hazardChecklist = JSON.parse(watchValues("hazard_identification"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      hazardChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = hazardChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      hazardChecklist.splice(currRowIndex, 1);
+    }
+    setValue("hazard_identification", JSON.stringify(hazardChecklist), {
+      shouldValidate: true,
     });
   };
+
   const [risksCheckboxState, setRisksCheckboxState] = useState([]);
+
   const handleRisksChecklistChange = (event: any, itemId: any) => {
-    setRisksCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("risk_assessment", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let riskChecklist = [];
+    if (watchValues("risk_assessment") !== "") {
+      riskChecklist = JSON.parse(watchValues("risk_assessment"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      riskChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = riskChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      riskChecklist.splice(currRowIndex, 1);
+    }
+    setValue("risk_assessment", JSON.stringify(riskChecklist), {
+      shouldValidate: true,
     });
   };
 
   const [ppeCheckboxState, setPpeCheckboxState] = useState([]);
+
   const handlePPEChecklistChange = (event: any, itemId: any) => {
-    setPpeCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("ppe_required", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let ppeCheckpoints = [];
+    if (watchValues("ppe_required") !== "") {
+      ppeCheckpoints = JSON.parse(watchValues("ppe_required"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      ppeCheckpoints.push(itemIdStr);
+    } else {
+      const currRowIndex = ppeCheckpoints.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      ppeCheckpoints.splice(currRowIndex, 1);
+    }
+    setValue("ppe_required", JSON.stringify(ppeCheckpoints), {
+      shouldValidate: true,
     });
   };
 
   const [generalCheckboxState, setGeneralCheckboxState] = useState([]);
+
   const handleGeneralWorkChecklistChange = (event: any, itemId: any) => {
-    setGeneralCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("general_work_dtls", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let generalChecklist = [];
+    if (watchValues("general_work_dtls") !== "") {
+      generalChecklist = JSON.parse(watchValues("general_work_dtls"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      generalChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = generalChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      generalChecklist.splice(currRowIndex, 1);
+    }
+    setValue("general_work_dtls", JSON.stringify(generalChecklist), {
+      shouldValidate: true,
     });
   };
   const [whCheckboxState, setWHCheckboxState] = useState([]);
+
   const handleWHChecklistChange = (event: any, itemId: any) => {
-    setWHCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("work_height_checklist", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let whChecklist = [];
+    if (watchValues("work_height_checklist") !== "") {
+      whChecklist = JSON.parse(watchValues("work_height_checklist"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      whChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = whChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      whChecklist.splice(currRowIndex, 1);
+    }
+    setValue("work_height_checklist", JSON.stringify(whChecklist), {
+      shouldValidate: true,
     });
   };
 
   const [confinedCheckboxState, setConfinedCheckboxState] = useState([]);
+
   const handleConfinedSpaceChecklistChange = (event: any, itemId: any) => {
-    setConfinedCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("confined_space_checklist", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let confinedChecklist = [];
+    if (watchValues("confined_space_checklist") !== "") {
+      confinedChecklist = JSON.parse(watchValues("confined_space_checklist"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      confinedChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = confinedChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      confinedChecklist.splice(currRowIndex, 1);
+    }
+    setValue("confined_space_checklist", JSON.stringify(confinedChecklist), {
+      shouldValidate: true,
     });
   };
 
   const [liftingCheckboxState, setLiftingCheckboxState] = useState([]);
+
   const handleLiftingChecklistChange = (event: any, itemId: any) => {
-    setLiftingCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("lifting_work_checklist", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let liftingChecklist = [];
+    if (watchValues("lifting_work_checklist") !== "") {
+      liftingChecklist = JSON.parse(watchValues("lifting_work_checklist"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      liftingChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = liftingChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      liftingChecklist.splice(currRowIndex, 1);
+    }
+    setValue("lifting_work_checklist", JSON.stringify(liftingChecklist), {
+      shouldValidate: true,
     });
   };
 
   const [esmsCheckboxState, setEsmsCheckboxState] = useState([]);
+
   const handleEsmsChecklistChange = (event: any, itemId: any) => {
-    setEsmsCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("esms_checklist", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let esmsChecklist = [];
+    if (watchValues("esms_checklist") !== "") {
+      esmsChecklist = JSON.parse(watchValues("esms_checklist"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      esmsChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = esmsChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      esmsChecklist.splice(currRowIndex, 1);
+    }
+    setValue("esms_checklist", JSON.stringify(esmsChecklist), {
+      shouldValidate: true,
     });
   };
 
   const [hotworkCheckboxState, setHotWorkCheckboxState] = useState([]);
+
   const handleHotWorkChecklistChange = (event: any, itemId: any) => {
-    setHotWorkCheckboxState((prevState: any) => {
-      const updatedState = event.target.checked
-        ? [...prevState, itemId]
-        : prevState.filter((id: any) => id !== itemId);
-
-      setValue("hot_work_checklist", JSON.stringify(updatedState), {
-        shouldValidate: true,
-      });
-
-      return updatedState;
+    let hotwrkChecklist = [];
+    if (watchValues("hot_work_checklist") !== "") {
+      hotwrkChecklist = JSON.parse(watchValues("hot_work_checklist"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      hotwrkChecklist.push(itemIdStr);
+    } else {
+      const currRowIndex = hotwrkChecklist.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      hotwrkChecklist.splice(currRowIndex, 1);
+    }
+    setValue("hot_work_checklist", JSON.stringify(hotwrkChecklist), {
+      shouldValidate: true,
     });
   };
 
   const [associatedIds, setAssociatedIds] = useState<string[]>([]);
+
   const handleAssCheckboxChange = (id: any) => {
+    let assIds = [];
+    if (watchValues("associated_permit") !== "") {
+      assIds = JSON.parse(watchValues("associated_permit"));
+    }
+
     if (id === "Work at Height") {
       setIsAssWHSectionOpen((prev) => !prev);
       if (isAssWHSectionOpen) {
-        setAssociatedIds((prevIds: any) =>
-          prevIds.filter((item: any) => item !== id),
-        ); // Remove ID
+        const currRowIndex = assIds.findIndex((item: any) => item === id);
+        assIds.splice(currRowIndex, 1);
+        setAssociatedIds(assIds);
       } else {
-        setAssociatedIds((prevIds: any) => [...prevIds, id]); // Add ID
+        setAssociatedIds((prevIds) => [...prevIds, id]);
+        assIds.push(id);
       }
     }
     if (id === "Confined Space") {
       setIsAssConfinedSectionOpen((prev) => !prev);
       if (isAssConfinedSectionOpen) {
-        setAssociatedIds((prevIds: any) =>
-          prevIds.filter((item: any) => item !== id),
-        ); // Remove ID
+        const currRowIndex = assIds.findIndex((item: any) => item === id);
+        assIds.splice(currRowIndex, 1);
+        setAssociatedIds(assIds);
       } else {
-        setAssociatedIds((prevIds: any) => [...prevIds, id]); // Add ID
+        setAssociatedIds((prevIds) => [...prevIds, id]);
+        assIds.push(id);
       }
     }
     if (id === "Lifting Work") {
       setIsAssLiftingSectionOpen((prev) => !prev);
       if (isAssLiftingSectionOpen) {
-        setAssociatedIds((prevIds: any) =>
-          prevIds.filter((item: any) => item !== id),
-        ); // Remove ID
+        const currRowIndex = assIds.findIndex((item: any) => item === id);
+        assIds.splice(currRowIndex, 1);
+        setAssociatedIds(assIds);
       } else {
-        setAssociatedIds((prevIds: any) => [...prevIds, id]); // Add ID
+        setAssociatedIds((prevIds) => [...prevIds, id]);
+        assIds.push(id);
       }
     }
     if (id === "ESMS Work Permit") {
       setIsAssEsmsSectionOpen((prev) => !prev);
       if (isAssEsmsSectionOpen) {
-        setAssociatedIds((prevIds: any) =>
-          prevIds.filter((item: any) => item !== id),
-        ); // Remove ID
+        const currRowIndex = assIds.findIndex((item: any) => item === id);
+        assIds.splice(currRowIndex, 1);
+        setAssociatedIds(assIds);
       } else {
-        setAssociatedIds((prevIds: any) => [...prevIds, id]); // Add ID
+        setAssociatedIds((prevIds) => [...prevIds, id]);
+        assIds.push(id);
       }
     }
     if (id === "Hot Work") {
       setIsAssHotWrkSectionOpen((prev) => !prev);
       if (isAssHotWrkSectionOpen) {
-        setAssociatedIds((prevIds: any) =>
-          prevIds.filter((item: any) => item !== id),
-        ); // Remove ID
+        const currRowIndex = assIds.findIndex((item: any) => item === id);
+        assIds.splice(currRowIndex, 1);
+        setAssociatedIds(assIds);
       } else {
-        setAssociatedIds((prevIds: any) => [...prevIds, id]); // Add ID
+        setAssociatedIds((prevIds) => [...prevIds, id]);
+        assIds.push(id);
       }
     }
-    setValue("associated_permit", JSON.stringify(associatedIds), {
+    setValue("associated_permit", JSON.stringify(assIds), {
       shouldValidate: true,
     });
   };
@@ -848,7 +925,7 @@ function LogPtw() {
                   )}
                   <div className="p-1">
                     <TextField
-                      name="other_specific_hazards"
+                      name="other_hazards"
                       label="Any other specific hazards"
                       control={control}
                     />
@@ -1467,7 +1544,7 @@ function LogPtw() {
                   )}
                   <div className="grid grid-cols-1 md:grid-cols-1">
                     <TextField
-                      name="ass_wh_supervision"
+                      name="work_height_supervision"
                       label="Supervision provided by(Atomberg's Emp)"
                       control={control}
                     />

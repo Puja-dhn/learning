@@ -195,7 +195,8 @@ exports.getPtwData = async (req, res) => {
       t1.updated_at,
       t1.updated_by,
       t7.name log_by,
-      LPAD(t1.id, 6, '0') AS disp_logno
+      LPAD(t1.id, 6, '0') AS disp_logno,
+      t1.equipment
     FROM
       t_inshe_log_ptw t1
       join t_inshe_departments t2 on t1.department = t2.id

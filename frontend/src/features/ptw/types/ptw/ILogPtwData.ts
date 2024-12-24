@@ -51,6 +51,7 @@ interface ILogPTWData {
   updated_by: string;
   log_by: string;
   disp_logno: string;
+  equipment: string;
 }
 
 export default ILogPTWData;
