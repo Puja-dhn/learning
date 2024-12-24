@@ -209,7 +209,7 @@ function DomainLogin() {
                         control={control}
                         type="password"
                         className="block py-2.5 px-3 mt-1 text-sm text-gray-900 bg-transparent border-2  focus:ring-0 appearance-none rounded-lg dark:text-white dark:border-gray-600 
-               dark:focus:border-[#4b8cf1] transition duration-300 ease-in-out w-[350px] hover:border-[#4b8cf1]"
+               dark:focus:border-[#4b8cf1] transition duration-300 ease-in-out w-[310px] hover:border-[#4b8cf1]"
                       />
                     </div>
 

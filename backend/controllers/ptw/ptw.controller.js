@@ -116,31 +116,17 @@ exports.getPTWMasterData = async (req, res) => {
 exports.getPtwData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
   const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
-  const {
-    id,
-    department,
-    area,
-    category,
-    severity,
-    obs_date_from,
-    obs_date_to,
-    status,
-  } = req.body;
+  const { id, department, area, date_from, date_to, status } = req.body;
 
   const strId = id > 0 ? ` and t1.id=${id}` : "";
   const strDepartment =
     department !== "All" ? ` and t1.department=${department}` : "";
   const strArea = area !== "All" ? ` and t1.area=${area}` : "";
-  const strCategory = category !== "All" ? ` and t1.category=${category}` : "";
-  const strSeverity =
-    severity !== "All" ? ` and t1.severity='${severity}'` : "";
   const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
   const strFromDate =
-    obs_date_from !== ""
-      ? ` and DATE(t1.obs_datetime) >='${obs_date_from}'`
-      : "";
+    date_from !== "" ? ` and DATE(t1.created_at) >='${date_from}'` : "";
   const strToDate =
-    obs_date_to !== "" ? ` and DATE(t1.obs_datetime) <='${obs_date_to}'` : "";
+    date_to !== "" ? ` and DATE(t1.created_at) <='${date_to}'` : "";
 
   const sioQuery = `
     SELECT 
@@ -205,7 +191,12 @@ exports.getPtwData = async (req, res) => {
       join t_inshe_users t7 on t1.created_by = t7.id
     WHERE
       1=1
-     
+      ${strId}
+      ${strDepartment}
+      ${strArea}
+      ${strStatus}
+      ${strFromDate}
+      ${strToDate}
   `;
 
   const resultPtw = await simpleQuery(sioQuery, []);
@@ -217,31 +208,6 @@ exports.getPtwData = async (req, res) => {
 exports.getOpenPtwData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
   const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
-  const {
-    id,
-    department,
-    area,
-    category,
-    severity,
-    obs_date_from,
-    obs_date_to,
-    status,
-  } = req.body;
-
-  const strId = id > 0 ? ` and t1.id=${id}` : "";
-  const strDepartment =
-    department !== "All" ? ` and t1.department=${department}` : "";
-  const strArea = area !== "All" ? ` and t1.area=${area}` : "";
-  const strCategory = category !== "All" ? ` and t1.category=${category}` : "";
-  const strSeverity =
-    severity !== "All" ? ` and t1.severity='${severity}'` : "";
-  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
-  const strFromDate =
-    obs_date_from !== ""
-      ? ` and DATE(t1.obs_datetime) >='${obs_date_from}'`
-      : "";
-  const strToDate =
-    obs_date_to !== "" ? ` and DATE(t1.obs_datetime) <='${obs_date_to}'` : "";
 
   const sioQuery = `
       SELECT 

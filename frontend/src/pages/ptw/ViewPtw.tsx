@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 import { shallowEqual } from "react-redux";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
   FunnelIcon,
   ArrowPathIcon,
   ChevronRightIcon,
-  PencilSquareIcon,
   EyeIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
@@ -14,6 +15,8 @@ import { useQueryClient } from "react-query";
 
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import * as XLSX from "xlsx";
+import { mergeStateWithFilterModel } from "@mui/x-data-grid/hooks/features/filter/gridFilterUtils";
 import { ASSET_BASE_URL } from "@/features/common/constants";
 // import { IOptionList } from "@/features/ui/types";
 import { IconButton } from "@/features/ui/buttons";
@@ -23,23 +26,17 @@ import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
 
 import ModalPopupMobile from "@/features/ui/popup/ModalPopupMobile";
-import ILogSioData from "@/features/sis/types/sis/ILogSioData";
-
-import { ILogSIOData, ILogSioFilterForm } from "@/features/sis/types";
 
 import { IOptionList } from "@/features/ui/types";
-import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
-import * as XLSX from "xlsx";
 import usePtwLogDetailQuery from "@/features/ptw/hooks/usePtwLogDetailQuery";
 import { usePTWMasterDataQuery } from "@/features/ptw/hooks";
-import PdfIcon from "@/assets/images/pdficon.png";
-import ILogPTWData from "@/features/ptw/types/ptw/ILogPtwData";
-import { mergeStateWithFilterModel } from "@mui/x-data-grid/hooks/features/filter/gridFilterUtils";
 import IContractorList from "@/features/ptw/types/ptw/IContractorList";
 import IConfigsList from "@/features/ptw/types/ptw/IConfigsList";
+import ILogPtwFilterForm from "@/features/ptw/types/ptw/ILogPtwFilterForm";
+import ILogPtwData from "@/features/ptw/types/ptw/ILogPtwData";
 
-interface ILogSioTeamData {
-  historyLogSioData: ILogSioData[];
+interface ILogPtwTeamData {
+  historyLogPtwData: ILogPtwData[];
 }
 interface IAnxPerson {
   name: string;
@@ -48,14 +45,13 @@ interface IAnxPerson {
   ticketNo: string;
 }
 
-const initialFilterValues: ILogSioFilterForm = {
+const initialFilterValues: ILogPtwFilterForm = {
   id: null,
   department: "All",
   category: "All",
   area: "All",
-  severity: "All",
-  obs_date_from: "",
-  obs_date_to: "",
+  date_from: "",
+  date_to: "",
   status: "All",
 };
 
@@ -66,9 +62,7 @@ function ViewPtw() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const [departments, setDepartments] = useState<IOptionList[]>([]);
-  const [categories, setCategories] = useState<IOptionList[]>([]);
   const [areas, setAreas] = useState<IOptionList[]>([]);
-  const [users, setUsers] = useState<IOptionList[]>([]);
   const [modalImage, setModalImage] = useState<string>("");
   const [isHazardSectionOpen, setIsHazardSectionOpen] = useState(false);
   const [hazardsChecklist, setHazardsChecklist] = useState<IOptionList[]>([]);
@@ -128,6 +122,7 @@ function ViewPtw() {
         setDepartmentHeadName(ownDepartment[0].head_name);
         setConfigs(historyPTWMasterData[0].CONFIG);
         setAreas(historyPTWMasterData[0].AREA);
+        setDepartments(historyPTWMasterData[0].DEPARTMENT);
 
         const filtercontractors = historyPTWMasterData[0].CONTRACTORS.map(
           (contractor: any) => ({
@@ -230,12 +225,12 @@ function ViewPtw() {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  const [teamData, setTeamData] = useState<ILogSioTeamData>({
-    historyLogSioData: [],
+  const [teamData, setTeamData] = useState<ILogPtwTeamData>({
+    historyLogPtwData: [],
   });
 
-  const [logDetails, setLogDetails] = useState<ILogSioTeamData>({
-    historyLogSioData: [],
+  const [logDetails, setLogDetails] = useState<ILogPtwTeamData>({
+    historyLogPtwData: [],
   });
 
   const [showLogDetailsDialog, setShowLogDetailsDialog] = useState({
@@ -272,14 +267,45 @@ function ViewPtw() {
     control: controlView,
     formState: formStatePDC,
     watch: watchValues,
-  } = useForm<ILogPTWData>({});
+  } = useForm<ILogPtwData>({});
 
   const { submitCount, errors } = formStatePDC;
   const handleViewPtwDialogClose = () => {
     setShowViewPtwDialog((oldState) => ({ ...oldState, status: false }));
   };
+  const handleDownloadClick = (row: ILogPtwData) => {
+    const contentId = `pdfcontent`;
+    const contentElement = document.getElementById(contentId);
 
-  const handleViewClick = (row: ILogPTWData) => {
+    if (contentElement) {
+      html2canvas(contentElement).then((canvas) => {
+        const imgData = canvas.toDataURL("image/png");
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const imgWidth = pageWidth; // Image width fits the page width
+        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Scale to fit content
+
+        let position = 0;
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+
+        // If the content exceeds one page, add new pages
+        while (imgHeight > pageHeight) {
+          position -= pageHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        }
+
+        // Save the PDF with a custom file name
+        pdf.save(`content-${row.id}.pdf`);
+      });
+    } else {
+      console.error("Content element not found!");
+    }
+  };
+  const handleViewClick = (row: ILogPtwData) => {
     if (row.associated_permit !== "") {
       setAssociatedIds(JSON.parse(row.associated_permit));
     }
@@ -389,7 +415,10 @@ function ViewPtw() {
           >
             <EyeIcon className="w-4 h-4" />
           </IconButton>
-          <IconButton className="ml-2">
+          <IconButton
+            className="ml-2"
+            onClick={() => handleDownloadClick(params.row)}
+          >
             <ArrowDownTrayIcon className="w-4 h-4" />
           </IconButton>
         </>
@@ -413,7 +442,7 @@ function ViewPtw() {
   // ]);
   const queryClient = useQueryClient();
 
-  const [filterList, setFilterList] = useState<ILogSioFilterForm>({
+  const [filterList, setFilterList] = useState<ILogPtwFilterForm>({
     ...initialFilterValues,
   });
 
@@ -422,13 +451,8 @@ function ViewPtw() {
     authState.ROLES.length > 0 &&
     authState.ROLES.includes(2);
 
-  const CURR_OBS_SEVERITY_LIST = [
-    { id: "Minor", name: "Minor" },
-    { id: "Serious", name: "Serious" },
-  ];
   const CURR_OBS_STATUS_LIST = [
     { id: "Open", name: "Open" },
-    { id: "PDC Assigned", name: "PDC Assigned" },
     { id: "Closed", name: "Closed" },
   ];
 
@@ -448,18 +472,12 @@ function ViewPtw() {
     reset: resetFilter,
     control: controlFilter,
     formState: formStateFilter,
-  } = useForm<ILogSioFilterForm>({
+  } = useForm<ILogPtwFilterForm>({
     defaultValues: initialFilterValues,
   });
 
   const { submitCount: submitCountFilter, errors: errorsFilter } =
     formStateFilter;
-
-  const handleReset = () => {
-    resetFilter({
-      ...initialFilterValues,
-    });
-  };
 
   const handleFilterDialogOpen = () => {
     resetFilter({
@@ -477,7 +495,7 @@ function ViewPtw() {
     setShowFilterDialog((oldState) => ({ ...oldState, status: false }));
   };
 
-  const handleFilterFormSubmit: SubmitHandler<ILogSioFilterForm> = (values) => {
+  const handleFilterFormSubmit: SubmitHandler<ILogPtwFilterForm> = (values) => {
     setShowFilterDialog((oldState) => ({ ...oldState, status: false }));
     setFilterList({ ...values });
   };
@@ -499,7 +517,7 @@ function ViewPtw() {
       ptwLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogSioData = !isAdmin
+      const historyLogPtwData = !isAdmin
         ? [
             ...ptwLogHistoryData.historyLogPtwData.filter(
               (item: any) => +item.created_by === authState.ID,
@@ -508,7 +526,7 @@ function ViewPtw() {
         : [...ptwLogHistoryData.historyLogptwData];
 
       setTeamData({
-        historyLogSioData,
+        historyLogPtwData,
       });
     }
   }, [ptwLogHistoryData, isPtwLogHistoryDataLoading, isPtwLogHistoryDataError]);
@@ -525,37 +543,6 @@ function ViewPtw() {
     });
   };
 
-  const handleShowLogDetails = (logNo: number) => {
-    const historyLogSioData = [
-      ...teamData.historyLogSioData.filter((item) => item.id === logNo),
-    ];
-    setLogDetails({ historyLogSioData });
-    setImagePreviews(JSON.parse(historyLogSioData[0].obs_photos));
-    if (historyLogSioData[0].closure_photos !== "") {
-      setClosureImagePreviews(JSON.parse(historyLogSioData[0].closure_photos));
-    }
-
-    setShowLogDetailsDialog({
-      status: true,
-    });
-  };
-  const handleLogDetailsDialogClose = () => {
-    setShowLogDetailsDialog((oldState) => ({
-      ...oldState,
-      status: false,
-    }));
-    setImagePreviews([]);
-    setClosureImagePreviews([]);
-  };
-
-  const customNoRowsOverlay = () => {
-    return (
-      <div style={{ textAlign: "center", padding: "20px" }}>
-        No Data Available
-      </div>
-    );
-  };
-
   const formatDate = (date: any) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, "0");
@@ -564,27 +551,15 @@ function ViewPtw() {
     return `${day}-${month}-${year}`;
   };
 
-  const handleImageDialogClose = () => {
-    setShowImageDialog((oldState) => ({ ...oldState, status: false }));
-    setModalImage("");
-  };
-  const openImageModal = (image: any) => {
-    setModalImage(image);
-    setShowImageDialog({ status: true });
-  };
   const handleExport = () => {
-    const rows = teamData.historyLogSioData.map((item) => ({
+    const rows = teamData.historyLogPtwData.map((item) => ({
       "Log No": item.disp_logno,
-      "Observation Date": item.obs_datetime,
+      "Observation Date": item.created_at,
       Department: item.department,
       Status: item.status,
       Area: item.area,
-      Category: item.category,
-      Severity: item.severity,
       "Pending On": item.pending_on,
       "Log By": item.log_by,
-      "PDC Date": item.target_date,
-      "Closure date": item.closure_date,
     }));
     const ws = XLSX.utils.json_to_sheet(rows);
     const wb = XLSX.utils.book_new();
@@ -650,6 +625,9 @@ function ViewPtw() {
           <IconButton onClick={handleExport}>
             <ArrowDownTrayIcon className="w-4 h-4" />
           </IconButton>
+          <IconButton onClick={handleFilterDialogOpen}>
+            <FunnelIcon className="w-4 h-4" />
+          </IconButton>
           <IconButton onClick={handleRefresh}>
             <ArrowPathIcon className="w-4 h-4" />
           </IconButton>
@@ -659,7 +637,7 @@ function ViewPtw() {
         <div className="h-full overflow-auto border-[1px] dark:border-gray-700 ">
           <Paper sx={{ height: "100%", width: "100%" }}>
             <DataGrid
-              rows={teamData.historyLogSioData}
+              rows={teamData.historyLogPtwData}
               columns={columns}
               getRowId={(row) =>
                 row.TEAM_ID || row.ID || Math.random().toString(36).substring(2)
@@ -681,12 +659,12 @@ function ViewPtw() {
         </div>
       ) : (
         <div className="flex flex-col h-full gap-2 overflow-auto ">
-          {teamData.historyLogSioData.map((row) => (
+          {teamData.historyLogPtwData.map((row) => (
             <button
               key={row.id}
               type="button"
-              onClick={() => handleShowLogDetails(row.id)}
               className="w-full"
+              onClick={() => handleViewClick(row)}
             >
               <div className="relative flex items-start bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800 dark:shadow-gray-700 dark:border-gray-600">
                 {/* Full-Height Vertical Log No */}
@@ -703,17 +681,19 @@ function ViewPtw() {
                     <div className="flex items-center space-x-4 w-[50%]">
                       <span className="font-semibold">Date:</span>
                       <span className="text-gray-600 dark:text-gray-400">
-                        {formatDate(row.obs_datetime)}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-4 w-[40%]">
-                      <span className="font-semibold">Severity:</span>
-                      <span className="text-gray-600 dark:text-gray-400">
-                        {row.severity}
+                        {formatDate(row.created_at)}
                       </span>
                     </div>
                   </div>
-
+                  <div className="flex justify-between mb-2">
+                    <div className="flex items-center w-full space-x-4">
+                      <span className="font-semibold">Department:</span>
+                      <span className="text-gray-600 dark:text-gray-400">
+                        {" "}
+                        {row.department}
+                      </span>
+                    </div>
+                  </div>
                   <div className="flex justify-between mb-2">
                     <div className="flex items-center w-full space-x-4">
                       <span className="font-semibold">Area:</span>
@@ -755,7 +735,7 @@ function ViewPtw() {
                   {/* Chevron Icon for Details */}
                   <div className="absolute top-0 right-0 flex items-center justify-center h-full px-2">
                     <ChevronRightIcon
-                      onClick={() => handleShowLogDetails(row.id)}
+                      onClick={() => handleViewClick(row)}
                       height={20}
                       className="text-[#014098] transition-colors duration-300 cursor-pointer hover:text-blue-700"
                     />
@@ -771,17 +751,13 @@ function ViewPtw() {
       {/* Mobile Layout - Button view for log details (only visible on mobile) */}
 
       <ModalPopup
-        heading="Search Observation Data"
+        heading="Search Permit Data"
         onClose={handleFilterDialogClose}
         openStatus={showFilterDialog.status}
         hasSubmit
         onSubmit={() => {
           handleSubmitFilter(handleFilterFormSubmit)();
         }}
-        onReset={() => {
-          handleReset();
-        }}
-        hasReset
         size="large"
         showError
         hasError={
@@ -817,42 +793,20 @@ function ViewPtw() {
                 optionList={[{ id: "All", name: "All Area" }, ...areas]}
               />
             </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <DropdownList
-                name="category"
-                label="Category"
-                control={controlFilter}
-                optionList={[
-                  { id: "All", name: "All Category" },
-                  ...categories,
-                ]}
-              />
-            </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <DropdownList
-                name="SEVERITY"
-                label="Severity"
-                control={controlFilter}
-                optionList={[
-                  { id: "All", name: "All Severity" },
-                  ...CURR_OBS_SEVERITY_LIST,
-                ]}
-              />
-            </div>
 
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <TextField
                 type="date"
-                name="obs_date_from"
-                label="Obs Date From"
+                name="date_from"
+                label="Date From"
                 control={controlFilter}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <TextField
                 type="date"
-                name="obs_date_to"
-                label="Obs Date To"
+                name="date_to"
+                label="Date To"
                 control={controlFilter}
               />
             </div>
@@ -871,272 +825,7 @@ function ViewPtw() {
           </div>
         </form>
       </ModalPopup>
-      <ModalPopupMobile
-        heading="Observation Details"
-        onClose={handleLogDetailsDialogClose}
-        openStatus={showLogDetailsDialog.status}
-        hasSubmit={false}
-        hasReset={false}
-        size="fullscreen"
-        showError
-      >
-        <div className="p-2 text-sm dark:bg-gray-700 h-[100%]">
-          {logDetails && logDetails.historyLogSioData.length > 0 && (
-            <div className="p-2 bg-white dark:bg-gray-800 h-[100%]">
-              <div className="space-y-4 text-[12px]">
-                <div className="bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800">
-                  <div className="p-2 bg-[#dee9ff] rounded-t-lg dark:bg-gray-600">
-                    <h2 className="font-semibold text-gray-800 text-md dark:text-gray-200">
-                      Observation Details
-                    </h2>
-                  </div>
-                  <div className="p-3 ">
-                    <div className="flex border-b-[#00000036] border-b-[1px]">
-                      <div className="flex-1">
-                        <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                          Obs No:
-                        </span>
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {logDetails.historyLogSioData[0].disp_logno}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                          Date:
-                        </span>
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {formatDate(
-                            logDetails.historyLogSioData[0].obs_datetime,
-                          )}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Log By:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].pending_on}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Observation Description:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].obs_desc}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Observation Suggestion:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].obs_sugg}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Severity:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].severity}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Category:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].category}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Department:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].department}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Area:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].area}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Status:
-                          </span>
-                          <span className="font-bold text-gray-600 dark:text-gray-400 ">
-                            {logDetails.historyLogSioData[0].status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="border-b-[#00000036] border-b-[1px] pb-2">
-                        <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                          Obs. Photos:
-                        </span>
-                        <div className="grid grid-cols-3 gap-2 mt-2">
-                          {imagePreviews.map((preview: any, index: any) => (
-                            <div key={index} className="relative">
-                              <img
-                                src={`${ASSET_BASE_URL}sioimages/${
-                                  preview || ""
-                                }`}
-                                alt={`preview-${index}`}
-                                className="object-cover w-full h-20 rounded-lg cursor-pointer"
-                                onClick={() => openImageModal(preview)}
-                              />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800">
-                  <div className="p-2 bg-[#dee9ff] rounded-t-lg dark:bg-gray-600">
-                    <h2 className="font-semibold text-gray-800 text-md dark:text-gray-200">
-                      Assigning Responsibilities
-                    </h2>
-                  </div>
-                  <div className="p-3 ">
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Resp. Person:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].responsibilities}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
 
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Target Date:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].target_date}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Action Plan:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].action_plan}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800">
-                  <div className="p-2 bg-[#dee9ff] rounded-t-lg dark:bg-gray-600">
-                    <h2 className="font-semibold text-gray-800 text-md dark:text-gray-200">
-                      Closure Details
-                    </h2>
-                  </div>
-                  <div className="p-3 ">
-                    <div className="py-1">
-                      <div className="flex border-b-[#00000036] border-b-[1px]">
-                        <div className="flex-1">
-                          <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                            Closure Description:
-                          </span>
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {" "}
-                            {logDetails.historyLogSioData[0].closure_desc}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="py-1">
-                      <div className="border-b-[#00000036] border-b-[1px] pb-2">
-                        <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
-                          Closure Photos:
-                        </span>
-                        <div className="grid grid-cols-3 gap-2 mt-2">
-                          {closureImagePreviews.map(
-                            (preview: any, index: any) => (
-                              <div key={index} className="relative">
-                                <img
-                                  src={`${ASSET_BASE_URL}sioimages/${
-                                    preview || ""
-                                  }`}
-                                  alt={`preview-${index}`}
-                                  className="object-cover w-full h-20 rounded-lg cursor-pointer"
-                                  onClick={() => openImageModal(preview)}
-                                />
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </ModalPopupMobile>
       <ModalPopup
         heading="View Permit Details"
         onClose={handleViewPtwDialogClose}
@@ -1148,7 +837,10 @@ function ViewPtw() {
           !(Object.keys(errorsFilter).length === 0) && submitCountFilter > 0
         }
       >
-        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+        <div
+          className="relative flex flex-col w-full h-full p-2 overflow-auto "
+          id="pdfcontent"
+        >
           <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
             <form className="w-[100%]   flex gap-2 flex-col  justify-evenly">
               <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
@@ -1205,7 +897,7 @@ function ViewPtw() {
                     <TextField
                       type="text"
                       name="nearest_firealarm"
-                      label="Nearest Fire Alarm Point"
+                      label="Nearest Manual Call Points"
                       control={controlView}
                       disabled
                     />
@@ -1728,13 +1420,13 @@ function ViewPtw() {
                 <div className="">
                   <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                     <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                      List of persons attached to this permit (Annexure V)
-                      &nbsp;
+                      List of persons attached to this permit (Other than
+                      custodian, issuer and initiator) &nbsp;
                     </h3>
                   </div>
 
                   <div className="mt-1">
-                    <table className="min-w-full border-collapse table-auto">
+                    <table className="min-w-full text-gray-700 border-collapse table-auto">
                       <thead>
                         <tr>
                           <th className="px-4 py-2 text-left border-b">
@@ -1850,42 +1542,43 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assConfinedChecklist && assConfinedChecklist.length > 0 && (
-                        <div>
-                          {assConfinedChecklist
-                            .reduce((rows: any, item: any, index: any) => {
-                              if (index % 4 === 0) rows.push([]);
-                              rows[rows.length - 1].push(item);
-                              return rows;
-                            }, [])
-                            .map((row: any, rowIndex: any) => (
-                              <div
-                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                key={rowIndex}
-                              >
-                                {row.map((item2: any, index: any) => (
-                                  <div
-                                    className="p-1 text-gray-700"
-                                    key={index}
-                                  >
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                        value="Yes"
-                                        checked={handleCheckedAssConfinedChecklist(
-                                          item2.id,
-                                        )}
-                                      />
-                                      &nbsp;
-                                      {item2.name}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                        </div>
-                      )}
+                      {assConfinedChecklist &&
+                        assConfinedChecklist.length > 0 && (
+                          <div>
+                            {assConfinedChecklist
+                              .reduce((rows: any, item: any, index: any) => {
+                                if (index % 4 === 0) rows.push([]);
+                                rows[rows.length - 1].push(item);
+                                return rows;
+                              }, [])
+                              .map((row: any, rowIndex: any) => (
+                                <div
+                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                  key={rowIndex}
+                                >
+                                  {row.map((item2: any, index: any) => (
+                                    <div
+                                      className="p-1 text-gray-700"
+                                      key={index}
+                                    >
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                          value="Yes"
+                                          checked={handleCheckedAssConfinedChecklist(
+                                            item2.id,
+                                          )}
+                                        />
+                                        &nbsp;
+                                        {item2.name}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
                     </div>
                     <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                       <TextField
@@ -1933,42 +1626,43 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assLiftingChecklist && assLiftingChecklist.length > 0 && (
-                        <div>
-                          {assLiftingChecklist
-                            .reduce((rows: any, item: any, index: any) => {
-                              if (index % 4 === 0) rows.push([]);
-                              rows[rows.length - 1].push(item);
-                              return rows;
-                            }, [])
-                            .map((row: any, rowIndex: any) => (
-                              <div
-                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                key={rowIndex}
-                              >
-                                {row.map((item2: any, index: any) => (
-                                  <div
-                                    className="p-1 text-gray-700"
-                                    key={index}
-                                  >
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                        value="Yes"
-                                        checked={handleCheckeAssLiftingChecklist(
-                                          item2.id,
-                                        )}
-                                      />
-                                      &nbsp;
-                                      {item2.name}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                        </div>
-                      )}
+                      {assLiftingChecklist &&
+                        assLiftingChecklist.length > 0 && (
+                          <div>
+                            {assLiftingChecklist
+                              .reduce((rows: any, item: any, index: any) => {
+                                if (index % 4 === 0) rows.push([]);
+                                rows[rows.length - 1].push(item);
+                                return rows;
+                              }, [])
+                              .map((row: any, rowIndex: any) => (
+                                <div
+                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                  key={rowIndex}
+                                >
+                                  {row.map((item2: any, index: any) => (
+                                    <div
+                                      className="p-1 text-gray-700"
+                                      key={index}
+                                    >
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                          value="Yes"
+                                          checked={handleCheckeAssLiftingChecklist(
+                                            item2.id,
+                                          )}
+                                        />
+                                        &nbsp;
+                                        {item2.name}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -2074,21 +1768,6 @@ function ViewPtw() {
               {/* end */}
             </form>
           </div>
-        </div>
-      </ModalPopup>
-      <ModalPopup
-        heading="View Image"
-        onClose={handleImageDialogClose}
-        openStatus={showImageDialog.status}
-        hasSubmit={false}
-        size="fullscreen"
-      >
-        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
-          <img
-            src={`${ASSET_BASE_URL}sioimages/${modalImage || ""}`}
-            alt="previewimage"
-            className="object-cover w-full h-full rounded-lg"
-          />
         </div>
       </ModalPopup>
     </div>

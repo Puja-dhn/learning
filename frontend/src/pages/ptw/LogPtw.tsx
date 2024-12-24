@@ -88,22 +88,23 @@ const initialFormValues: ILogPTWForm = {
   status: "",
 };
 
-// const formSchema = Yup.object().shape({
-//   department: Yup.string().required("Department is required"),
-//   area: Yup.string().required("Area is required"),
-//   work_location: Yup.string().required("Work location is required"),
-//   datetime_from: Yup.string().required("Date time from is required"),
-//   datetime_to: Yup.string().required("Date time to is required"),
-//   nearest_firealarm: Yup.string().required(
-//     "Nearest Fire Alarm Point is required",
-//   ),
-//   job_description: Yup.string().required("Job Description is required"),
-//   moc_required: Yup.string().required("Select MOC is required or not"),
-//   equipment: Yup.string().required("Equipment is required"),
-//   supervisor_name: Yup.string().required("name of Supervisor is required"),
-//   contractor: Yup.string().required("Contractor is required"),
-//   esic_no: Yup.string().required("ESIC Reg No is required"),
-// });
+const formSchema = Yup.object().shape({
+  department: Yup.string().required("Department is required"),
+  area: Yup.string().required("Area is required"),
+  work_location: Yup.string().required("Work location is required"),
+  datetime_from: Yup.string().required("Date time from is required"),
+  datetime_to: Yup.string().required("Date time to is required"),
+  nearest_firealarm: Yup.string().required(
+    "Nearest Fire Alarm Point is required",
+  ),
+  job_description: Yup.string().required("Job Description is required"),
+  moc_required: Yup.string().required("Select MOC is required or not"),
+  equipment: Yup.string().required("Equipment is required"),
+  supervisor_name: Yup.string().required("name of Supervisor is required"),
+  contractor: Yup.string().required("Contractor is required"),
+  esic_no: Yup.string().required("ESIC Reg No is required"),
+  general_work_dtls: Yup.string().required("General work details is required"),
+});
 
 interface IAnxPerson {
   name: string;
@@ -176,7 +177,7 @@ function LogPtw() {
     watch: watchValues,
   } = useForm<ILogPTWForm>({
     defaultValues: initialFormValues,
-    // resolver: yupResolver(formSchema),
+    resolver: yupResolver(formSchema),
   });
   const { isSubmitting, submitCount, errors } = formState;
   // Handle adding a new row
@@ -358,11 +359,6 @@ function LogPtw() {
       ...initialFormValues,
     });
   };
-  useEffect(() => {
-    if (globalState && globalState.areaId >= 0) {
-      handleReset();
-    }
-  }, [globalState]);
 
   const [hazardCheckboxState, setHazardCheckboxState] = useState([]);
   const handleHazardsChecklistChange = (event: any, itemId: any) => {
@@ -701,7 +697,7 @@ function LogPtw() {
                 <TextField
                   type="text"
                   name="nearest_firealarm"
-                  label="Nearest Fire Alarm Point"
+                  label="Nearest Manual Call Points"
                   control={control}
                 />
               </div>
@@ -1368,7 +1364,8 @@ function LogPtw() {
             <div className="">
               <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                 <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                  List of persons attached to this permit (Annexure V) &nbsp;
+                  List of persons attached to this permit (Other than custodian,
+                  issuer and initiator) &nbsp;
                 </h3>
               </div>
 
