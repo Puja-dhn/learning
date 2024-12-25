@@ -5,7 +5,6 @@ import {
   FunnelIcon,
   ArrowPathIcon,
   ChevronRightIcon,
-  PencilSquareIcon,
   EyeIcon,
   ArrowDownTrayIcon,
 } from "@heroicons/react/24/solid";
@@ -14,11 +13,8 @@ import { useQueryClient } from "react-query";
 
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import {
-  ASSET_BASE_URL,
-  OBS_CATEGORY_LIST,
-  OBS_STATUS_LIST,
-} from "@/features/common/constants";
+import * as XLSX from "xlsx";
+import { ASSET_BASE_URL } from "@/features/common/constants";
 // import { IOptionList } from "@/features/ui/types";
 import { IconButton } from "@/features/ui/buttons";
 import { ModalPopup } from "@/features/ui/popup";
@@ -34,7 +30,7 @@ import useSisLogDetailQuery from "@/features/sis/hooks/useSisLogDetailQuery";
 import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
-import * as XLSX from "xlsx";
+import IAreasList from "@/features/sis/types/sis/IAreasList";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -76,8 +72,10 @@ function ViewSio() {
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const [departments, setDepartments] = useState<IOptionList[]>([]);
   const [categories, setCategories] = useState<IOptionList[]>([]);
-  const [areas, setAreas] = useState<IOptionList[]>([]);
-  const [users, setUsers] = useState<IOptionList[]>([]);
+  const [severity, setSeverity] = useState<IOptionList[]>([]);
+  const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
+
   const [modalImage, setModalImage] = useState<string>("");
 
   const {
@@ -102,8 +100,8 @@ function ViewSio() {
 
       setDepartments(historySIOMasterData[0].DEPARTMENT);
       setCategories(historySIOMasterData[0].CATEGORY);
+      setSeverity(historySIOMasterData[0].SEVERITY);
       setAreas(historySIOMasterData[0].AREA);
-      setUsers(historySIOMasterData[0].USERS);
     }
   }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
 
@@ -143,16 +141,11 @@ function ViewSio() {
     status: false,
   });
 
-  const {
-    handleSubmit: handleSubmitActionDetails,
-    reset: resetActionTaken,
-    control: controlAction,
-    formState: formStatePDC,
-  } = useForm<ISIOPDCAssignData>({
-    defaultValues: initialActionTakenValues,
-  });
+  const { reset: resetActionTaken, control: controlAction } =
+    useForm<ISIOPDCAssignData>({
+      defaultValues: initialActionTakenValues,
+    });
 
-  const { submitCount, errors } = formStatePDC;
   const handlePDCAssignDialogClose = () => {
     setShowPDCAssignDialog((oldState) => ({ ...oldState, status: false }));
   };
@@ -200,6 +193,7 @@ function ViewSio() {
     },
     { field: "disp_logno", headerName: "Log No", width: 70 },
     { field: "obs_datetime", headerName: "Observation Date", width: 250 },
+    { field: "obs_desc", headerName: "Observation Description", width: 250 },
     { field: "department", headerName: "Department", width: 240 },
     { field: "status", headerName: "Status", width: 120 },
     { field: "area", headerName: "Area", width: 250 },
@@ -211,7 +205,7 @@ function ViewSio() {
     { field: "closure_date", headerName: "Closure Date", width: 200 },
   ];
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
 
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
@@ -227,10 +221,6 @@ function ViewSio() {
     authState.ROLES.length > 0 &&
     authState.ROLES.includes(2);
 
-  const CURR_OBS_SEVERITY_LIST = [
-    { id: "Minor", name: "Minor" },
-    { id: "Serious", name: "Serious" },
-  ];
   const CURR_OBS_STATUS_LIST = [
     { id: "Open", name: "Open" },
     { id: "PDC Assigned", name: "PDC Assigned" },
@@ -252,6 +242,7 @@ function ViewSio() {
     handleSubmit: handleSubmitFilter,
     reset: resetFilter,
     control: controlFilter,
+    watch: watchValues,
     formState: formStateFilter,
   } = useForm<ILogSioFilterForm>({
     defaultValues: initialFilterValues,
@@ -259,12 +250,6 @@ function ViewSio() {
 
   const { submitCount: submitCountFilter, errors: errorsFilter } =
     formStateFilter;
-
-  const handleReset = () => {
-    resetFilter({
-      ...initialFilterValues,
-    });
-  };
 
   const handleFilterDialogOpen = () => {
     resetFilter({
@@ -330,6 +315,15 @@ function ViewSio() {
     });
   };
 
+  useEffect(() => {
+    if (+watchValues("department") > 0) {
+      const fArea = areas.filter(
+        (item) => +item.parent_id === +watchValues("department"),
+      );
+      setFilteredAreas(fArea);
+    }
+  }, [watchValues("department")]);
+
   const handleShowLogDetails = (logNo: number) => {
     const historyLogSioData = [
       ...teamData.historyLogSioData.filter((item) => item.id === logNo),
@@ -353,14 +347,6 @@ function ViewSio() {
     setClosureImagePreviews([]);
   };
 
-  const customNoRowsOverlay = () => {
-    return (
-      <div style={{ textAlign: "center", padding: "20px" }}>
-        No Data Available
-      </div>
-    );
-  };
-
   const formatDate = (date: any) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, "0");
@@ -381,6 +367,7 @@ function ViewSio() {
     const rows = teamData.historyLogSioData.map((item) => ({
       "Log No": item.disp_logno,
       "Observation Date": item.obs_datetime,
+      "Observation Description": item.obs_desc,
       Department: item.department,
       Status: item.status,
       Area: item.area,
@@ -527,12 +514,12 @@ function ViewSio() {
                       <span
                         className={`${
                           row.status === "Open"
-                            ? "text-red-500" // red color for "Open"
+                            ? "text-red-500"
                             : row.status === "Closed"
-                            ? "text-green-500" // green color for "Closed"
+                            ? "text-green-500"
                             : row.status === "PDC Assigned"
-                            ? "text-orange-500" // orange color for "PDC Assigned"
-                            : "text-gray-600" // default gray if no match
+                            ? "text-orange-500"
+                            : "text-gray-600"
                         } dark:text-gray-400`}
                       >
                         {row.status}
@@ -566,10 +553,6 @@ function ViewSio() {
         onSubmit={() => {
           handleSubmitFilter(handleFilterFormSubmit)();
         }}
-        onReset={() => {
-          handleReset();
-        }}
-        hasReset
         size="large"
         showError
         hasError={
@@ -602,7 +585,7 @@ function ViewSio() {
                 name="area"
                 label="Area"
                 control={controlFilter}
-                optionList={[{ id: "All", name: "All Area" }, ...areas]}
+                optionList={[{ id: "All", name: "All Area" }, ...filteredAreas]}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
@@ -621,10 +604,7 @@ function ViewSio() {
                 name="SEVERITY"
                 label="Severity"
                 control={controlFilter}
-                optionList={[
-                  { id: "All", name: "All Severity" },
-                  ...CURR_OBS_SEVERITY_LIST,
-                ]}
+                optionList={[{ id: "All", name: "All Severity" }, ...severity]}
               />
             </div>
 
@@ -990,7 +970,7 @@ function ViewSio() {
                       name="severity"
                       label="Severity"
                       control={controlAction}
-                      optionList={[...CURR_OBS_SEVERITY_LIST]}
+                      optionList={[...severity]}
                       disabled
                     />
                   </div>

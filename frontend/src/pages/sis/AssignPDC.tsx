@@ -13,13 +13,10 @@ import { useQueryClient } from "react-query";
 
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import {
-  ASSET_BASE_URL,
-  OBS_CATEGORY_LIST,
-  OBS_STATUS_LIST,
-} from "@/features/common/constants";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { ASSET_BASE_URL } from "@/features/common/constants";
 // import { IOptionList } from "@/features/ui/types";
-import { Button, IconButton } from "@/features/ui/buttons";
+import { IconButton } from "@/features/ui/buttons";
 import { ModalPopup } from "@/features/ui/popup";
 import { DropdownList, TextArea, TextField } from "@/features/ui/form";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
@@ -32,7 +29,7 @@ import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 import { submitPDCAssign } from "@/features/sis/services/sis.services";
-import { yupResolver } from "@hookform/resolvers/yup";
+import IAreasList from "@/features/sis/types/sis/IAreasList";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -43,7 +40,7 @@ const initialFilterValues: ILogSioFilterForm = {
   department: "All",
   category: "All",
   area: "All",
-  severity: "",
+  severity: "All",
   obs_date_from: "",
   obs_date_to: "",
   status: "All",
@@ -81,7 +78,9 @@ function AssignPDC() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [departments, setDepartments] = useState<IOptionList[]>([]);
   const [categories, setCategories] = useState<IOptionList[]>([]);
-  const [areas, setAreas] = useState<IOptionList[]>([]);
+  const [severity, setSeverity] = useState<IOptionList[]>([]);
+  const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const {
@@ -106,6 +105,7 @@ function AssignPDC() {
 
       setDepartments(historySIOMasterData[0].DEPARTMENT);
       setCategories(historySIOMasterData[0].CATEGORY);
+      setSeverity(historySIOMasterData[0].SEVERITY);
       setAreas(historySIOMasterData[0].AREA);
       setUsers(historySIOMasterData[0].USERS);
     }
@@ -145,16 +145,19 @@ function AssignPDC() {
     handleSubmit: handleSubmitPDCDetails,
     reset: resetPDCData,
     control: controlPDC,
-    formState: formStatePDC,
   } = useForm<ISIOPDCAssignData>({
     defaultValues: initialPDCAssignValues,
     resolver: yupResolver(assignPDCFormSchema),
   });
 
-  const { submitCount, errors } = formStatePDC;
   const handlePDCAssignDialogClose = () => {
     setShowPDCAssignDialog((oldState) => ({ ...oldState, status: false }));
   };
+  const CURR_OBS_STATUS_LIST = [
+    { id: "Open", name: "Open" },
+    { id: "PDC Assigned", name: "PDC Assigned" },
+    { id: "Closed", name: "Closed" },
+  ];
   const handleActionClick = (row: ILogSIOData) => {
     resetPDCData({
       id: row.id,
@@ -189,7 +192,6 @@ function AssignPDC() {
           ...oldState,
           status: false,
         }));
-        handleRefresh();
       })
 
       .catch((err) => {
@@ -217,7 +219,6 @@ function AssignPDC() {
           ...oldState,
           status: false,
         }));
-        handleRefresh();
       })
 
       .catch((err) => {
@@ -253,7 +254,7 @@ function AssignPDC() {
     { field: "status", headerName: "Status", width: 220 },
   ];
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
 
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
@@ -290,18 +291,13 @@ function AssignPDC() {
     reset: resetFilter,
     control: controlFilter,
     formState: formStateFilter,
+    watch: watchValues,
   } = useForm<ILogSioFilterForm>({
     defaultValues: initialFilterValues,
   });
 
   const { submitCount: submitCountFilter, errors: errorsFilter } =
     formStateFilter;
-
-  const handleReset = () => {
-    resetFilter({
-      ...initialFilterValues,
-    });
-  };
 
   const handleFilterDialogOpen = () => {
     resetFilter({
@@ -361,6 +357,15 @@ function AssignPDC() {
     });
   }, []);
 
+  useEffect(() => {
+    if (+watchValues("department") > 0) {
+      const fArea = areas.filter(
+        (item) => +item.parent_id === +watchValues("department"),
+      );
+      setFilteredAreas(fArea);
+    }
+  }, [watchValues("department")]);
+
   const handleRefresh = () => {
     queryClient.invalidateQueries({
       predicate: (query) => query.queryKey[0] === "sioOpenDataQuery",
@@ -370,7 +375,6 @@ function AssignPDC() {
   const {
     control: controlAssignForm,
     handleSubmit,
-    formState,
     reset: resetAssignPDC,
   } = useForm<ISIOPDCAssignData>({
     defaultValues: initialPDCAssignValues,
@@ -397,13 +401,6 @@ function AssignPDC() {
     }));
   };
 
-  const customNoRowsOverlay = () => {
-    return (
-      <div style={{ textAlign: "center", padding: "20px" }}>
-        No Data Available
-      </div>
-    );
-  };
   const formatDate = (date: any) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, "0");
@@ -572,17 +569,13 @@ function AssignPDC() {
       {/* Mobile Layout - Button view for log details (only visible on mobile) */}
 
       <ModalPopup
-        heading="Search Aect Data"
+        heading="Search Observation Data"
         onClose={handleFilterDialogClose}
         openStatus={showFilterDialog.status}
         hasSubmit
         onSubmit={() => {
           handleSubmitFilter(handleFilterFormSubmit)();
         }}
-        onReset={() => {
-          handleReset();
-        }}
-        hasReset
         size="large"
         showError
         hasError={
@@ -594,76 +587,38 @@ function AssignPDC() {
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <TextField
                 type="number"
-                name="ID"
-                label="Log No"
-                control={controlFilter}
-              />
-            </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-3/4">
-              <TextField
-                name="OBS_DESC"
-                label="Observation"
-                control={controlFilter}
-              />
-            </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <TextField
-                type="date"
-                name="REPORTED_DATE_FROM"
-                label="Reported Date From"
-                control={controlFilter}
-              />
-            </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <TextField
-                type="date"
-                name="REPORTED_DATE_TO"
-                label="Reported Date To"
-                control={controlFilter}
-              />
-            </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <TextField
-                name="LOCATION"
-                label="Exact Location"
+                name="id"
+                label="Obs No"
                 control={controlFilter}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
-                name="STATUS"
-                label="Status"
+                name="department"
+                label="Department"
                 control={controlFilter}
                 optionList={[
-                  { id: "All", name: "All Status" },
-                  ...OBS_STATUS_LIST,
+                  { id: "All", name: "All Departments" },
+                  ...departments,
                 ]}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <TextField
-                type="date"
-                name="PDC_DATE_FROM"
-                label="PDC Date From"
+              <DropdownList
+                name="area"
+                label="Area"
                 control={controlFilter}
-              />
-            </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <TextField
-                type="date"
-                name="PDC_DATE_TO"
-                label="PDC Date To"
-                control={controlFilter}
+                optionList={[{ id: "All", name: "All Area" }, ...filteredAreas]}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
-                name="CATEGORY"
+                name="category"
                 label="Category"
                 control={controlFilter}
                 optionList={[
                   { id: "All", name: "All Category" },
-                  ...OBS_CATEGORY_LIST,
+                  ...categories,
                 ]}
               />
             </div>
@@ -672,39 +627,38 @@ function AssignPDC() {
                 name="SEVERITY"
                 label="Severity"
                 control={controlFilter}
+                optionList={[{ id: "All", name: "All Severity" }, ...severity]}
+              />
+            </div>
+
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+              <TextField
+                type="date"
+                name="obs_date_from"
+                label="Obs Date From"
+                control={controlFilter}
+              />
+            </div>
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+              <TextField
+                type="date"
+                name="obs_date_to"
+                label="Obs Date To"
+                control={controlFilter}
+              />
+            </div>
+
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+              <DropdownList
+                name="status"
+                label="Status"
+                control={controlFilter}
                 optionList={[
-                  { id: "All", name: "All Severity" },
-                  ...CURR_OBS_SEVERITY_LIST,
+                  { id: "All", name: "All Status" },
+                  ...CURR_OBS_STATUS_LIST,
                 ]}
               />
             </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/2">
-              <TextField
-                type="date"
-                name="ACTION_CLOSED_DATE_FROM"
-                label="Closure Date From"
-                control={controlFilter}
-              />
-            </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/2">
-              <TextField
-                type="date"
-                name="ACTION_CLOSED_DATE_TO"
-                label="Closure Date To"
-                control={controlFilter}
-              />
-            </div>
-            {/* <div className="p-2 basis-full lg:basis-2/4">
-              <DropdownList
-                name="REPORTED_BY"
-                label="Reported By"
-                control={controlFilter}
-                optionList={reportedByList}
-                changeHandler={(value) => {
-                  setValueFilter("REPORTED_BY", +value);
-                }}
-              />
-            </div> */}
           </div>
         </form>
       </ModalPopup>
@@ -809,6 +763,7 @@ function AssignPDC() {
                 </div>
                 <div className="flex mt-4 space-x-4 overflow-x-auto">
                   {imagePreviews.map((preview: any, index: any) => (
+                    // eslint-disable-next-line react/no-array-index-key
                     <div key={index} className="relative">
                       <img
                         src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
@@ -1016,6 +971,7 @@ function AssignPDC() {
                         </span>
                         <div className="grid grid-cols-3 gap-2 mt-2">
                           {imagePreviews.map((preview: any, index: any) => (
+                            // eslint-disable-next-line react/no-array-index-key
                             <div key={index} className="relative">
                               <img
                                 src={`${ASSET_BASE_URL}sioimages/${

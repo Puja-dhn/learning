@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import dayjs from "dayjs";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { shallowEqual } from "react-redux";
@@ -16,6 +15,7 @@ import { addNewSIOData } from "@/features/sis/services/sis.services";
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 import { API_BASE_URL, ASSET_BASE_URL } from "@/features/common/constants";
+import IAreasList from "@/features/sis/types/sis/IAreasList";
 
 const initialFormValues: ILogSisForm = {
   OBS_DATE_TIME: "",
@@ -45,7 +45,6 @@ const formSchema = Yup.object().shape({
 function LogSis() {
   const alertToast = useAlertConfig();
   const loader = useLoaderConfig();
-  const authState = useAppSelector(({ auth }) => auth, shallowEqual);
   const globalState = useAppSelector(({ global }) => global, shallowEqual);
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -53,11 +52,11 @@ function LogSis() {
 
   const [departments, setDepartments] = useState<IOptionList[]>([]);
   const [categories, setCategories] = useState<IOptionList[]>([]);
-  const [areas, setAreas] = useState<IOptionList[]>([]);
+  const [severity, setSeverity] = useState<IOptionList[]>([]);
+  const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const [closureImagePreviews, setClosureImagePreviews] = useState<any>([]);
-
-  const [collapseFilter, setCollapseFilter] = useState(true);
 
   const {
     data: sioMasterData,
@@ -81,6 +80,7 @@ function LogSis() {
 
       setDepartments(historySIOMasterData[0].DEPARTMENT);
       setCategories(historySIOMasterData[0].CATEGORY);
+      setSeverity(historySIOMasterData[0].SEVERITY);
       setAreas(historySIOMasterData[0].AREA);
     }
   }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
@@ -91,10 +91,6 @@ function LogSis() {
     });
   }, []);
 
-  const CURR_OBS_SEVERITY_LIST = [
-    { id: "Minor", name: "Minor" },
-    { id: "Serious", name: "Serious" },
-  ];
   const CURR_OBS_STATUS = [
     { id: "Open", name: "Open" },
     { id: "Closed", name: "Closed" },
@@ -105,15 +101,13 @@ function LogSis() {
     reset,
     control,
     formState,
-    getValues,
-    setValue,
     watch: watchValues,
   } = useForm<ILogSisForm>({
     defaultValues: initialFormValues,
     resolver: yupResolver(formSchema),
   });
 
-  const { isSubmitting, submitCount, errors } = formState;
+  const { isSubmitting } = formState;
 
   const handleReset = () => {
     reset({
@@ -126,11 +120,14 @@ function LogSis() {
     }
   }, [globalState]);
 
-  const isHiddenHirarchy = collapseFilter;
-
-  const handleCollpaseToggle = () => {
-    setCollapseFilter(!collapseFilter);
-  };
+  useEffect(() => {
+    if (+watchValues("DEPARTMENT") > 0) {
+      const fArea = areas.filter(
+        (item) => +item.parent_id === +watchValues("DEPARTMENT"),
+      );
+      setFilteredAreas(fArea);
+    }
+  }, [watchValues("DEPARTMENT")]);
 
   const handleFormSubmit: SubmitHandler<ILogSisForm> = (values) => {
     if (imagePreviews.length === 0) {
@@ -205,7 +202,7 @@ function LogSis() {
       method: "POST",
       body: formData,
     })
-      .then(async (res) => {
+      .then(async () => {
         setImagePreviews(() => [...filenames]);
       })
       .catch(() => {
@@ -322,7 +319,10 @@ function LogSis() {
                   name="AREA"
                   label="Area"
                   control={control}
-                  optionList={[{ id: "", name: "Select Area" }, ...areas]}
+                  optionList={[
+                    { id: "", name: "Select Area" },
+                    ...filteredAreas,
+                  ]}
                 />
               </div>
             </div>
@@ -343,7 +343,7 @@ function LogSis() {
                   name="SEVERITY"
                   label="Severity"
                   control={control}
-                  optionList={[...CURR_OBS_SEVERITY_LIST]}
+                  optionList={[...severity]}
                 />
               </div>
               <div className="p-1">
@@ -407,6 +407,7 @@ function LogSis() {
             </div>
             <div className="flex mt-4 space-x-4 overflow-x-auto">
               {imagePreviews.map((preview: any, index: any) => (
+                // eslint-disable-next-line react/no-array-index-key
                 <div key={index} className="relative">
                   <img
                     src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
@@ -476,6 +477,7 @@ function LogSis() {
                   </div>
                   <div className="flex mt-4 space-x-4 overflow-x-auto">
                     {closureImagePreviews.map((preview: any, index: any) => (
+                      // eslint-disable-next-line react/no-array-index-key
                       <div key={index} className="relative">
                         <img
                           src={preview}

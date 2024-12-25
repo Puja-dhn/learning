@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
 import { shallowEqual } from "react-redux";
@@ -16,16 +16,11 @@ import { useQueryClient } from "react-query";
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import * as XLSX from "xlsx";
-import { mergeStateWithFilterModel } from "@mui/x-data-grid/hooks/features/filter/gridFilterUtils";
-import { ASSET_BASE_URL } from "@/features/common/constants";
-// import { IOptionList } from "@/features/ui/types";
 import { IconButton } from "@/features/ui/buttons";
 import { ModalPopup } from "@/features/ui/popup";
 import { DropdownList, TextArea, TextField } from "@/features/ui/form";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
-
-import ModalPopupMobile from "@/features/ui/popup/ModalPopupMobile";
 
 import { IOptionList } from "@/features/ui/types";
 import usePtwLogDetailQuery from "@/features/ptw/hooks/usePtwLogDetailQuery";
@@ -34,6 +29,8 @@ import IContractorList from "@/features/ptw/types/ptw/IContractorList";
 import IConfigsList from "@/features/ptw/types/ptw/IConfigsList";
 import ILogPtwFilterForm from "@/features/ptw/types/ptw/ILogPtwFilterForm";
 import ILogPtwData from "@/features/ptw/types/ptw/ILogPtwData";
+import IAreasList from "@/features/sis/types/sis/IAreasList";
+import { display } from "@mui/system";
 
 interface ILogPtwTeamData {
   historyLogPtwData: ILogPtwData[];
@@ -58,25 +55,27 @@ const initialFilterValues: ILogPtwFilterForm = {
 function ViewPtw() {
   const alertToast = useAlertConfig();
   const loader = useLoaderConfig();
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const authState = useAppSelector(({ auth }) => auth, shallowEqual);
   const [isDesktop, setIsDesktop] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState<any>([]);
   const [departments, setDepartments] = useState<IOptionList[]>([]);
-  const [areas, setAreas] = useState<IOptionList[]>([]);
-  const [modalImage, setModalImage] = useState<string>("");
+  const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
+
   const [isHazardSectionOpen, setIsHazardSectionOpen] = useState(false);
   const [hazardsChecklist, setHazardsChecklist] = useState<IOptionList[]>([]);
   const [configs, setConfigs] = useState<IConfigsList[]>([]);
 
-  const [masterContractors, setMasterContractors] = useState<IContractorList[]>(
-    [],
-  );
   const [contractors, setContractors] = useState<IOptionList[]>([]);
   const [departmentHeadName, setDepartmentHeadName] = useState<string>("");
   const [isRiskSectionOpen, setIsRiskSectionOpen] = useState(false);
   const [riskChecklist, setRiskChecklist] = useState<IOptionList[]>([]);
   const [isPPESectionOpen, setIsPPESectionOpen] = useState(false);
+  const [isEquipmentSectionOpen, setIsEquipmentSectionOpen] = useState(false);
   const [ppeChecklist, setPPEChecklist] = useState<IOptionList[]>([]);
+  const [equipmentChecklist, setEquipmentChecklist] = useState<IOptionList[]>(
+    [],
+  );
   const [assGenChecklist, setAssGenChecklist] = useState<IOptionList[]>([]);
   const [isAssWHSectionOpen, setIsAssWHSectionOpen] = useState(false);
   const [assWHChecklist, setAssWHChecklist] = useState<IOptionList[]>([]);
@@ -153,6 +152,14 @@ function ViewPtw() {
           name: check.checklist,
         }));
         setPPEChecklist(filterPPE);
+
+        const filterEquipment = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Tools and Equipment",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setEquipmentChecklist(filterEquipment);
 
         const filterAssGen = historyPTWMasterData[0].CONFIG.filter(
           (item: any) => item.type === "General Work",
@@ -248,6 +255,7 @@ function ViewPtw() {
   const [hazardsChecklistIds, setHazardsChecklistIds] = useState<any[]>([]);
   const [riskChecklistIds, setRiskChecklistIds] = useState<any[]>([]);
   const [ppeChecklistIds, setPPEChecklistIds] = useState<any[]>([]);
+  const [equipmentChecklistIds, setEquipmentChecklistIds] = useState<any[]>([]);
   const [assGenChecklistIds, setAssGenChecklistIds] = useState<any[]>([]);
   const [assWHChecklistIds, setAssWHChecklistIds] = useState<any[]>([]);
   const [assConfinedChecklistIds, setAssConfinedChecklistIds] = useState<any[]>(
@@ -273,38 +281,234 @@ function ViewPtw() {
   const handleViewPtwDialogClose = () => {
     setShowViewPtwDialog((oldState) => ({ ...oldState, status: false }));
   };
-  const handleDownloadClick = (row: ILogPtwData) => {
-    const contentId = `pdfcontent`;
-    const contentElement = document.getElementById(contentId);
-
-    if (contentElement) {
-      html2canvas(contentElement).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const pdf = new jsPDF("p", "mm", "a4");
-
-        const pageWidth = pdf.internal.pageSize.getWidth();
-        const pageHeight = pdf.internal.pageSize.getHeight();
-
-        const imgWidth = pageWidth; // Image width fits the page width
-        const imgHeight = (canvas.height * imgWidth) / canvas.width; // Scale to fit content
-
-        let position = 0;
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-
-        // If the content exceeds one page, add new pages
-        while (imgHeight > pageHeight) {
-          position -= pageHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        }
-
-        // Save the PDF with a custom file name
-        pdf.save(`content-${row.id}.pdf`);
-      });
-    } else {
-      console.error("Content element not found!");
+  const handleDownloadClick = async () => {
+    if (!containerRef.current) {
+      console.error("Container ref is null");
+      return;
     }
+
+    try {
+      const scale = 2; // Increased scale for better quality
+      const container = containerRef.current;
+
+      // Get the bounding rectangle of the container
+      const { top, left, width, height } = container.getBoundingClientRect();
+
+      // Calculate the offset to exclude header
+      const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+      const footerHeight = document.querySelector("footer")?.offsetHeight || 0;
+
+      const canvas = await html2canvas(document.documentElement, {
+        scale: scale,
+        x: left,
+        y: top + headerHeight,
+        width: width,
+        height: height - headerHeight - footerHeight,
+        useCORS: true,
+        allowTaint: true,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF({
+        orientation: width > height ? "l" : "p",
+        unit: "px",
+        format: [width, height - headerHeight - footerHeight],
+      });
+
+      pdf.addImage(
+        imgData,
+        "PNG",
+        0,
+        0,
+        width,
+        height - headerHeight - footerHeight,
+      );
+      pdf.save("foundry-report.pdf");
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+    } finally {
+    }
+    // const content = document.getElementById("content");
+
+    // if (!content) {
+    //   console.error("Content container not found.");
+    //   return;
+    // }
+
+    // try {
+    //   // Temporarily show the content for capturing (if it's hidden)
+    //   content.style.display = "block";
+
+    //   // Capture content as canvas using html2canvas with a higher scale for better quality
+    //   const canvas = await html2canvas(content, {
+    //     scale: 3, // High resolution for sharp images
+    //     useCORS: true, // Handle CORS for external images
+    //     scrollX: 0, // No horizontal scroll offset
+    //     scrollY: -window.scrollY, // Adjust for vertical scroll offset
+    //     backgroundColor: null, // Transparent background (if required)
+    //   });
+
+    //   // Create a new jsPDF instance with A4 page dimensions
+    //   const pdf = new jsPDF("p", "mm", "a4");
+
+    //   // A4 dimensions in mm
+    //   const pdfWidth = 210; // A4 width in mm
+    //   const pdfHeight = 297; // A4 height in mm (standard)
+
+    //   // Get the canvas dimensions
+    //   const canvasWidth = canvas.width;
+    //   const canvasHeight = 6000;
+
+    //   // Scale the canvas to fit A4 page
+    //   const scaleX = pdfWidth / canvasWidth;
+    //   const scaleY = pdfHeight / canvasHeight;
+
+    //   // Choose the best scaling factor (maintains aspect ratio)
+    //   const scale = Math.min(scaleX, scaleY);
+
+    //   // Calculate the image width and height
+    //   const imgWidth = canvasWidth * scale;
+    //   const imgHeight = canvasHeight * scale;
+
+    //   // Add the first page with the image, ensuring it covers the entire page
+    //   pdf.addImage(
+    //     canvas.toDataURL("image/png"),
+    //     "PNG",
+    //     0,
+    //     0,
+    //     imgWidth,
+    //     imgHeight,
+    //   );
+
+    //   // Now handle the overflow by adding additional pages if needed
+    //   let currentY = imgHeight; // Track the current Y position in the canvas
+    //   const pageHeight = pdfHeight; // A4 page height (standard A4 size)
+
+    //   // Add content slices to new pages if the content height exceeds the page height
+    //   while (currentY < canvasHeight) {
+    //     // Calculate the height of the next slice
+    //     const sliceHeight = Math.min(pageHeight, canvasHeight - currentY);
+
+    //     // Create a temporary canvas to hold the slice
+    //     const pageCanvas = document.createElement("canvas");
+    //     pageCanvas.width = canvasWidth;
+    //     pageCanvas.height = sliceHeight;
+
+    //     const pageCtx = pageCanvas.getContext("2d");
+
+    //     if (pageCtx) {
+    //       // Draw the slice from the original canvas
+    //       pageCtx.drawImage(
+    //         canvas,
+    //         0, // X offset for the image on the original canvas
+    //         currentY, // Y offset for the image on the original canvas
+    //         canvasWidth, // Width of the canvas section
+    //         sliceHeight, // Height of the slice
+    //         0, // X offset on the pageCanvas
+    //         0, // Y offset on the pageCanvas
+    //         canvasWidth, // Width of the slice on the pageCanvas
+    //         sliceHeight, // Height of the slice on the pageCanvas
+    //       );
+
+    //       // Convert the slice to an image
+    //       const imgData = pageCanvas.toDataURL("image/png");
+
+    //       // Add the slice to the next page of the PDF
+    //       pdf.addImage(
+    //         imgData,
+    //         "PNG",
+    //         0,
+    //         0,
+    //         pdfWidth,
+    //         (pdfWidth / canvasWidth) * sliceHeight,
+    //       );
+
+    //       // Update the current Y position for the next slice
+    //       currentY += sliceHeight;
+
+    //       // Add a new page if the content still exceeds the current page
+    //       if (currentY < canvasHeight) {
+    //         pdf.addPage();
+    //       }
+    //     } else {
+    //       console.error("Error: Unable to get 2D context for pageCanvas.");
+    //       break;
+    //     }
+    //   }
+
+    //   // Save the generated PDF
+    //   pdf.save("content-design.pdf");
+
+    //   // After generating the PDF, hide the content again
+    //   content.style.display = "none";
+    // } catch (error) {
+    //   console.error("Error generating PDF:", error);
+    // }
+
+    // if (!containerRef.current) {
+    //   console.error("Container ref is null");
+    //   return;
+    // }
+
+    // loader.show();
+
+    // try {
+    //   const scale = 2;
+    //   const container = containerRef.current;
+
+    //   const { top, left, width, height } = container.getBoundingClientRect();
+    //   const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+    //   const footerHeight = document.querySelector("footer")?.offsetHeight || 0;
+
+    //   // Adjust the capture area based on header and footer heights
+    //   const captureHeight = height + headerHeight + footerHeight;
+
+    //   // Create the canvas
+    //   const canvas = await html2canvas(document.documentElement, {
+    //     scale,
+    //     x: left,
+    //     y: top,
+    //     width,
+    //     height: captureHeight,
+    //     useCORS: true,
+    //     allowTaint: true,
+    //   });
+
+    //   const imgData = canvas.toDataURL("image/png");
+
+    //   // Create the PDF document
+    //   const pdf = new jsPDF({
+    //     orientation: "p",
+    //     unit: "px",
+    //     format: [width, captureHeight],
+    //   });
+
+    //   // If the content height exceeds the page height, split it into multiple pages
+    //   let pageHeight = pdf.internal.pageSize.height;
+    //   let currentHeight = 0;
+
+    //   // Loop to add images for multi-page PDFs
+    //   while (currentHeight < captureHeight) {
+    //     const remainingHeight = captureHeight - currentHeight;
+    //     const imageHeight = Math.min(remainingHeight, pageHeight);
+
+    //     pdf.addImage(imgData, "PNG", 0, -currentHeight, width, imageHeight);
+    //     currentHeight += imageHeight;
+
+    //     if (currentHeight < captureHeight) {
+    //       pdf.addPage(); // Add a new page if there is more content
+    //     }
+    //   }
+
+    //   // Save the PDF
+    //   pdf.save("permit.pdf");
+    // } catch (error) {
+    //   console.error("Error generating PDF:", error);
+    // } finally {
+    //   loader.hide();
+    // }
   };
+
   const handleViewClick = (row: ILogPtwData) => {
     if (row.associated_permit !== "") {
       setAssociatedIds(JSON.parse(row.associated_permit));
@@ -320,6 +524,10 @@ function ViewPtw() {
     if (row.ppe_required !== "") {
       setIsPPESectionOpen(true);
       setPPEChecklistIds(JSON.parse(row.ppe_required));
+    }
+    if (row.equipment_checklist !== "") {
+      setIsEquipmentSectionOpen(true);
+      setEquipmentChecklistIds(JSON.parse(row.equipment_checklist));
     }
     if (row.annexture_v !== "") {
       setAnxRows(JSON.parse(row.annexture_v));
@@ -395,6 +603,7 @@ function ViewPtw() {
       lifting_work_checklist: row.lifting_work_checklist,
       esms_checklist: row.esms_checklist,
       hot_work_checklist: row.hot_work_checklist,
+      equipment_checklist: row.equipment_checklist,
       equipment: row.equipment,
     });
 
@@ -415,12 +624,12 @@ function ViewPtw() {
           >
             <EyeIcon className="w-4 h-4" />
           </IconButton>
-          <IconButton
+          {/* <IconButton
             className="ml-2"
             onClick={() => handleDownloadClick(params.row)}
           >
             <ArrowDownTrayIcon className="w-4 h-4" />
-          </IconButton>
+          </IconButton> */}
         </>
       ),
     },
@@ -435,7 +644,7 @@ function ViewPtw() {
     { field: "log_by", headerName: "Log By", width: 200 },
   ];
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
 
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
@@ -472,6 +681,7 @@ function ViewPtw() {
     reset: resetFilter,
     control: controlFilter,
     formState: formStateFilter,
+    watch: watchFilterValues,
   } = useForm<ILogPtwFilterForm>({
     defaultValues: initialFilterValues,
   });
@@ -517,13 +727,7 @@ function ViewPtw() {
       ptwLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogPtwData = !isAdmin
-        ? [
-            ...ptwLogHistoryData.historyLogPtwData.filter(
-              (item: any) => +item.created_by === authState.ID,
-            ),
-          ]
-        : [...ptwLogHistoryData.historyLogptwData];
+      const historyLogPtwData = [...ptwLogHistoryData.historyLogPtwData];
 
       setTeamData({
         historyLogPtwData,
@@ -542,6 +746,14 @@ function ViewPtw() {
       predicate: (query) => query.queryKey[0] === "sioDataQuery",
     });
   };
+  useEffect(() => {
+    if (+watchFilterValues("department") > 0) {
+      const fArea = areas.filter(
+        (item) => +item.parent_id === +watchFilterValues("department"),
+      );
+      setFilteredAreas(fArea);
+    }
+  }, [watchFilterValues("department")]);
 
   const formatDate = (date: any) => {
     const d = new Date(date);
@@ -583,6 +795,11 @@ function ViewPtw() {
   };
   const handleCheckedPPE = (type: any) => {
     if (ppeChecklistIds.includes(`${type}`)) {
+      return true;
+    }
+  };
+  const handleCheckedEquipment = (type: any) => {
+    if (equipmentChecklistIds.includes(`${type}`)) {
       return true;
     }
   };
@@ -766,7 +983,7 @@ function ViewPtw() {
       >
         <form className="bg-[#ecf3f9] dark:bg-gray-600 grid gap-2.5 p-2.5">
           <div className="flex flex-wrap justify-evenly items-center p-2.5 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500">
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
               <TextField
                 type="number"
                 name="id"
@@ -774,7 +991,7 @@ function ViewPtw() {
                 control={controlFilter}
               />
             </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
               <DropdownList
                 name="department"
                 label="Department"
@@ -785,16 +1002,16 @@ function ViewPtw() {
                 ]}
               />
             </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
               <DropdownList
                 name="area"
                 label="Area"
                 control={controlFilter}
-                optionList={[{ id: "All", name: "All Area" }, ...areas]}
+                optionList={[{ id: "All", name: "All Area" }, ...filteredAreas]}
               />
             </div>
 
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
               <TextField
                 type="date"
                 name="date_from"
@@ -802,7 +1019,7 @@ function ViewPtw() {
                 control={controlFilter}
               />
             </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
               <TextField
                 type="date"
                 name="date_to"
@@ -811,7 +1028,7 @@ function ViewPtw() {
               />
             </div>
 
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/3">
               <DropdownList
                 name="status"
                 label="Status"
@@ -833,16 +1050,21 @@ function ViewPtw() {
         hasSubmit={false}
         size="fullscreen"
         showError
+        onReset={handleDownloadClick}
+        hasReset
         hasError={
           !(Object.keys(errorsFilter).length === 0) && submitCountFilter > 0
         }
       >
-        <div
-          className="relative flex flex-col w-full h-full p-2 overflow-auto "
-          id="pdfcontent"
-        >
-          <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
-            <form className="w-[100%]   flex gap-2 flex-col  justify-evenly">
+        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+          <div
+            className="p-2 bg-white shadow-lg dark:bg-gray-800"
+            ref={containerRef}
+          >
+            <form
+              className="w-[100%]   flex gap-2 flex-col  justify-evenly"
+              id="content"
+            >
               <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
                 <div className="pb-2 border-b-2 border-gray-200 dark:border-gray-500">
                   <h2 className="font-semibold text-gray-700 text-md dark:text-gray-300">
@@ -964,16 +1186,7 @@ function ViewPtw() {
                     </div>
                   </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-1">
-                  <div className="p-1">
-                    <TextArea
-                      name="equipment"
-                      label="	Equipment(s) to be worked on "
-                      control={controlView}
-                      disabled
-                    />
-                  </div>
-                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3">
                   <div className="p-1">
                     <TextField
@@ -1243,6 +1456,83 @@ function ViewPtw() {
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+              <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                <div className="">
+                  <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                    <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                      Tools and Equipment required for the job
+                      identified,available and inspected OK &nbsp;
+                    </h3>
+                    <input
+                      type="radio"
+                      name="equipment_checklist"
+                      value="Yes"
+                      checked={watchValues("equipment_checklist") !== ""}
+                    />
+                    &nbsp;&nbsp;<span className="text-black">Yes</span>
+                    &nbsp;&nbsp;
+                    <input
+                      type="radio"
+                      name="equipment_checklist"
+                      value="No"
+                      checked={watchValues("equipment_checklist") === ""}
+                    />
+                    &nbsp;&nbsp;<span className="text-black">No</span>
+                  </div>
+
+                  {/* Conditionally render collapsible section */}
+                  {isEquipmentSectionOpen && (
+                    <div className="p-2 mt-1 ">
+                      {equipmentChecklist && equipmentChecklist.length > 0 && (
+                        <div>
+                          {equipmentChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]); // Create a new row every 3 items
+                              rows[rows.length - 1].push(item); // Add item to the last row
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`equipment_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckedEquipment(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-1">
+                    <div className="p-1">
+                      <TextArea
+                        name="equipment"
+                        label="	Equipment(s) to be worked on "
+                        control={controlView}
+                        disabled
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
@@ -1542,43 +1832,42 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assConfinedChecklist &&
-                        assConfinedChecklist.length > 0 && (
-                          <div>
-                            {assConfinedChecklist
-                              .reduce((rows: any, item: any, index: any) => {
-                                if (index % 4 === 0) rows.push([]);
-                                rows[rows.length - 1].push(item);
-                                return rows;
-                              }, [])
-                              .map((row: any, rowIndex: any) => (
-                                <div
-                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                  key={rowIndex}
-                                >
-                                  {row.map((item2: any, index: any) => (
-                                    <div
-                                      className="p-1 text-gray-700"
-                                      key={index}
-                                    >
-                                      <label>
-                                        <input
-                                          type="checkbox"
-                                          name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                          value="Yes"
-                                          checked={handleCheckedAssConfinedChecklist(
-                                            item2.id,
-                                          )}
-                                        />
-                                        &nbsp;
-                                        {item2.name}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                      {assConfinedChecklist && assConfinedChecklist.length > 0 && (
+                        <div>
+                          {assConfinedChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]);
+                              rows[rows.length - 1].push(item);
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckedAssConfinedChecklist(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                     <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                       <TextField
@@ -1626,43 +1915,42 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assLiftingChecklist &&
-                        assLiftingChecklist.length > 0 && (
-                          <div>
-                            {assLiftingChecklist
-                              .reduce((rows: any, item: any, index: any) => {
-                                if (index % 4 === 0) rows.push([]);
-                                rows[rows.length - 1].push(item);
-                                return rows;
-                              }, [])
-                              .map((row: any, rowIndex: any) => (
-                                <div
-                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                  key={rowIndex}
-                                >
-                                  {row.map((item2: any, index: any) => (
-                                    <div
-                                      className="p-1 text-gray-700"
-                                      key={index}
-                                    >
-                                      <label>
-                                        <input
-                                          type="checkbox"
-                                          name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                          value="Yes"
-                                          checked={handleCheckeAssLiftingChecklist(
-                                            item2.id,
-                                          )}
-                                        />
-                                        &nbsp;
-                                        {item2.name}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                      {assLiftingChecklist && assLiftingChecklist.length > 0 && (
+                        <div>
+                          {assLiftingChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]);
+                              rows[rows.length - 1].push(item);
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckeAssLiftingChecklist(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

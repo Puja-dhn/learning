@@ -32,12 +32,14 @@ exports.getPTWMasterData = async (req, res) => {
     const departmentQuery = `
       SELECT DISTINCT
           t1.id,
-          t1.department_name name,
-          t1.head_name
+          t1.name,
+          t2.name head_name
       FROM
-          t_inshe_departments t1
+          t_inshe_org_structures t1
+          left join t_inshe_users t2 on t1.head_user_id = t2.id
       WHERE
-              t1.status = 'Active'
+              t1.is_deleted = 0
+        and t1.category = "DEPT"
        
     `;
 
@@ -46,11 +48,13 @@ exports.getPTWMasterData = async (req, res) => {
     const areasQuery = `
     SELECT DISTINCT
         t1.id,
+        t1.parent_id,
         t1.name
     FROM
-        t_inshe_areas t1
+        t_inshe_org_structures t1
     WHERE
-      t1.status = 'Active'
+      t1.is_deleted = 0
+      and t1.category = "AREA"
      
   `;
 
@@ -132,7 +136,7 @@ exports.getPtwData = async (req, res) => {
     SELECT 
       t1.id,
       t1.department department_id,
-      t2.department_name department,
+      t2.name department,
       t1.area area_id,
       t3.name area,
       t1.work_location,
@@ -176,6 +180,7 @@ exports.getPtwData = async (req, res) => {
       t1.lifting_work_checklist,
       t1.esms_checklist,
       t1.hot_work_checklist,
+      t1.equipment_checklist,
       t1.created_at,
       t1.created_by,
       t1.updated_at,
@@ -185,8 +190,8 @@ exports.getPtwData = async (req, res) => {
       t1.equipment
     FROM
       t_inshe_log_ptw t1
-      join t_inshe_departments t2 on t1.department = t2.id
-      join t_inshe_areas t3 on t1.area = t3.id
+      join t_inshe_org_structures t2 on t1.department = t2.id
+      join t_inshe_org_structures t3 on t1.area = t3.id
       left join t_inshe_users t5 on t1.pending_on = t5.id
       join t_inshe_users t7 on t1.created_by = t7.id
     WHERE
@@ -197,6 +202,7 @@ exports.getPtwData = async (req, res) => {
       ${strStatus}
       ${strFromDate}
       ${strToDate}
+      order by t1.id desc
   `;
 
   const resultPtw = await simpleQuery(sioQuery, []);
@@ -213,7 +219,7 @@ exports.getOpenPtwData = async (req, res) => {
       SELECT 
         t1.id,
         t1.department department_id,
-        t2.department_name department,
+        t2.name department,
         t1.area area_id,
         t3.name area,
         t1.work_location,
@@ -257,6 +263,7 @@ exports.getOpenPtwData = async (req, res) => {
         t1.lifting_work_checklist,
         t1.esms_checklist,
         t1.hot_work_checklist,
+        t1.equipment_checklist,
         t1.created_at,
         t1.created_by,
         t1.updated_at,
@@ -265,13 +272,14 @@ exports.getOpenPtwData = async (req, res) => {
         LPAD(t1.id, 6, '0') AS disp_logno
       FROM
         t_inshe_log_ptw t1
-        join t_inshe_departments t2 on t1.department = t2.id
-        join t_inshe_areas t3 on t1.area = t3.id
+        join t_inshe_org_structures t2 on t1.department = t2.id
+        join t_inshe_org_structures t3 on t1.area = t3.id
         left join t_inshe_users t5 on t1.pending_on = t5.id
         join t_inshe_users t7 on t1.created_by = t7.id
       WHERE
         1=1
        and t1.pending_on = ? 
+       order by t1.id desc
     `;
 
   const resultPtw = await simpleQuery(sioQuery, [logged_user_id]);
@@ -351,6 +359,7 @@ exports.addNewPTWData = async (req, res) => {
     lifting_work_checklist,
     esms_checklist,
     hot_work_checklist,
+    equipment_checklist,
     pending_on,
     status,
   } = req.body;
@@ -362,19 +371,19 @@ exports.addNewPTWData = async (req, res) => {
     const departmentQuery = `
       SELECT DISTINCT
         t1.id,
-        t1.department_name name,
-        t1.head_id
+        t1.name,
+        t1.head_user_id as head_id
       FROM
-        t_inshe_departments t1
+        t_inshe_org_structures t1
       WHERE
-        t1.status = 'Active' AND t1.id = ?
+        t1.is_deleted = 0 AND t1.id = ?
     `;
     const resultDepartments = await simpleQuery(departmentQuery, [DEPARTMENT]);
     if (!resultDepartments.length) {
-      return res.status(404).json({ message: "Department not found." });
+      return res.status(400).json({ message: "Department not found." });
     }
 
-    const departmentHead = resultDepartments[0].id;
+    const departmentHead = resultDepartments[0].head_id;
     const query = `
       INSERT INTO t_inshe_log_ptw (
         department, area, work_location, datetime_from, datetime_to, 
@@ -386,9 +395,9 @@ exports.addNewPTWData = async (req, res) => {
         annexture_v, work_height_checklist, work_height_supervision, confined_space_checklist, 
         confined_space_supervision, confined_space_atmospheric, confined_space_oxygen_level, 
         confined_space_lel, confined_space_toxic, confined_space_detector, 
-        lifting_work_checklist, esms_checklist, hot_work_checklist, pending_on, status,
+        lifting_work_checklist, esms_checklist, hot_work_checklist, equipment_checklist, pending_on, status,
         created_at,created_by,updated_at,updated_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
@@ -434,6 +443,7 @@ exports.addNewPTWData = async (req, res) => {
       lifting_work_checklist,
       esms_checklist,
       hot_work_checklist,
+      equipment_checklist,
       departmentHead,
       "Open",
       currentTime,

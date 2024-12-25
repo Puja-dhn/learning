@@ -45,6 +45,7 @@ interface ILogPTWData {
   lifting_work_checklist: string;
   esms_checklist: string;
   hot_work_checklist: string;
+  equipment_checklist: string;
   created_at: string;
   created_by: string;
   updated_at: string;

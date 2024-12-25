@@ -25,7 +25,6 @@ function HomeSidebar() {
       ? " grid-rows-[auto_1fr_auto] "
       : "grid-rows-[auto_1fr]";
   useEffect(() => {
-    console.log(accessState);
     if (APP_MENUS) {
       const currMasterMenuList = APP_MENUS.filter(
         (item) => item.appId === accessState.appId,

@@ -44,17 +44,15 @@ function Dashboard() {
 
     if (!isAppAccessDataLoading && appAccessData) {
       const currAppData = APP_MENUS.filter((item) => item.appId === 1)[0];
-      const currDashboardMenu = currAppData.menuList[1];
+      const currDashboardMenu = currAppData.menuList[0];
       setAppAccess(appAccessData);
       setSelMenu(currDashboardMenu);
     }
   }, [appAccessData, isAppAccessDataLoading, isAppAccessDataError]);
   return (
-    <>
-      <div className="items-start justify-start w-full h-full p-6 overflow-auto md:flex">
-        <AppList screenType="Dashboard" />
-      </div>
-    </>
+    <div className="items-start justify-start w-full h-full p-6 overflow-auto md:flex">
+      <AppList screenType="Dashboard" />
+    </div>
   );
 }
 

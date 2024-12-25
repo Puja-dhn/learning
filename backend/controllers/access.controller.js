@@ -87,7 +87,7 @@ exports.appaccess = async (req, res) => {
     res.status(200).json({
       menus: resultMenus,
       apps: resultApps,
-      appId: 2, // Modify as needed if you want dynamic appId
+      appId: 1, // Modify as needed if you want dynamic appId
     });
   } catch (error) {
     console.error("Error fetching data:", error);

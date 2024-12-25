@@ -13,31 +13,23 @@ import { useQueryClient } from "react-query";
 
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import {
-  API_BASE_URL,
-  ASSET_BASE_URL,
-  OBS_CATEGORY_LIST,
-  OBS_STATUS_LIST,
-} from "@/features/common/constants";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { API_BASE_URL, ASSET_BASE_URL } from "@/features/common/constants";
 // import { IOptionList } from "@/features/ui/types";
-import { Button, IconButton } from "@/features/ui/buttons";
+import { IconButton } from "@/features/ui/buttons";
 import { ModalPopup } from "@/features/ui/popup";
 import { DropdownList, TextArea, TextField } from "@/features/ui/form";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
 import ModalPopupMobile from "@/features/ui/popup/ModalPopupMobile";
 import ILogSioData from "@/features/sis/types/sis/ILogSioData";
-import { useSisOpenLogQuery } from "@/features/sis/hooks";
 import { ILogSIOData, ILogSioFilterForm } from "@/features/sis/types";
 import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
-import {
-  submitActionTaken,
-  submitPDCAssign,
-} from "@/features/sis/services/sis.services";
-import { yupResolver } from "@hookform/resolvers/yup";
+import { submitActionTaken } from "@/features/sis/services/sis.services";
 import useSisAssignedLogQuery from "@/features/sis/hooks/useSisAssignedLogQuery";
+import IAreasList from "@/features/sis/types/sis/IAreasList";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -84,8 +76,10 @@ function ActionTaken() {
   const [isDesktop, setIsDesktop] = useState(false);
   const [departments, setDepartments] = useState<IOptionList[]>([]);
   const [categories, setCategories] = useState<IOptionList[]>([]);
-  const [areas, setAreas] = useState<IOptionList[]>([]);
-  const [users, setUsers] = useState<IOptionList[]>([]);
+  const [severity, setSeverity] = useState<IOptionList[]>([]);
+  const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
+
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const closureFileInputRef = useRef<HTMLInputElement | null>(null);
   const [closureImagePreviews, setClosureImagePreviews] = useState<any>([]);
@@ -112,8 +106,8 @@ function ActionTaken() {
 
       setDepartments(historySIOMasterData[0].DEPARTMENT);
       setCategories(historySIOMasterData[0].CATEGORY);
+      setSeverity(historySIOMasterData[0].SEVERITY);
       setAreas(historySIOMasterData[0].AREA);
-      setUsers(historySIOMasterData[0].USERS);
     }
   }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
   useEffect(() => {
@@ -154,13 +148,11 @@ function ActionTaken() {
     handleSubmit: handleSubmitActionDetails,
     reset: resetActionTaken,
     control: controlAction,
-    formState: formStatePDC,
   } = useForm<ISIOPDCAssignData>({
     defaultValues: initialActionTakenValues,
     resolver: yupResolver(actionFormSchema),
   });
 
-  const { submitCount, errors } = formStatePDC;
   const handlePDCAssignDialogClose = () => {
     setShowPDCAssignDialog((oldState) => ({ ...oldState, status: false }));
   };
@@ -203,7 +195,6 @@ function ActionTaken() {
             ...oldState,
             status: false,
           }));
-          handleRefresh();
         })
 
         .catch((err) => {
@@ -231,7 +222,6 @@ function ActionTaken() {
             ...oldState,
             status: false,
           }));
-          handleRefresh();
         })
 
         .catch((err) => {
@@ -271,7 +261,7 @@ function ActionTaken() {
     { field: "closure_date", headerName: "Closure Date", width: 200 },
   ];
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
 
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
@@ -282,15 +272,6 @@ function ActionTaken() {
     ...initialFilterValues,
   });
 
-  const isAdmin =
-    authState.ROLES &&
-    authState.ROLES.length > 0 &&
-    authState.ROLES.includes(2);
-
-  const CURR_OBS_SEVERITY_LIST = [
-    { id: "Minor", name: "Minor" },
-    { id: "Serious", name: "Serious" },
-  ];
   const CURR_OBS_STATUS_LIST = [
     { id: "Open", name: "Open" },
     { id: "PDC Assigned", name: "PDC Assigned" },
@@ -313,18 +294,13 @@ function ActionTaken() {
     reset: resetFilter,
     control: controlFilter,
     formState: formStateFilter,
+    watch: watchValues,
   } = useForm<ILogSioFilterForm>({
     defaultValues: initialFilterValues,
   });
 
   const { submitCount: submitCountFilter, errors: errorsFilter } =
     formStateFilter;
-
-  const handleReset = () => {
-    resetFilter({
-      ...initialFilterValues,
-    });
-  };
 
   const handleFilterDialogOpen = () => {
     resetFilter({
@@ -364,13 +340,7 @@ function ActionTaken() {
       sioLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogSioData = !isAdmin
-        ? [
-            ...sioLogHistoryData.historyLogSioData.filter(
-              (item) => +item.created_by === authState.ID,
-            ),
-          ]
-        : [...sioLogHistoryData.historyLogSioData];
+      const historyLogSioData = [...sioLogHistoryData.historyLogSioData];
 
       setTeamData({
         historyLogSioData,
@@ -393,7 +363,6 @@ function ActionTaken() {
   const {
     control: controlActionTaken,
     handleSubmit,
-    formState,
     reset: resetActionTakenMobile,
   } = useForm<ISIOPDCAssignData>({
     defaultValues: initialActionTakenValues,
@@ -423,13 +392,14 @@ function ActionTaken() {
     }));
   };
 
-  const customNoRowsOverlay = () => {
-    return (
-      <div style={{ textAlign: "center", padding: "20px" }}>
-        No Data Available
-      </div>
-    );
-  };
+  useEffect(() => {
+    if (+watchValues("department") > 0) {
+      const fArea = areas.filter(
+        (item) => +item.parent_id === +watchValues("department"),
+      );
+      setFilteredAreas(fArea);
+    }
+  }, [watchValues("department")]);
 
   const handleClosureFileButtonClick = () => {
     if (closureFileInputRef.current) {
@@ -459,7 +429,7 @@ function ActionTaken() {
       method: "POST",
       body: formData,
     })
-      .then(async (res) => {
+      .then(async () => {
         setClosureImagePreviews(() => [...filenames]);
       })
       .catch(() => {
@@ -677,10 +647,6 @@ function ActionTaken() {
         onSubmit={() => {
           handleSubmitFilter(handleFilterFormSubmit)();
         }}
-        onReset={() => {
-          handleReset();
-        }}
-        hasReset
         size="large"
         showError
         hasError={
@@ -713,7 +679,7 @@ function ActionTaken() {
                 name="area"
                 label="Area"
                 control={controlFilter}
-                optionList={[{ id: "All", name: "All Area" }, ...areas]}
+                optionList={[{ id: "All", name: "All Area" }, ...filteredAreas]}
               />
             </div>
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
@@ -732,10 +698,7 @@ function ActionTaken() {
                 name="SEVERITY"
                 label="Severity"
                 control={controlFilter}
-                optionList={[
-                  { id: "All", name: "All Severity" },
-                  ...CURR_OBS_SEVERITY_LIST,
-                ]}
+                optionList={[{ id: "All", name: "All Severity" }, ...severity]}
               />
             </div>
 
@@ -845,7 +808,7 @@ function ActionTaken() {
                       name="severity"
                       label="Severity"
                       control={controlAction}
-                      optionList={[...CURR_OBS_SEVERITY_LIST]}
+                      optionList={[...severity]}
                       disabled
                     />
                   </div>
@@ -928,7 +891,7 @@ function ActionTaken() {
                   </div>
 
                   <div className="w-[100%]   gap-4  justify-evenly">
-                    <div className="grid grid-cols-1 md:grid-cols-2">
+                    <div className="grid grid-cols-1 md:grid-cols-1">
                       <div className="p-1">
                         <TextArea
                           name="closure_desc"

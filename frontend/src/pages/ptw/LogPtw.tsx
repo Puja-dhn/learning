@@ -1,29 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
-import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { shallowEqual } from "react-redux";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
+import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Button, IconButton } from "@/features/ui/buttons";
 import { TextArea, TextField, DropdownList } from "@/features/ui/form";
 import { useAppSelector } from "@/store/hooks";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 
-import ILogSisForm from "@/features/sis/types/sis/ILogSisForm";
-import { addNewSIOData } from "@/features/sis/services/sis.services";
 import { IOptionList } from "@/features/ui/types";
-import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
-import { API_BASE_URL, ASSET_BASE_URL } from "@/features/common/constants";
 import { usePTWMasterDataQuery } from "@/features/ptw/hooks";
 import IConfigsList from "@/features/ptw/types/ptw/IConfigsList";
 import ILogPTWForm from "@/features/ptw/types/ptw/ILogPTWForm";
 import IContractorList from "@/features/ptw/types/ptw/IContractorList";
-import { PlusIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { InputText } from "@/features/ui/elements";
-import { min } from "lodash";
 import { addNewPTWData } from "@/features/ptw/services/ptw.services";
+import IAreasList from "@/features/sis/types/sis/IAreasList";
 
 const today = new Date();
 
@@ -84,6 +80,7 @@ const initialFormValues: ILogPTWForm = {
   lifting_work_checklist: "",
   esms_checklist: "",
   hot_work_checklist: "",
+  equipment_checklist: "",
   pending_on: "",
   status: "",
 };
@@ -98,12 +95,9 @@ const formSchema = Yup.object().shape({
     "Nearest Fire Alarm Point is required",
   ),
   job_description: Yup.string().required("Job Description is required"),
-  moc_required: Yup.string().required("Select MOC is required or not"),
-  equipment: Yup.string().required("Equipment is required"),
   supervisor_name: Yup.string().required("name of Supervisor is required"),
   contractor: Yup.string().required("Contractor is required"),
   esic_no: Yup.string().required("ESIC Reg No is required"),
-  general_work_dtls: Yup.string().required("General work details is required"),
 });
 
 interface IAnxPerson {
@@ -116,31 +110,29 @@ function LogPtw() {
   const alertToast = useAlertConfig();
   const loader = useLoaderConfig();
   const authState = useAppSelector(({ auth }) => auth, shallowEqual);
-  const globalState = useAppSelector(({ global }) => global, shallowEqual);
+
+  const navigate = useNavigate();
+
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const closureFileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [departments, setDepartments] = useState<IOptionList[]>([]);
   const [configs, setConfigs] = useState<IConfigsList[]>([]);
-  const [areas, setAreas] = useState<IOptionList[]>([]);
-  const [masterContractors, setMasterContractors] = useState<IContractorList[]>(
-    [],
-  );
-  const [contractors, setContractors] = useState<IOptionList[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<any>([]);
-  const [closureImagePreviews, setClosureImagePreviews] = useState<any>([]);
+  const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
 
-  const [collapseFilter, setCollapseFilter] = useState(true);
+  const [contractors, setContractors] = useState<IOptionList[]>([]);
+
   const [isHazardSectionOpen, setIsHazardSectionOpen] = useState(false);
   const [hazardsChecklist, setHazardsChecklist] = useState<IOptionList[]>([]);
   const [isRiskSectionOpen, setIsRiskSectionOpen] = useState(false);
   const [riskChecklist, setRiskChecklist] = useState<IOptionList[]>([]);
   const [isPPESectionOpen, setIsPPESectionOpen] = useState(false);
+  const [isEquipmentSectionOpen, setIsEquipmentSectionOpen] = useState(false);
   const [ppeChecklist, setPPEChecklist] = useState<IOptionList[]>([]);
+  const [equipmentChecklist, setEquipmentChecklist] = useState<IOptionList[]>(
+    [],
+  );
   const [isIsolationSectionOpen, setIsIsolationSectionOpen] = useState(false);
-  const [isTrailSectionOpen, setIsTrailSectionOpen] = useState(false);
-  const [isAssGenSectionOpen, setIsAssGenSectionOpen] = useState(false);
+
   const [assGenChecklist, setAssGenChecklist] = useState<IOptionList[]>([]);
   const [isAssWHSectionOpen, setIsAssWHSectionOpen] = useState(false);
   const [assWHChecklist, setAssWHChecklist] = useState<IOptionList[]>([]);
@@ -165,6 +157,7 @@ function LogPtw() {
   const [attTrade, setAttTrade] = useState<string>("");
   const [attTicketNo, setAttTicketNo] = useState<string>("");
   const [departmentHeadName, setDepartmentHeadName] = useState<string>("");
+  const [departmentId, setDepartmentId] = useState<string>("");
 
   const [anxRows, setAnxRows] = useState<IAnxPerson[]>([]);
   const {
@@ -172,14 +165,14 @@ function LogPtw() {
     reset,
     control,
     formState,
-    getValues,
+
     setValue,
     watch: watchValues,
   } = useForm<ILogPTWForm>({
     defaultValues: initialFormValues,
     resolver: yupResolver(formSchema),
   });
-  const { isSubmitting, submitCount, errors } = formState;
+  const { isSubmitting } = formState;
   // Handle adding a new row
   const addRow = () => {
     if (attPerName === "") {
@@ -225,16 +218,6 @@ function LogPtw() {
     });
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    index: number,
-    field: keyof IAnxPerson,
-  ) => {
-    const updatedRows = [...anxRows];
-    updatedRows[index][field] = e.target.value;
-    setAnxRows(updatedRows);
-  };
-
   const {
     data: ptwMasterData,
     isLoading: isPTWMasterDataLoading,
@@ -259,8 +242,8 @@ function LogPtw() {
           (item: any) => +item.id === +authState.DEPARTMENT,
         );
         setDepartmentHeadName(ownDepartment[0].head_name);
-        //setDepartments(historyPTWMasterData[0].DEPARTMENT);
         setValue("department", ownDepartment[0].name, { shouldValidate: true });
+        setDepartmentId(ownDepartment[0].id.toString());
         setConfigs(historyPTWMasterData[0].CONFIG);
         setAreas(historyPTWMasterData[0].AREA);
 
@@ -293,6 +276,14 @@ function LogPtw() {
           name: check.checklist,
         }));
         setPPEChecklist(filterPPE);
+
+        const filterEquipment = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Tools and Equipment",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setEquipmentChecklist(filterEquipment);
 
         const filterAssGen = historyPTWMasterData[0].CONFIG.filter(
           (item: any) => item.type === "General Work",
@@ -360,7 +351,13 @@ function LogPtw() {
     });
   };
 
-  const [hazardCheckboxState, setHazardCheckboxState] = useState([]);
+  useEffect(() => {
+    if (+departmentId > 0) {
+      const fArea = areas.filter((item) => +item.parent_id === +departmentId);
+      setFilteredAreas(fArea);
+    }
+  }, [departmentId]);
+
   const handleHazardsChecklistChange = (event: any, itemId: any) => {
     let hazardChecklist = [];
     if (watchValues("hazard_identification") !== "") {
@@ -379,8 +376,6 @@ function LogPtw() {
       shouldValidate: true,
     });
   };
-
-  const [risksCheckboxState, setRisksCheckboxState] = useState([]);
 
   const handleRisksChecklistChange = (event: any, itemId: any) => {
     let riskChecklist = [];
@@ -401,8 +396,6 @@ function LogPtw() {
     });
   };
 
-  const [ppeCheckboxState, setPpeCheckboxState] = useState([]);
-
   const handlePPEChecklistChange = (event: any, itemId: any) => {
     let ppeCheckpoints = [];
     if (watchValues("ppe_required") !== "") {
@@ -422,7 +415,24 @@ function LogPtw() {
     });
   };
 
-  const [generalCheckboxState, setGeneralCheckboxState] = useState([]);
+  const handleEquipmentChecklistChange = (event: any, itemId: any) => {
+    let equipmentCheckpoints = [];
+    if (watchValues("equipment_checklist") !== "") {
+      equipmentCheckpoints = JSON.parse(watchValues("equipment_checklist"));
+    }
+    const itemIdStr = String(itemId);
+    if (event.target.checked) {
+      equipmentCheckpoints.push(itemIdStr);
+    } else {
+      const currRowIndex = equipmentCheckpoints.findIndex(
+        (item: any) => item === itemIdStr,
+      );
+      equipmentCheckpoints.splice(currRowIndex, 1);
+    }
+    setValue("equipment_checklist", JSON.stringify(equipmentCheckpoints), {
+      shouldValidate: true,
+    });
+  };
 
   const handleGeneralWorkChecklistChange = (event: any, itemId: any) => {
     let generalChecklist = [];
@@ -442,7 +452,6 @@ function LogPtw() {
       shouldValidate: true,
     });
   };
-  const [whCheckboxState, setWHCheckboxState] = useState([]);
 
   const handleWHChecklistChange = (event: any, itemId: any) => {
     let whChecklist = [];
@@ -463,8 +472,6 @@ function LogPtw() {
     });
   };
 
-  const [confinedCheckboxState, setConfinedCheckboxState] = useState([]);
-
   const handleConfinedSpaceChecklistChange = (event: any, itemId: any) => {
     let confinedChecklist = [];
     if (watchValues("confined_space_checklist") !== "") {
@@ -483,8 +490,6 @@ function LogPtw() {
       shouldValidate: true,
     });
   };
-
-  const [liftingCheckboxState, setLiftingCheckboxState] = useState([]);
 
   const handleLiftingChecklistChange = (event: any, itemId: any) => {
     let liftingChecklist = [];
@@ -505,8 +510,6 @@ function LogPtw() {
     });
   };
 
-  const [esmsCheckboxState, setEsmsCheckboxState] = useState([]);
-
   const handleEsmsChecklistChange = (event: any, itemId: any) => {
     let esmsChecklist = [];
     if (watchValues("esms_checklist") !== "") {
@@ -525,8 +528,6 @@ function LogPtw() {
       shouldValidate: true,
     });
   };
-
-  const [hotworkCheckboxState, setHotWorkCheckboxState] = useState([]);
 
   const handleHotWorkChecklistChange = (event: any, itemId: any) => {
     let hotwrkChecklist = [];
@@ -616,24 +617,49 @@ function LogPtw() {
   };
 
   const handleFormSubmit: SubmitHandler<ILogPTWForm> = (values: any) => {
-    loader.show();
-    addNewPTWData(values)
-      .then(() => {
-        alertToast.show("success", "Data added successfully", true, 2000);
-        handleReset();
-        // Invalidate queries
-        queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === "ptwMasterDataQuery",
+    if (watchValues("moc_required") === "") {
+      alertToast.show(
+        "warning",
+        "Please select moc is required or not",
+        true,
+        2000,
+      );
+    } else if (
+      watchValues("moc_required") === "Yes" &&
+      watchValues("moc_title") === ""
+    ) {
+      alertToast.show("warning", "MOC title is required", true, 2000);
+    } else if (
+      watchValues("moc_required") === "Yes" &&
+      watchValues("moc_no") === ""
+    ) {
+      alertToast.show("warning", "MOC no is required", true, 2000);
+    } else if (
+      watchValues("moc_required") === "No" &&
+      watchValues("why_moc_remarks") === ""
+    ) {
+      alertToast.show("warning", "MOC remarks is required", true, 2000);
+    } else {
+      loader.show();
+      addNewPTWData(values)
+        .then(() => {
+          alertToast.show("success", "Data added successfully", true, 2000);
+          handleReset();
+          // Invalidate queries
+          queryClient.invalidateQueries({
+            predicate: (query) => query.queryKey[0] === "ptwMasterDataQuery",
+          });
+          navigate("/ptw/view-ptw", { replace: true });
+        })
+        .catch((err: any) => {
+          if (err.response && err.response.status) {
+            alertToast.show("warning", err.response.data.message, true);
+          }
+        })
+        .finally(() => {
+          loader.hide();
         });
-      })
-      .catch((err: any) => {
-        if (err.response && err.response.status) {
-          alertToast.show("warning", err.response.data.errorMessage, true);
-        }
-      })
-      .finally(() => {
-        loader.hide();
-      });
+    }
   };
 
   return (
@@ -661,7 +687,10 @@ function LogPtw() {
                   name="area"
                   label="Area"
                   control={control}
-                  optionList={[{ id: "", name: "Select Area" }, ...areas]}
+                  optionList={[
+                    { id: "", name: "Select Area" },
+                    ...filteredAreas,
+                  ]}
                 />
               </div>
               <div className="p-1">
@@ -763,15 +792,7 @@ function LogPtw() {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-1">
-              <div className="p-1">
-                <TextArea
-                  name="equipment"
-                  label="	Equipment(s) to be worked on "
-                  control={control}
-                />
-              </div>
-            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3">
               <div className="p-1">
                 <TextField
@@ -1057,6 +1078,83 @@ function LogPtw() {
                         ))}
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+            <div className="">
+              <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                  Tools and Equipment required for the job identified,available
+                  and inspected OK &nbsp;
+                </h3>
+                <input
+                  type="radio"
+                  name="equipment_required"
+                  value="Yes"
+                  onChange={() => setIsEquipmentSectionOpen(true)}
+                  checked={isEquipmentSectionOpen}
+                />
+                &nbsp;&nbsp;Yes&nbsp;&nbsp;
+                <input
+                  type="radio"
+                  name="equipment_required"
+                  value="No"
+                  onChange={() => setIsEquipmentSectionOpen(false)}
+                  checked={!isEquipmentSectionOpen}
+                />
+                &nbsp;&nbsp;No
+              </div>
+
+              {/* Conditionally render collapsible section */}
+              {isEquipmentSectionOpen && (
+                <div className="p-2 mt-1 ">
+                  {equipmentChecklist && equipmentChecklist.length > 0 && (
+                    <div>
+                      {equipmentChecklist
+                        .reduce((rows: any, item: any, index: any) => {
+                          if (index % 4 === 0) rows.push([]); // Create a new row every 3 items
+                          rows[rows.length - 1].push(item); // Add item to the last row
+                          return rows;
+                        }, [])
+                        .map((row: any, rowIndex: any) => (
+                          <div
+                            className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                            key={rowIndex}
+                          >
+                            {row.map((item2: any, index: any) => (
+                              <div className="p-1" key={index}>
+                                <label>
+                                  <input
+                                    type="checkbox"
+                                    name={`equipment_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                    value="Yes"
+                                    onChange={(event: any) =>
+                                      handleEquipmentChecklistChange(
+                                        event,
+                                        item2.id,
+                                      )
+                                    }
+                                  />
+                                  &nbsp;
+                                  {item2.name}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-1">
+                    <div className="p-1">
+                      <TextArea
+                        name="equipment"
+                        label="	Equipment(s) to be worked on "
+                        control={control}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

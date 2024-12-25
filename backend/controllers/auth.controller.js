@@ -88,7 +88,7 @@ exports.refreshToken = async (req, res) => {
 exports.login = async (req, res) => {
   const { emailId, password } = req.body;
   let result;
-  let roleRows;
+  let roleRows = [];
   let errorStatus = 0;
 
   const decEmail = decryptData(emailId);
@@ -132,8 +132,8 @@ exports.login = async (req, res) => {
     const updateresults = await simpleQuery(updatequery, [userData.id]);
     const queryRoles = `SELECT role_id FROM t_inshe_user_role WHERE user_id = ?`;
     const resultRoles = await simpleQuery(queryRoles, [userData.id]);
-    roleRows = Array.isArray(resultRoles.rows)
-      ? resultRoles.rows.map((item) => item.ROLE_ID)
+    roleRows = Array.isArray(resultRoles)
+      ? resultRoles.map((item) => item.role_id)
       : [];
 
     if (!isAuthenticated) {

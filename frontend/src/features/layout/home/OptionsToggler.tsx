@@ -100,7 +100,7 @@ function OptionsToggler(props: IProps) {
           layoutState.optionsMenuStatus ? "block" : "hidden"
         }`}
       >
-        <div className="p-2 font-normal text-cyan-700 hover:bg-slate-50">
+        <div className="p-2 font-normal text-[#06235b] hover:bg-slate-50">
           <button
             onClick={() => {
               navigate("/master", { replace: true });
@@ -111,7 +111,7 @@ function OptionsToggler(props: IProps) {
             <HomeIcon className="w-5 h-4 " /> Home
           </button>
         </div>
-        <div className="p-2 font-normal text-cyan-700 hover:bg-slate-50">
+        <div className="p-2 font-normal text-[#06235b] hover:bg-slate-50">
           <button
             type="button"
             onClick={() => {

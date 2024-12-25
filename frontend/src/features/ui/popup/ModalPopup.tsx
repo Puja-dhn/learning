@@ -119,7 +119,7 @@ function ModalPopup(props: IProps) {
                 className="mt-2 dark:hover:bg-gray-400"
                 btnType="secondary"
               >
-                Reset
+                Download
               </Button>
             )}
             {hasDelete && (

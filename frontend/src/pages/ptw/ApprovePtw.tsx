@@ -14,24 +14,23 @@ import { useQueryClient } from "react-query";
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 
+import * as XLSX from "xlsx";
 import { IconButton } from "@/features/ui/buttons";
 import { ModalPopup } from "@/features/ui/popup";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
 
-import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
-import { IOptionList } from "@/features/ui/types";
-import * as XLSX from "xlsx";
 import usePtwOpenLogDetailQuery from "@/features/ptw/hooks/usePtwOpenLogDetailQuery";
 import { usePTWMasterDataQuery } from "@/features/ptw/hooks";
-import ILogPtwData from "@/features/ptw/types/ptw/ILogPtwData";
 import ILogPTWApproveForm from "@/features/ptw/types/ptw/ILogPTWApproveForm";
 import { TextArea, TextField } from "@/features/ui/form";
 import { submitCustodianApproval } from "@/features/ptw/services/ptw.services";
-import ILogPTWData from "@/features/ptw/types/ptw/ILogPtwData";
+import ILogPtwData from "@/features/ptw/types/ptw/ILogPtwData";
 import IConfigsList from "@/features/ptw/types/ptw/IConfigsList";
 import IContractorList from "@/features/ptw/types/ptw/IContractorList";
 import ILogPtwFilterForm from "@/features/ptw/types/ptw/ILogPtwFilterForm";
+import IAreasList from "@/features/sis/types/sis/IAreasList";
+import { IOptionList } from "@/features/ui/types";
 
 interface ILogPtwTeamData {
   historyLogPtwData: ILogPtwData[];
@@ -61,12 +60,10 @@ function ApprovePtw() {
   const loader = useLoaderConfig();
   const authState = useAppSelector(({ auth }) => auth, shallowEqual);
   const [isDesktop, setIsDesktop] = useState(false);
-  const [imagePreviews, setImagePreviews] = useState<any>([]);
-  const [departments, setDepartments] = useState<IOptionList[]>([]);
-  const [categories, setCategories] = useState<IOptionList[]>([]);
-  const [areas, setAreas] = useState<IOptionList[]>([]);
+
+  const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
-  const [modalImage, setModalImage] = useState<string>("");
   const [isHazardSectionOpen, setIsHazardSectionOpen] = useState(false);
   const [hazardsChecklist, setHazardsChecklist] = useState<IOptionList[]>([]);
   const [configs, setConfigs] = useState<IConfigsList[]>([]);
@@ -80,6 +77,12 @@ function ApprovePtw() {
   const [riskChecklist, setRiskChecklist] = useState<IOptionList[]>([]);
   const [isPPESectionOpen, setIsPPESectionOpen] = useState(false);
   const [ppeChecklist, setPPEChecklist] = useState<IOptionList[]>([]);
+
+  const [isEquipmentSectionOpen, setIsEquipmentSectionOpen] = useState(false);
+  const [equipmentChecklist, setEquipmentChecklist] = useState<IOptionList[]>(
+    [],
+  );
+
   const [assGenChecklist, setAssGenChecklist] = useState<IOptionList[]>([]);
   const [isAssWHSectionOpen, setIsAssWHSectionOpen] = useState(false);
   const [assWHChecklist, setAssWHChecklist] = useState<IOptionList[]>([]);
@@ -158,6 +161,14 @@ function ApprovePtw() {
           name: check.checklist,
         }));
         setPPEChecklist(filterPPE);
+
+        const filterEquipment = historyPTWMasterData[0].CONFIG.filter(
+          (item: any) => item.type === "Tools and Equipment",
+        ).map((check: any) => ({
+          id: check.id,
+          name: check.checklist,
+        }));
+        setEquipmentChecklist(filterPPE);
 
         const filterAssGen = historyPTWMasterData[0].CONFIG.filter(
           (item: any) => item.type === "General Work",
@@ -254,6 +265,7 @@ function ApprovePtw() {
   const [hazardsChecklistIds, setHazardsChecklistIds] = useState<any[]>([]);
   const [riskChecklistIds, setRiskChecklistIds] = useState<any[]>([]);
   const [ppeChecklistIds, setPPEChecklistIds] = useState<any[]>([]);
+  const [equipmentChecklistIds, setEquipmentChecklistIds] = useState<any[]>([]);
   const [assGenChecklistIds, setAssGenChecklistIds] = useState<any[]>([]);
   const [assWHChecklistIds, setAssWHChecklistIds] = useState<any[]>([]);
   const [assConfinedChecklistIds, setAssConfinedChecklistIds] = useState<any[]>(
@@ -272,13 +284,13 @@ function ApprovePtw() {
     control: controlView,
 
     watch: watchValues,
-  } = useForm<ILogPTWData>({});
+  } = useForm<ILogPtwData>({});
 
   const handleViewPtwDialogClose = () => {
     setShowViewPtwDialog((oldState) => ({ ...oldState, status: false }));
   };
 
-  const handleViewClick = (row: ILogPTWData) => {
+  const handleViewClick = (row: ILogPtwData) => {
     if (row.associated_permit !== "") {
       setAssociatedIds(JSON.parse(row.associated_permit));
     }
@@ -293,6 +305,10 @@ function ApprovePtw() {
     if (row.ppe_required !== "") {
       setIsPPESectionOpen(true);
       setPPEChecklistIds(JSON.parse(row.ppe_required));
+    }
+    if (row.equipment_checklist !== "") {
+      setIsEquipmentSectionOpen(true);
+      setEquipmentChecklistIds(JSON.parse(row.equipment_checklist));
     }
     if (row.annexture_v !== "") {
       setAnxRows(JSON.parse(row.annexture_v));
@@ -442,7 +458,7 @@ function ApprovePtw() {
     { field: "log_by", headerName: "Log By", width: 200 },
   ];
 
-  const paginationModel = { page: 0, pageSize: 5 };
+  const paginationModel = { page: 0, pageSize: 10 };
 
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
@@ -484,6 +500,7 @@ function ApprovePtw() {
     reset: resetFilter,
     control: controlFilter,
     formState: formStateFilter,
+    watch: watchFilterValues,
   } = useForm<ILogPtwFilterForm>({
     defaultValues: initialFilterValues,
   });
@@ -560,32 +577,14 @@ function ApprovePtw() {
       predicate: (query) => query.queryKey[0] === "openPtwDataQuery",
     });
   };
-
-  const handleShowLogDetails = (logNo: number) => {
-    const historyLogPtwData = [
-      ...teamData.historyLogPtwData.filter((item) => +item.id === +logNo),
-    ];
-    setLogDetails({ historyLogPtwData });
-
-    setShowLogDetailsDialog({
-      status: true,
-    });
-  };
-  const handleLogDetailsDialogClose = () => {
-    setShowLogDetailsDialog((oldState) => ({
-      ...oldState,
-      status: false,
-    }));
-    setImagePreviews([]);
-  };
-
-  const customNoRowsOverlay = () => {
-    return (
-      <div style={{ textAlign: "center", padding: "20px" }}>
-        No Data Available
-      </div>
-    );
-  };
+  useEffect(() => {
+    if (+watchFilterValues("department") > 0) {
+      const fArea = areas.filter(
+        (item) => +item.parent_id === +watchFilterValues("department"),
+      );
+      setFilteredAreas(fArea);
+    }
+  }, [watchFilterValues("department")]);
 
   const handleApproveFormSubmit: SubmitHandler<ILogPTWApproveForm> = (
     values: any,
@@ -647,6 +646,11 @@ function ApprovePtw() {
   };
   const handleCheckedPPE = (type: any) => {
     if (ppeChecklistIds.includes(`${type}`)) {
+      return true;
+    }
+  };
+  const handleCheckedEquipment = (type: any) => {
+    if (equipmentChecklistIds.includes(`${type}`)) {
       return true;
     }
   };
@@ -944,16 +948,7 @@ function ApprovePtw() {
                     </div>
                   </div>
                 )}
-                <div className="grid grid-cols-1 md:grid-cols-1">
-                  <div className="p-1">
-                    <TextArea
-                      name="equipment"
-                      label="	Equipment(s) to be worked on "
-                      control={controlView}
-                      disabled
-                    />
-                  </div>
-                </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-3">
                   <div className="p-1">
                     <TextField
@@ -1223,6 +1218,83 @@ function ApprovePtw() {
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+              <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                <div className="">
+                  <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                    <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                      Tools and Equipment required for the job
+                      identified,available and inspected OK &nbsp;
+                    </h3>
+                    <input
+                      type="radio"
+                      name="equipment_checklist"
+                      value="Yes"
+                      checked={watchValues("equipment_checklist") !== ""}
+                    />
+                    &nbsp;&nbsp;<span className="text-black">Yes</span>
+                    &nbsp;&nbsp;
+                    <input
+                      type="radio"
+                      name="equipment_checklist"
+                      value="No"
+                      checked={watchValues("equipment_checklist") === ""}
+                    />
+                    &nbsp;&nbsp;<span className="text-black">No</span>
+                  </div>
+
+                  {/* Conditionally render collapsible section */}
+                  {isEquipmentSectionOpen && (
+                    <div className="p-2 mt-1 ">
+                      {equipmentChecklist && equipmentChecklist.length > 0 && (
+                        <div>
+                          {equipmentChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]); // Create a new row every 3 items
+                              rows[rows.length - 1].push(item); // Add item to the last row
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`equipment_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckedEquipment(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-1">
+                    <div className="p-1">
+                      <TextArea
+                        name="equipment"
+                        label="	Equipment(s) to be worked on "
+                        control={controlView}
+                        disabled
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
               <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
@@ -1522,43 +1594,42 @@ function ApprovePtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assConfinedChecklist &&
-                        assConfinedChecklist.length > 0 && (
-                          <div>
-                            {assConfinedChecklist
-                              .reduce((rows: any, item: any, index: any) => {
-                                if (index % 4 === 0) rows.push([]);
-                                rows[rows.length - 1].push(item);
-                                return rows;
-                              }, [])
-                              .map((row: any, rowIndex: any) => (
-                                <div
-                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                  key={rowIndex}
-                                >
-                                  {row.map((item2: any, index: any) => (
-                                    <div
-                                      className="p-1 text-gray-700"
-                                      key={index}
-                                    >
-                                      <label>
-                                        <input
-                                          type="checkbox"
-                                          name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                          value="Yes"
-                                          checked={handleCheckedAssConfinedChecklist(
-                                            item2.id,
-                                          )}
-                                        />
-                                        &nbsp;
-                                        {item2.name}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                      {assConfinedChecklist && assConfinedChecklist.length > 0 && (
+                        <div>
+                          {assConfinedChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]);
+                              rows[rows.length - 1].push(item);
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckedAssConfinedChecklist(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                     <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                       <TextField
@@ -1606,43 +1677,42 @@ function ApprovePtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assLiftingChecklist &&
-                        assLiftingChecklist.length > 0 && (
-                          <div>
-                            {assLiftingChecklist
-                              .reduce((rows: any, item: any, index: any) => {
-                                if (index % 4 === 0) rows.push([]);
-                                rows[rows.length - 1].push(item);
-                                return rows;
-                              }, [])
-                              .map((row: any, rowIndex: any) => (
-                                <div
-                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                  key={rowIndex}
-                                >
-                                  {row.map((item2: any, index: any) => (
-                                    <div
-                                      className="p-1 text-gray-700"
-                                      key={index}
-                                    >
-                                      <label>
-                                        <input
-                                          type="checkbox"
-                                          name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                          value="Yes"
-                                          checked={handleCheckeAssLiftingChecklist(
-                                            item2.id,
-                                          )}
-                                        />
-                                        &nbsp;
-                                        {item2.name}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                      {assLiftingChecklist && assLiftingChecklist.length > 0 && (
+                        <div>
+                          {assLiftingChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]);
+                              rows[rows.length - 1].push(item);
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckeAssLiftingChecklist(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

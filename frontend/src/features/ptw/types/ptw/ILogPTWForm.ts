@@ -41,6 +41,7 @@ interface ILogPTWForm {
   lifting_work_checklist: string;
   esms_checklist: string;
   hot_work_checklist: string;
+  equipment_checklist: string;
   pending_on: string;
   status: string;
 }
