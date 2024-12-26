@@ -5,6 +5,9 @@ import PrivateRoutes from "./features/authorization/PrivateRoute";
 import AssignPDC from "./pages/sis/AssignPDC";
 import ActionTaken from "./pages/sis/ActionTaken";
 import LogIms from "./pages/ims/LogIms";
+import ViewIms from "./pages/ims/ViewIms";
+import TeamFormation from "./pages/ims/TeamFormation";
+import CloseIncident from "./pages/ims/CloseIncident";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -92,6 +95,9 @@ function App() {
             <Route index element={<LogIms />} />
             <Route path="dashboard" element={<LogIms />} />
             <Route path="log-ims" element={<LogIms />} />
+            <Route path="view-ims" element={<ViewIms />} />
+            <Route path="team-formation" element={<TeamFormation />} />
+            <Route path="close-incident" element={<CloseIncident />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

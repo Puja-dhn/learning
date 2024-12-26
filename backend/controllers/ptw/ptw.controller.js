@@ -296,7 +296,7 @@ exports.submitPTWApprovalData = async (req, res) => {
     const currentTime = new Date();
 
     const updateQuery = `
-        update t_inshe_log_ptw set custodian_comments = ?,  updated_at = ?, updated_by = ?, status = "Closed", pending_on = 0 where id=?
+        update t_inshe_log_ptw set custodian_comments = ?,  updated_at = ?, updated_by = ?, status = "Custodian Approved", pending_on = 0 where id=?
       `;
     const updateValues = [, comments, currentTime, ID, id];
 
