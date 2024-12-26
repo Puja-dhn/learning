@@ -11,12 +11,14 @@ const accessRoutes = require("./access.routes");
 
 const sioRoutes = require("./sio.routes");
 const ptwRoutes = require("./ptw.routes");
+const imsRoutes = require("./ims.routes");
 
 router.use("/auth", commonMiddleware, authRoutes);
 router.use("/access", commonMiddleware, authMiddleware, accessRoutes);
 
 router.use("/sio", commonMiddleware, authMiddleware, sioRoutes);
 router.use("/ptw", commonMiddleware, authMiddleware, ptwRoutes);
+router.use("/ims", commonMiddleware, authMiddleware, imsRoutes);
 
 const AppObsImageStorage = multer.diskStorage({
   destination: function (req, file, cb) {

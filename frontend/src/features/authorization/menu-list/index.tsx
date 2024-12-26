@@ -3,6 +3,7 @@ import MASTER_MENU_LIST from "./master";
 import { getFlatMenuList } from "../utils";
 import SIS_MENU_LIST from "./sis";
 import PTW_MENU_LIST from "./ptw";
+import IMS_MENU_LIST from "./ims";
 
 const APP_MENUS = [
   {
@@ -22,6 +23,12 @@ const APP_MENUS = [
     routeMaster: "ptw",
     menuList: PTW_MENU_LIST,
     menuFlatList: [...getFlatMenuList(PTW_MENU_LIST)],
+  },
+  {
+    appId: 4,
+    routeMaster: "ims",
+    menuList: IMS_MENU_LIST,
+    menuFlatList: [...getFlatMenuList(IMS_MENU_LIST)],
   },
 ];
 

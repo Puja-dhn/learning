@@ -4,6 +4,7 @@ import { Navigate, Outlet, Route, Routes } from "react-router-dom";
 import PrivateRoutes from "./features/authorization/PrivateRoute";
 import AssignPDC from "./pages/sis/AssignPDC";
 import ActionTaken from "./pages/sis/ActionTaken";
+import LogIms from "./pages/ims/LogIms";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -81,6 +82,16 @@ function App() {
             <Route path="log-ptw" element={<LogPtw />} />
             <Route path="view-ptw" element={<ViewPtw />} />
             <Route path="approve-ptw" element={<ApprovePtw />} />
+            <Route path="*" element={<PageNotFound />} />
+          </Route>
+
+          <Route
+            path="ims"
+            element={<PrivateRoutes outlet={<HomeLayout appId={4} />} />}
+          >
+            <Route index element={<LogIms />} />
+            <Route path="dashboard" element={<LogIms />} />
+            <Route path="log-ims" element={<LogIms />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 
