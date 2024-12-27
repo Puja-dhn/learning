@@ -1,4 +1,4 @@
-interface IImsTeamFormData {
+interface IImsMedicalFormData {
   disp_logno: number;
   incident_no: number;
   inc_date_time: string;
@@ -21,7 +21,7 @@ interface IImsTeamFormData {
   updated_at: string;
   updated_by: string;
   log_by: string;
-  suggested_team: string;
+  injury_details: string;
 }
 
-export default IImsTeamFormData;
+export default IImsMedicalFormData;

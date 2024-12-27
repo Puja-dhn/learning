@@ -8,6 +8,8 @@ import LogIms from "./pages/ims/LogIms";
 import ViewIms from "./pages/ims/ViewIms";
 import TeamFormation from "./pages/ims/TeamFormation";
 import CloseIncident from "./pages/ims/CloseIncident";
+import CategorizeIncident from "./pages/ims/CategorizeIncident";
+import IncidentInvestigation from "./pages/ims/IncidentInvestigation";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -98,6 +100,14 @@ function App() {
             <Route path="view-ims" element={<ViewIms />} />
             <Route path="team-formation" element={<TeamFormation />} />
             <Route path="close-incident" element={<CloseIncident />} />
+            <Route
+              path="incident-categorization"
+              element={<CategorizeIncident />}
+            />
+            <Route
+              path="incident-investigation"
+              element={<IncidentInvestigation />}
+            />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

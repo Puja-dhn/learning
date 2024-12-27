@@ -13,6 +13,8 @@ import LogIms from "@/pages/ims/LogIms";
 import ViewIms from "@/pages/ims/ViewIms";
 import TeamFormation from "@/pages/ims/TeamFormation";
 import CloseIncident from "@/pages/ims/CloseIncident";
+import CategorizeIncident from "@/pages/ims/CategorizeIncident";
+import IncidentInvestigation from "@/pages/ims/IncidentInvestigation";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -71,6 +73,30 @@ const IMS_MENU_LIST: IMenuItem[] = [
     appId: 4,
     path: "team-formation",
     element: <TeamFormation />,
+    children: [],
+    menuType: "Normal",
+  },
+
+  {
+    id: 19,
+    name: "Incident Categorization",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 4,
+    path: "incident-categorization",
+    element: <CategorizeIncident />,
+    children: [],
+    menuType: "Normal",
+  },
+
+  {
+    id: 20,
+    name: "Investigation",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 4,
+    path: "incident-investigation",
+    element: <IncidentInvestigation />,
     children: [],
     menuType: "Normal",
   },

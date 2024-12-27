@@ -7,6 +7,9 @@ import {
   ChevronRightIcon,
   EyeIcon,
   ArrowDownTrayIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  PlusIcon,
 } from "@heroicons/react/24/solid";
 import { useQueryClient } from "react-query";
 // import { utils, writeFile } from "xlsx";
@@ -32,7 +35,17 @@ import ILogImsFilterForm from "@/features/ims/types/ILogImsFilterForm";
 import useIMSMasterDataQuery from "@/features/ims/hooks/useIMSMasterDataQuery";
 import ILogImsData from "@/features/ims/types/ILogImsData";
 import useImsLogDetailQuery from "@/features/ims/hooks/useImsLogDetailQuery";
-import { getIncidentOthersData } from "@/features/ims/services/ims.services";
+import {
+  getIncidentOthersData,
+  submitIncidentCategory,
+  submitTeamFormation,
+} from "@/features/ims/services/ims.services";
+
+import IImsTeamFormData from "@/features/ims/types/IImsTeamFormData";
+import { InputText } from "@/features/ui/elements";
+import useImsCategorizationQuery from "@/features/ims/hooks/useImsCategorizationQuery";
+import IImsMedicalFormData from "@/features/ims/types/IImsMedicalFormData";
+import IInjuryDtls from "@/features/ims/types/IInjuryDtls";
 
 interface ILogImsTeamData {
   historyLogImsData: ILogImsData[];
@@ -72,18 +85,24 @@ const initialFilterValues: ILogImsFilterForm = {
   status: "All",
 };
 
-function ViewIms() {
+function CategorizeIncident() {
   const alertToast = useAlertConfig();
   const loader = useLoaderConfig();
   const authState = useAppSelector(({ auth }) => auth, shallowEqual);
   const [isDesktop, setIsDesktop] = useState(false);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const [departments, setDepartments] = useState<IOptionList[]>([]);
+  const [users, setUsers] = useState<IOptionList[]>([]);
   const [injuryType, setInjuryType] = useState<IOptionList[]>([]);
   const [factors, setFactors] = useState<IOptionList[]>([]);
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
-
+  const [suggTeamRow, setSuggTeamRow] = useState<any[]>([]);
+  const [suggTeamNewRow, setSuggTeamNewRow] = useState({
+    id: "",
+    name: "",
+  });
+  const queryClient = useQueryClient();
   const {
     data: imsMasterData,
     isLoading: isIMSMasterDataLoading,
@@ -108,6 +127,7 @@ function ViewIms() {
       setInjuryType(historyImsMasterData[0].INJURYTYPE);
       setFactors(historyImsMasterData[0].FACTORS);
       setAreas(historyImsMasterData[0].AREA);
+      setUsers(historyImsMasterData[0].USERS);
     }
   }, [imsMasterData, isIMSMasterDataLoading, isIMSMasterDataError]);
 
@@ -144,17 +164,34 @@ function ViewIms() {
   });
   const [injuryRow, setInjuryRow] = useState<any[]>([]);
   const [witTeamRow, setWitTeamRow] = useState<any[]>([]);
-  const [suggTeamRow, setSuggTeamRow] = useState<any[]>([]);
 
   const [injuryFilterRow, setInjuryFilterRow] = useState<any[]>([]);
   const [witTeamFilterRow, setWitTeamFilterRow] = useState<any[]>([]);
   const [suggTeamFilterRow, setSuggTeamFilterRow] = useState<any[]>([]);
 
+  const [newRow, setNewRow] = useState({
+    id: "",
+    company_type: "Permanent",
+    employee_id: "",
+    name: "",
+    department: "",
+    company: "TML",
+    age: "",
+    sex: "",
+    deployed_date: "",
+    body_part: "",
+    injury_nature: "",
+    category: "",
+    rejoin_date: "",
+  });
+
   const {
+    handleSubmit: handleSubmitPDCDetails,
     reset: resetActionTaken,
     control: controlAction,
+    setValue,
     watch: watchView,
-  } = useForm<ILogImsData>({
+  } = useForm<IImsMedicalFormData>({
     defaultValues: initialViewImsValues,
   });
 
@@ -170,6 +207,7 @@ function ViewIms() {
       (item) => item.header_id === row.incident_no,
     );
     setSuggTeamFilterRow(suggFilter);
+
     const wittFilter = witTeamRow.filter(
       (item) => item.header_id === row.incident_no,
     );
@@ -191,11 +229,44 @@ function ViewIms() {
       incident_details: row.incident_details,
       immediate_action: row.immediate_action,
       status: row.status,
+      injury_details: JSON.stringify(injFilter),
     });
 
     setShowPDCAssignDialog({
       status: true,
     });
+  };
+
+  const handleAssignPDCSubmit: SubmitHandler<IImsMedicalFormData> = (
+    values,
+  ) => {
+    loader.show();
+    submitIncidentCategory(values)
+      .then(() => {
+        alertToast.show(
+          "success",
+          "Incident Categorized Successfully",
+          true,
+          2000,
+        );
+        queryClient.invalidateQueries({
+          predicate: (query) =>
+            query.queryKey[0] === "imsCatwegorizationDataQuery",
+        });
+        setShowPDCAssignDialog((oldState) => ({
+          ...oldState,
+          status: false,
+        }));
+      })
+
+      .catch((err) => {
+        if (err.response && err.response.status) {
+          alertToast.show("warning", err.response.data.errorMessage, true);
+        }
+      })
+      .finally(() => {
+        loader.hide();
+      });
   };
   const columns: GridColDef[] = [
     {
@@ -207,7 +278,7 @@ function ViewIms() {
           className="ml-2"
           onClick={() => handleActionClick(params.row)}
         >
-          <EyeIcon className="w-4 h-4" />
+          <PencilSquareIcon className="w-4 h-4" />
         </IconButton>
       ),
     },
@@ -227,7 +298,6 @@ function ViewIms() {
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
   // ]);
-  const queryClient = useQueryClient();
 
   const [filterList, setFilterList] = useState<ILogImsFilterForm>({
     ...initialFilterValues,
@@ -249,7 +319,7 @@ function ViewIms() {
     data: imsLogHistoryData,
     isLoading: isImsLogHistoryDataLoading,
     isError: isImsLogHistoryDataError,
-  } = useImsLogDetailQuery(filterList);
+  } = useImsCategorizationQuery(filterList);
 
   const [showFilterDialog, setShowFilterDialog] = useState({
     status: false,
@@ -310,7 +380,7 @@ function ViewIms() {
       const historyLogImsData = !isAdmin
         ? [
             ...imsLogHistoryData.historyLogImsData.filter(
-              (item) => +item.created_by === authState.ID,
+              (item: any) => +item.created_by === authState.ID,
             ),
           ]
         : [...imsLogHistoryData.historyLogImsData];
@@ -326,13 +396,13 @@ function ViewIms() {
 
   useEffect(() => {
     queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === "imsDataQuery",
+      predicate: (query) => query.queryKey[0] === "imsCatwegorizationDataQuery",
     });
   }, []);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === "imsDataQuery",
+      predicate: (query) => query.queryKey[0] === "imsCatwegorizationDataQuery",
     });
   };
 
@@ -383,11 +453,25 @@ function ViewIms() {
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
     XLSX.writeFile(wb, "export.xlsx");
   };
+
+  const handleInputChange = (
+    field: string,
+    value: string,
+    item: IInjuryDtls,
+  ) => {
+    const updatedArray = injuryFilterRow.map((row) =>
+      row.id === item.id ? { ...row, [field]: value } : row,
+    );
+
+    setInjuryFilterRow(updatedArray);
+    setValue("injury_details", JSON.stringify(updatedArray));
+  };
+
   return (
     <div className="flex flex-col w-full h-full gap-2 p-4 overflow-hidden text-sm md:p-6">
       <div className="h-[50px] flex justify-between items-center p-1.5 px-2.5 border-[1px] text-md font-semibold text-center bg-[#f0f8ff] rounded-lg shadow-md dark:bg-gray-600 dark:text-cyan-200 dark:border-gray-500">
         <div className="flex items-center justify-center gap-2">
-          View Incident
+          Incident Categorization
         </div>
         <div className="flex items-center justify-end gap-4 ml-20">
           <IconButton onClick={handleExport}>
@@ -587,14 +671,14 @@ function ViewIms() {
                 optionList={[{ id: "All", name: "All Area" }, ...filteredAreas]}
               />
             </div>
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            {/* <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
                 name="injury_type"
                 label="Injury Type"
                 control={controlFilter}
                 optionList={[{ id: "All", name: "All" }, ...injuryType]}
               />
-            </div>
+            </div> */}
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
                 name="factors"
@@ -621,7 +705,7 @@ function ViewIms() {
               />
             </div>
 
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
+            {/* <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
                 name="status"
                 label="Status"
@@ -631,16 +715,19 @@ function ViewIms() {
                   ...CURR_OBS_STATUS_LIST,
                 ]}
               />
-            </div>
+            </div> */}
           </div>
         </form>
       </ModalPopup>
 
       <ModalPopup
-        heading="View Incident"
+        heading="Incident Categorization"
         onClose={handlePDCAssignDialogClose}
         openStatus={showPDCAssignDialog.status}
-        hasSubmit={false}
+        hasSubmit
+        onSubmit={() => {
+          handleSubmitPDCDetails(handleAssignPDCSubmit)();
+        }}
         size="fullscreen"
         showError
         hasError={
@@ -792,6 +879,12 @@ function ViewIms() {
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 InjuryNature
                               </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Category
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Rejoin Date
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
@@ -829,6 +922,37 @@ function ViewIms() {
                                 </td>
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.injury_nature}
+                                </td>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  <select
+                                    value={item.category}
+                                    onChange={(e) =>
+                                      handleInputChange(
+                                        "category",
+                                        e.target.value,
+                                        item,
+                                      )
+                                    }
+                                    className="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                                  >
+                                    {injuryType &&
+                                      injuryType.length > 0 &&
+                                      injuryType.map((item2) => (
+                                        <option value={item2.id}>
+                                          {item2.name}
+                                        </option>
+                                      ))}
+                                  </select>
+                                </td>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  <InputText
+                                    type="date"
+                                    value={item.rejoin_date}
+                                    changeHandler={(e: any) =>
+                                      handleInputChange("rejoin_date", e, item)
+                                    }
+                                    className="w-full"
+                                  />
                                 </td>
                               </tr>
                             ))}
@@ -870,12 +994,15 @@ function ViewIms() {
                           </tr>
                         </thead>
                         <tbody>
+                          {/* Input row for adding new rows */}
+
+                          {/* Render additional rows from injuryRow */}
                           {suggTeamFilterRow &&
                             suggTeamFilterRow.length > 0 &&
                             suggTeamFilterRow.map((item, index) => (
                               <tr key={index}>
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  {index + 2}
+                                  {index + 1}
                                 </td>
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.name}
@@ -917,18 +1044,18 @@ function ViewIms() {
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="text-gray-700">
+                        <tbody>
                           {witTeamFilterRow &&
                             witTeamFilterRow.length > 0 &&
                             witTeamFilterRow.map((item, index) => (
                               <tr key={index}>
-                                <td className="px-4 py-2 text-gray-700 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b ">
                                   {index + 1}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b ">
                                   {item.employee_id}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b ">
                                   {item.name}
                                 </td>
 
@@ -951,4 +1078,4 @@ function ViewIms() {
   );
 }
 
-export default ViewIms;
+export default CategorizeIncident;

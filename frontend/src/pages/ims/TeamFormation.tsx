@@ -187,6 +187,7 @@ function TeamFormation() {
       (item) => item.header_id === row.incident_no,
     );
     setSuggTeamFilterRow(suggFilter);
+
     const wittFilter = witTeamRow.filter(
       (item) => item.header_id === row.incident_no,
     );
@@ -208,6 +209,7 @@ function TeamFormation() {
       incident_details: row.incident_details,
       immediate_action: row.immediate_action,
       status: row.status,
+      suggested_team: JSON.stringify(suggFilter),
     });
 
     setShowPDCAssignDialog({
@@ -761,26 +763,18 @@ function TeamFormation() {
                   />
                 </div>
                 <div className="p-1">
-                  <DropdownList
+                  <TextField
                     name="department"
                     label="Department"
                     control={controlAction}
-                    optionList={[
-                      { id: "", name: "Select Department" },
-                      ...departments,
-                    ]}
                     disabled
                   />
                 </div>
                 <div className="p-1">
-                  <DropdownList
+                  <TextField
                     name="area"
                     label="Area"
                     control={controlAction}
-                    optionList={[
-                      { id: "", name: "Select Area" },
-                      ...filteredAreas,
-                    ]}
                     disabled
                   />
                 </div>
@@ -795,26 +789,18 @@ function TeamFormation() {
                   />
                 </div>
                 <div className="p-1">
-                  <DropdownList
+                  <TextField
                     name="injury_type"
                     label="Injury Type"
                     control={controlAction}
-                    optionList={[
-                      { id: "", name: "Select Injury Type" },
-                      ...injuryType,
-                    ]}
                     disabled
                   />
                 </div>
                 <div className="p-1">
-                  <DropdownList
+                  <TextField
                     name="factors"
                     label="Factors"
                     control={controlAction}
-                    optionList={[
-                      { id: "", name: "Select factors" },
-                      ...factors,
-                    ]}
                     disabled
                   />
                 </div>
@@ -857,7 +843,7 @@ function TeamFormation() {
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                {+watchView("injury_type") === +10 && (
+                {watchView("injury_type") === "Medical Center FAC" && (
                   <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                     <div className="">
                       <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
@@ -898,7 +884,7 @@ function TeamFormation() {
                                 Deployed Date
                               </th>
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                                BofyPart
+                                BodyPart
                               </th>
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 InjuryNature
@@ -908,38 +894,38 @@ function TeamFormation() {
                           <tbody>
                             {injuryFilterRow.map((item, index) => (
                               <tr key={index}>
-                                <td className="px-4 py-2 border-b">
-                                  {index + 2}
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {index + 1}
                                 </td>
-                                <td className="px-4 py-2 border-b">
-                                  {item.companyType}
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.company_type}
                                 </td>
-                                <td className="px-4 py-2 border-b">
-                                  {item.employeeId}
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.employee_id}
                                 </td>
-                                <td className="px-4 py-2 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.name}
                                 </td>
-                                <td className="px-4 py-2 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.department}
                                 </td>
-                                <td className="px-4 py-2 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.company}
                                 </td>
-                                <td className="px-4 py-2 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.age}
                                 </td>
-                                <td className="px-4 py-2 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.sex}
                                 </td>
-                                <td className="px-4 py-2 border-b">
-                                  {item.deployedDate}
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.deployed_date}
                                 </td>
-                                <td className="px-4 py-2 border-b">
-                                  {item.bodyPart}
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.body_part}
                                 </td>
-                                <td className="px-4 py-2 border-b">
-                                  {item.injuryNature}
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.injury_nature}
                                 </td>
                               </tr>
                             ))}
@@ -947,11 +933,11 @@ function TeamFormation() {
                         </table>
                       </div>
                       <div className="grid grid-cols-1 p-2">
-                        <DropdownList
+                        <TextField
                           name="immediate_action"
                           label="Immediate Action"
                           control={controlAction}
-                          optionList={[{ id: "", name: "Select" }]}
+                          disabled
                         />
                       </div>
                     </div>
@@ -1085,17 +1071,17 @@ function TeamFormation() {
                             witTeamFilterRow.length > 0 &&
                             witTeamFilterRow.map((item, index) => (
                               <tr key={index}>
-                                <td className="px-4 py-2 border-b">
-                                  {index + 2}
+                                <td className="px-4 py-2 text-gray-700 border-b ">
+                                  {index + 1}
                                 </td>
-                                <td className="px-4 py-2 border-b">
-                                  {item.employeeId}
+                                <td className="px-4 py-2 text-gray-700 border-b ">
+                                  {item.employee_id}
                                 </td>
-                                <td className="px-4 py-2 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b ">
                                   {item.name}
                                 </td>
 
-                                <td className="px-4 py-2 border-b">
+                                <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.department}
                                 </td>
                               </tr>

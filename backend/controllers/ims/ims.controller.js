@@ -9,6 +9,7 @@ const DB_CONFIG = {
 };
 
 async function simpleQuery(statement, binds) {
+  // console.log(statement, binds);
   let conn;
   try {
     conn = await mysql2.createConnection(DB_CONFIG);
@@ -726,12 +727,13 @@ exports.submitTeamFormationdata = async (req, res) => {
 
   const currentTime = new Date();
   const checkHeaderExistsQuery =
-    "SELECT * FROM t_inshe_incident_team WHERE header_id = ?";
+    "SELECT * FROM t_inshe_incident_team WHERE header_id = ? and team_type='SUGGESTED_TEAM'";
   const headerExists = await simpleQuery(checkHeaderExistsQuery, [incident_no]);
 
   // Delete existing data if header_id exists
   if (headerExists.length > 0) {
-    const deleteQuery = "DELETE FROM t_inshe_incident_team WHERE header_id = ?";
+    const deleteQuery =
+      "DELETE FROM t_inshe_incident_team WHERE header_id = ? and team_type='SUGGESTED_TEAM'";
     await simpleQuery(deleteQuery, [incident_no]);
     console.log("Existing data for header_id", incident_no, "deleted");
   }
@@ -742,6 +744,7 @@ exports.submitTeamFormationdata = async (req, res) => {
       let parsedData;
       try {
         parsedData = JSON.parse(jsonString);
+        console.log(parsedData);
       } catch (error) {
         console.error("Error parsing JSON:", error);
         return;
@@ -780,12 +783,12 @@ exports.submitTeamFormationdata = async (req, res) => {
   ]);
 
   const updateHeaderQuery = `
-  UPDATE t_inshe_incident_header 
-  SET status = 'TEAM_FORMED', 
-      updated_at = ?, 
-      updated_by = ? 
-  WHERE id = ?
-`;
+    UPDATE t_inshe_incident_header
+    SET status = 'Team Formed',
+        updated_at = ?,
+        updated_by = ?
+    WHERE id = ?
+  `;
   await simpleQuery(updateHeaderQuery, [currentTime, ID, incident_no]);
 
   console.log("Data inserted successfully.");
@@ -853,7 +856,7 @@ exports.getImsCloseData = async (req, res) => {
     join t_inshe_users t7 on t1.created_by = t7.id
   WHERE
     1=1
-    and t1.status='INVESTIGATE'
+    and t1.status='Investigation'
     and t1.pending_on = ?
     ${strId}
     ${strDepartment}
@@ -984,5 +987,202 @@ exports.closeIncident = async (req, res) => {
   ]);
 
   console.log("Data inserted successfully.");
+  res.status(200).json({ message: "Data processed successfully." });
+};
+exports.getImsCategorizationData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
+
+  const {
+    incident_no,
+    department,
+    area,
+    injury_type,
+    factors,
+    date_from,
+    date_to,
+    status,
+  } = req.body;
+
+  const strId = incident_no > 0 ? ` and t1.id=${id}` : "";
+  const strDepartment =
+    department !== "All" ? ` and t1.department=${department}` : "";
+  const strArea = area !== "All" ? ` and t1.area=${area}` : "";
+  const strInjuryType =
+    injury_type !== "All" ? ` and t1.injury_type=${injury_type}` : "";
+  const strFactors = factors !== "All" ? ` and t1.factors='${factors}'` : "";
+  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
+  const strFromDate =
+    date_from !== "" ? ` and DATE(t1.obs_datetime) >='${date_from}'` : "";
+  const strToDate =
+    date_to !== "" ? ` and DATE(t1.obs_datetime) <='${date_to}'` : "";
+
+  const imsQuery = `
+  SELECT 
+    t1.id incident_no,
+    t1.inc_date_time,
+    t1.department department_id,
+    t2.name department,
+    t1.area area_id,
+    t3.name area,
+    t4.context_name injury_type,
+    t8.context_name factors,
+    t1.reported_by,
+    t1.exact_location,
+    t1.potential_outcome,
+    t1.action_taken,
+    t1.incident_details,
+    t1.immediate_action,
+    'Medical Team' pending_on,
+    t1.status,
+    t1.created_at,
+    t1.created_by,
+    t1.updated_at,
+    t1.updated_by,
+    t7.name log_by,
+    LPAD(t1.id, 6, '0') AS disp_logno
+  FROM
+    t_inshe_incident_header t1
+    join t_inshe_org_structures t2 on t1.department = t2.id
+    join t_inshe_org_structures t3 on t1.area = t3.id
+    left join t_inshe_context_definitions t4 on t1.injury_type = t4.context_id
+    left join t_inshe_context_definitions t8 on t1.factors = t8.context_id
+    left join t_inshe_users t5 on t1.pending_on = t5.id
+    join t_inshe_users t7 on t1.created_by = t7.id
+  WHERE
+    1=1
+    and t1.status != 'Closed'
+    and t1.medical_status = 'Pending'
+    ${strId}
+    ${strDepartment}
+    ${strArea}
+    ${strInjuryType}
+    ${strFactors}
+    ${strStatus}
+    ${strFromDate}
+    ${strToDate}
+    order by t1.id desc
+`;
+
+  const resultIms = await simpleQuery(imsQuery, [logged_user_id]);
+
+  const injuryQuery = `
+      SELECT 
+          t1.id,
+          t1.header_id,
+          t1.company_type,
+          t1.employee_id,
+          t1.name,
+          t1.department,
+          t1.company,
+          t1.age,
+          t1.sex,
+          t1.deployed_date,
+          t1.body_part,
+          t1.injury_nature,
+          t1.category,
+          t1.rejoin_date
+      FROM
+          t_inshe_incident_injury_dtls t1
+      WHERE
+       1=1
+       
+    `;
+
+  const resultInjury = await simpleQuery(injuryQuery, []);
+
+  const suggTeamQuery = `
+      SELECT DISTINCT
+          t1.id,
+          t1.header_id,
+          t1.team_type,
+          t1.employee_id,
+          t1.name,
+          t1.department
+      FROM
+          t_inshe_incident_team t1
+      WHERE
+        1=1
+        and team_type = "SUGGESTED_TEAM"
+       
+    `;
+
+  const resultSuggTeams = await simpleQuery(suggTeamQuery, []);
+
+  const witTeamQuery = `
+      SELECT DISTINCT
+          t1.id,
+          t1.header_id,
+          t1.team_type,
+          t1.employee_id,
+          t1.name,
+          t1.department
+      FROM
+          t_inshe_incident_team t1
+      WHERE
+        1=1
+        and team_type = "WITNESS_TEAM"
+       
+    `;
+
+  const resultWittTeams = await simpleQuery(witTeamQuery, []);
+
+  res.status(200).json({
+    historyLogImsData: [...resultIms],
+    INJURY_DETAILS: [...resultInjury],
+    SUGG_TEAM: [...resultSuggTeams],
+    WITNESS_TEAM: [...resultWittTeams],
+  });
+};
+exports.submitIncidentCategory = async (req, res) => {
+  const { ID } = req.user;
+  const { injury_details, incident_no } = req.body.pdcData;
+  const currentTime = new Date();
+  const injuryDetailsArray = JSON.parse(injury_details);
+  if (Array.isArray(injuryDetailsArray) && injuryDetailsArray.length > 0) {
+    const updateInjuryDetailQuery = `
+      UPDATE t_inshe_incident_injury_dtls
+      SET category = ?, rejoin_date = ?, status = 'Completed', updated_at = ?, updated_by = ?
+      WHERE id = ?
+    `;
+
+    for (const detail of injuryDetailsArray) {
+      await simpleQuery(updateInjuryDetailQuery, [
+        detail.category ? detail.category : "",
+        detail.rejoin_date ? detail.rejoin_date : "",
+        currentTime,
+        ID,
+        detail.id,
+      ]);
+    }
+  }
+
+  const checkStatusQuery = `
+  SELECT COUNT(*) AS incomplete_count
+  FROM t_inshe_incident_injury_dtls
+  WHERE header_id = ? AND status != 'Completed'
+`;
+  const [result] = await simpleQuery(checkStatusQuery, [incident_no]);
+
+  if (result.incomplete_count === 0) {
+    // Update the header's medical status to 'Completed'
+    const updateHeaderQuery = `
+    UPDATE t_inshe_incident_header
+    SET medical_status = 'Completed', updated_at = ?, updated_by = ?
+    WHERE id = ?
+  `;
+    await simpleQuery(updateHeaderQuery, [currentTime, ID, incident_no]);
+  }
+
+  // const updateHeaderQuery = `
+  //   UPDATE t_inshe_incident_header
+  //   SET status = 'Team Formed',
+  //       updated_at = ?,
+  //       updated_by = ?
+  //   WHERE id = ?
+  // `;
+  // await simpleQuery(updateHeaderQuery, [currentTime, ID, incident_no]);
+
+  console.log("Data updated successfully.");
   res.status(200).json({ message: "Data processed successfully." });
 };

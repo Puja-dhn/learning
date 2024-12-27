@@ -9,6 +9,7 @@ import ITeamDtls from "../types/ITeamDtls";
 import IInjuryDtls from "../types/IInjuryDtls";
 import IImsTeamFormData from "../types/IImsTeamFormData";
 import IImsCloseFormData from "../types/IImsCloseFormData";
+import IImsMedicalFormData from "../types/IImsMedicalFormData";
 
 const addNewImsData = (formData: any) => {
   return http.post<ILogImsForm, AxiosResponse<string>>(
@@ -30,7 +31,8 @@ const getIMSData = (filterData: ILogImsFilterForm) => {
       historyLogImsData: ILogImsData[];
       INJURY_DETAILS: IInjuryDtls[];
       SUGG_TEAM: ITeamDtls[];
-      WITNESS_TEAM: ITeamDtls[] }>
+      WITNESS_TEAM: ITeamDtls[];
+    }>
   >("/ims/get-ims-data", filterData);
 };
 const getIncidentOthersData = (incidentNo: number) => {
@@ -46,7 +48,8 @@ const getIMSTeamFormationData = (filterData: ILogImsFilterForm) => {
       historyLogImsData: ILogImsData[];
       INJURY_DETAILS: IInjuryDtls[];
       SUGG_TEAM: ITeamDtls[];
-      WITNESS_TEAM: ITeamDtls[] }>
+      WITNESS_TEAM: ITeamDtls[];
+    }>
   >("/ims/get-ims-teamformation-data", filterData);
 };
 const submitTeamFormation = (pdcData: IImsTeamFormData) => {
@@ -54,7 +57,8 @@ const submitTeamFormation = (pdcData: IImsTeamFormData) => {
     "/ims/submit-teamformnation-data",
     {
       pdcData,
-  });
+    },
+  );
 };
 const getIMSCloseData = (filterData: ILogImsFilterForm) => {
   return http.post<
@@ -63,14 +67,37 @@ const getIMSCloseData = (filterData: ILogImsFilterForm) => {
       historyLogImsData: ILogImsData[];
       INJURY_DETAILS: IInjuryDtls[];
       SUGG_TEAM: ITeamDtls[];
-      WITNESS_TEAM: ITeamDtls[] }>
+      WITNESS_TEAM: ITeamDtls[];
+    }>
   >("/ims/get-ims-close-data", filterData);
 };
 const closeIncident = (pdcData: IImsCloseFormData) => {
   return http.post<any, AxiosResponse<string>>("/ims/close-incident", {
-      pdcData,
+    pdcData,
   });
 };
+
+const getIMSCategorizationData = (filterData: ILogImsFilterForm) => {
+  return http.post<
+    ILogImsFilterForm,
+    AxiosResponse<{
+      historyLogImsData: ILogImsData[];
+      INJURY_DETAILS: IInjuryDtls[];
+      SUGG_TEAM: ITeamDtls[];
+      WITNESS_TEAM: ITeamDtls[];
+    }>
+  >("/ims/get-ims-categorization-data", filterData);
+};
+
+const submitIncidentCategory = (pdcData: IImsMedicalFormData) => {
+  return http.post<any, AxiosResponse<string>>(
+    "/ims/submit-incident-category",
+    {
+      pdcData,
+    },
+  );
+};
+
 export {
   getIMSMasterData,
   addNewImsData,
@@ -79,6 +106,7 @@ export {
   getIMSTeamFormationData,
   submitTeamFormation,
   getIMSCloseData,
-  closeIncident
-
+  closeIncident,
+  getIMSCategorizationData,
+  submitIncidentCategory,
 };

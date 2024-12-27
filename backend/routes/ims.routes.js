@@ -16,5 +16,10 @@ router.post(
 );
 router.post("/get-ims-close-data", imsController.getImsCloseData);
 router.post("/close-incident", imsController.closeIncident);
+router.post(
+  "/get-ims-categorization-data",
+  imsController.getImsCategorizationData
+);
+router.post("/submit-incident-category", imsController.submitIncidentCategory);
 
 module.exports = router;
