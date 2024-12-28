@@ -1,11 +1,10 @@
 interface IUserData {
-  ID: number;
-  NAME: string;
-  EMAIL: string;
-  MOBILE: string;
-  LOCATION: number;
-  DEPARTMENT: string;
-  PROFILE_PIC_URL: string;
+  id: number;
+  name: string;
+  email: string;
+  mobile: string;
+  profile_pic_url: string;
+  roles: string;
 }
 
 export default IUserData;

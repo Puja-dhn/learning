@@ -4,6 +4,7 @@ import HomeIcon from "@heroicons/react/24/outline/HomeIcon";
 import HomeIconSolid from "@heroicons/react/24/solid/HomeIcon";
 
 import IMenuItem from "../types/IMenuItem";
+import Users from "@/pages/master/Users";
 
 const Dashboard = React.lazy(() => import("@/pages/master/Dashboard"));
 const ContextDefinations = React.lazy(
@@ -31,7 +32,7 @@ const MASTER_MENU_LIST: IMenuItem[] = [
     iconSelected: <HomeIconSolid className="w-5 h-5" />,
     appId: 1,
     path: "users",
-    element: <Dashboard />,
+    element: <Users />,
     children: [],
     menuType: "Normal",
   },

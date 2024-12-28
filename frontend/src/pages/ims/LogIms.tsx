@@ -56,6 +56,8 @@ function LogIms() {
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [contractors, setContractors] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
+  const [bodypartList, setBodypartList] = useState<IOptionList[]>([]);
+  const [injuryNameList, setInjuryNameList] = useState<IOptionList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
 
   const [injuryRow, setInjuryRow] = useState<any[]>([]);
@@ -64,7 +66,7 @@ function LogIms() {
     employeeId: "",
     name: "",
     department: "",
-    company: "TML",
+    company: "",
     age: "",
     sex: "",
     deployedDate: "",
@@ -109,6 +111,8 @@ function LogIms() {
       setAreas(historyIMSMasterData[0].AREA);
       setContractors(historyIMSMasterData[0].CONTRACTORS);
       setUsers(historyIMSMasterData[0].USERS);
+      setBodypartList(historyIMSMasterData[0].BODYPART);
+      setInjuryNameList(historyIMSMasterData[0].INJURYNATURE);
     }
   }, [imsMasterData, isIMSMasterDataLoading, isIMSSMasterDataError]);
 
@@ -190,7 +194,6 @@ function LogIms() {
       newRow.company &&
       newRow.age &&
       newRow.sex &&
-      newRow.deployedDate &&
       newRow.bodyPart &&
       newRow.injuryNature
     ) {
@@ -205,7 +208,7 @@ function LogIms() {
 
       // Reset the new row input
       setNewRow({
-        companyType: "",
+        companyType: "Permanent",
         employeeId: "",
         name: "",
         department: "",
@@ -397,9 +400,9 @@ function LogIms() {
               <div className="p-1">
                 <DropdownList
                   name="factors"
-                  label="Factors"
+                  label="Cause Of Incident"
                   control={control}
-                  optionList={[{ id: "", name: "Select factors" }, ...factors]}
+                  optionList={[{ id: "", name: "Select" }, ...factors]}
                 />
               </div>
             </div>
@@ -422,7 +425,7 @@ function LogIms() {
               <div className="p-1">
                 <TextArea
                   name="action_taken"
-                  label="Action taken"
+                  label="Immediate Action taken"
                   control={control}
                 />
               </div>
@@ -474,9 +477,7 @@ function LogIms() {
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                               Sex
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Deployed Date
-                            </th>
+
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                               BodyPart
                             </th>
@@ -582,44 +583,60 @@ function LogIms() {
                               />
                             </td>
                             <td className="px-4 py-2 border-b">
-                              <InputText
-                                type="text"
+                              <select
                                 value={newRow.sex}
-                                changeHandler={(e: any) =>
-                                  handleInputChange("sex", e)
+                                onChange={(e: any) =>
+                                  handleInputChange("sex", e.target.value)
                                 }
-                                className="w-full"
-                              />
+                                name="sex"
+                                className="bg-gray-50 border border-gray-300 outline-none focus:border-blue-900 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-400"
+                              >
+                                <option value="">Select</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                              </select>
                             </td>
+
                             <td className="px-4 py-2 border-b">
-                              <InputText
-                                type="date"
-                                value={newRow.deployedDate}
-                                changeHandler={(e: any) =>
-                                  handleInputChange("deployedDate", e)
-                                }
-                                className="w-full"
-                              />
-                            </td>
-                            <td className="px-4 py-2 border-b">
-                              <InputText
-                                type="text"
+                              <select
                                 value={newRow.bodyPart}
-                                changeHandler={(e: any) =>
-                                  handleInputChange("bodyPart", e)
+                                onChange={(e: any) =>
+                                  handleInputChange("bodyPart", e.target.value)
                                 }
-                                className="w-full"
-                              />
+                                name="bodyPart"
+                                className="bg-gray-50 border border-gray-300 outline-none focus:border-blue-900 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-400"
+                              >
+                                <option value="">Select</option>
+                                {bodypartList &&
+                                  bodypartList.length > 0 &&
+                                  bodypartList.map((item, index) => (
+                                    <option key={index} value={item.name}>
+                                      {item.name}
+                                    </option>
+                                  ))}
+                              </select>
                             </td>
                             <td className="px-4 py-2 border-b">
-                              <InputText
-                                type="text"
+                              <select
                                 value={newRow.injuryNature}
-                                changeHandler={(e: any) =>
-                                  handleInputChange("injuryNature", e)
+                                onChange={(e: any) =>
+                                  handleInputChange(
+                                    "injuryNature",
+                                    e.target.value,
+                                  )
                                 }
-                                className="w-full"
-                              />
+                                name="injuryNature"
+                                className="bg-gray-50 border border-gray-300 outline-none focus:border-blue-900 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-gray-400"
+                              >
+                                <option value="">Select</option>
+                                {injuryNameList &&
+                                  injuryNameList.length > 0 &&
+                                  injuryNameList.map((item, index) => (
+                                    <option key={index} value={item.name}>
+                                      {item.name}
+                                    </option>
+                                  ))}
+                              </select>
                             </td>
                             <td className="px-4 py-2 border-b">
                               <IconButton onClick={addRow}>
@@ -651,9 +668,7 @@ function LogIms() {
                               </td>
                               <td className="px-4 py-2 border-b">{item.age}</td>
                               <td className="px-4 py-2 border-b">{item.sex}</td>
-                              <td className="px-4 py-2 border-b">
-                                {item.deployedDate}
-                              </td>
+
                               <td className="px-4 py-2 border-b">
                                 {item.bodyPart}
                               </td>
@@ -670,14 +685,6 @@ function LogIms() {
                         </tbody>
                       </table>
                     </div>
-                    <div className="grid grid-cols-1 p-2">
-                      <DropdownList
-                        name="immediate_action"
-                        label="Immediate Action"
-                        control={control}
-                        optionList={[{ id: "", name: "Select" }]}
-                      />
-                    </div>
                   </div>
                 </div>
               )}
@@ -685,7 +692,7 @@ function LogIms() {
                 <div className="">
                   <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                     <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                      Suggested Team &nbsp;
+                      Suggested Team (Investigation Team) &nbsp;
                     </h3>
                   </div>
 
@@ -693,14 +700,14 @@ function LogIms() {
                     <table className="min-w-full border-collapse table-auto">
                       <thead>
                         <tr>
-                          <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                          <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[9.5%]">
                             Sl. No.
                           </th>
-                          <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                            Name
-                          </th>
-                          <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                          <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[27%]">
                             Employee ID
+                          </th>
+                          <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[27%]">
+                            Name
                           </th>
 
                           <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
@@ -713,8 +720,16 @@ function LogIms() {
                         <tr>
                           <td className="px-4 py-2 border-b">1</td>
                           <td className="px-4 py-2 border-b">
+                            <InputText
+                              type="text"
+                              value={suggTeamNewRow.id}
+                              className="w-full "
+                              disabled
+                            />
+                          </td>
+                          <td className="px-4 py-2 border-b">
                             <select
-                              value={suggTeamNewRow.name}
+                              value={suggTeamNewRow.id}
                               onChange={(e) =>
                                 handleSuggTeamInputChange(
                                   "name",
@@ -731,14 +746,7 @@ function LogIms() {
                                 ))}
                             </select>
                           </td>
-                          <td className="px-4 py-2 border-b">
-                            <InputText
-                              type="text"
-                              value={suggTeamNewRow.id}
-                              className="w-full "
-                              disabled
-                            />
-                          </td>
+
                           <td className="px-4 py-2 border-b">
                             <IconButton onClick={addSuggTeamRow}>
                               <PlusIcon className="w-4 h-4" />
@@ -754,10 +762,10 @@ function LogIms() {
                               <td className="px-4 py-2 border-b">
                                 {index + 2}
                               </td>
+                              <td className="px-4 py-2 border-b">{item.id}</td>
                               <td className="px-4 py-2 border-b">
                                 {item.name}
                               </td>
-                              <td className="px-4 py-2 border-b">{item.id}</td>
 
                               <td className="px-4 py-2 border-b">
                                 <IconButton

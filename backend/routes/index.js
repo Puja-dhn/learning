@@ -12,6 +12,7 @@ const accessRoutes = require("./access.routes");
 const sioRoutes = require("./sio.routes");
 const ptwRoutes = require("./ptw.routes");
 const imsRoutes = require("./ims.routes");
+const userRouts = require("./user.routes");
 
 router.use("/auth", commonMiddleware, authRoutes);
 router.use("/access", commonMiddleware, authMiddleware, accessRoutes);
@@ -19,6 +20,7 @@ router.use("/access", commonMiddleware, authMiddleware, accessRoutes);
 router.use("/sio", commonMiddleware, authMiddleware, sioRoutes);
 router.use("/ptw", commonMiddleware, authMiddleware, ptwRoutes);
 router.use("/ims", commonMiddleware, authMiddleware, imsRoutes);
+router.use("/user", commonMiddleware, authMiddleware, userRouts);
 
 const AppObsImageStorage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -140,6 +142,37 @@ router.post("/deleteObsClosureImage", (req, res) => {
       .status(200)
       .json({ success: true, message: "Image deleted successfully" });
   });
+});
+
+// profile upload
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "static/api/images/profile");
+    cb(null, "static/api/images/profile");
+  },
+  filename: function (req, file, cb) {
+    const filename = req.body.filename || "temp.JPG";
+    cb(null, filename);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, callback) {
+    var ext = path.extname(file.originalname);
+    if (ext !== ".jpg" && ext !== ".JPG" && ext !== ".jpeg") {
+      return callback(new Error("Only JPG are allowed"));
+    }
+    callback(null, true);
+  },
+  limits: {
+    fileSize: 1024 * 1024,
+  },
+});
+
+router.post("/uploadprofile", upload.single("file"), function (req, res) {
+  res.status(200).json("success");
 });
 
 module.exports = router;

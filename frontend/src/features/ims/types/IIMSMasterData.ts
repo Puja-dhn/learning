@@ -8,5 +8,8 @@ interface ISIOMasterData {
   AREA: IAreasList[];
   CONTRACTORS: IOptionList[];
   USERS: IOptionList[];
+  BODYPART: IOptionList[];
+  INJURYNATURE: IOptionList[];
+  INJURYMEDICAL: IOptionList[];
 }
 export default ISIOMasterData;

@@ -87,6 +87,7 @@ function IncidentInvestigation() {
   const [injuryType, setInjuryType] = useState<IOptionList[]>([]);
   const [factors, setFactors] = useState<IOptionList[]>([]);
   const [areas, setAreas] = useState<IAreasList[]>([]);
+  const [users, setUsers] = useState<IOptionList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
 
   const {
@@ -113,6 +114,7 @@ function IncidentInvestigation() {
       setInjuryType(historyImsMasterData[0].INJURYTYPE);
       setFactors(historyImsMasterData[0].FACTORS);
       setAreas(historyImsMasterData[0].AREA);
+      setUsers(historyImsMasterData[0].USERS);
     }
   }, [imsMasterData, isIMSMasterDataLoading, isIMSMasterDataError]);
 
@@ -1611,7 +1613,7 @@ function IncidentInvestigation() {
                     </div>
                   </div>
                 </div>
-                <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                {/* <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                       <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
@@ -1660,7 +1662,7 @@ function IncidentInvestigation() {
                       </div>
                     </div>
                   </div>
-                </div>
+                </div> */}
                 <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">

@@ -102,6 +102,7 @@ function CategorizeIncident() {
     id: "",
     name: "",
   });
+  const [injuryMedical, setInjuryMedical] = useState<IOptionList[]>([]);
   const queryClient = useQueryClient();
   const {
     data: imsMasterData,
@@ -128,6 +129,7 @@ function CategorizeIncident() {
       setFactors(historyImsMasterData[0].FACTORS);
       setAreas(historyImsMasterData[0].AREA);
       setUsers(historyImsMasterData[0].USERS);
+      setInjuryMedical(historyImsMasterData[0].INJURYMEDICAL);
     }
   }, [imsMasterData, isIMSMasterDataLoading, isIMSMasterDataError]);
 
@@ -682,7 +684,7 @@ function CategorizeIncident() {
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
                 name="factors"
-                label="Factors"
+                label="Cause Of Incident"
                 control={controlFilter}
                 optionList={[{ id: "All", name: "All" }, ...factors]}
               />
@@ -789,7 +791,7 @@ function CategorizeIncident() {
                 <div className="p-1">
                   <TextField
                     name="factors"
-                    label="Factors"
+                    label="Cause Of Incident"
                     control={controlAction}
                     disabled
                   />
@@ -816,7 +818,7 @@ function CategorizeIncident() {
                 <div className="p-1">
                   <TextArea
                     name="action_taken"
-                    label="Action taken"
+                    label="Immediate Action taken"
                     control={controlAction}
                     disabled
                   />
@@ -870,9 +872,7 @@ function CategorizeIncident() {
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Sex
                               </th>
-                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                                Deployed Date
-                              </th>
+
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 BodyPart
                               </th>
@@ -914,9 +914,7 @@ function CategorizeIncident() {
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.sex}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.deployed_date}
-                                </td>
+
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.body_part}
                                 </td>
@@ -935,9 +933,9 @@ function CategorizeIncident() {
                                     }
                                     className="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"
                                   >
-                                    {injuryType &&
-                                      injuryType.length > 0 &&
-                                      injuryType.map((item2) => (
+                                    {injuryMedical &&
+                                      injuryMedical.length > 0 &&
+                                      injuryMedical.map((item2) => (
                                         <option value={item2.id}>
                                           {item2.name}
                                         </option>
@@ -959,14 +957,6 @@ function CategorizeIncident() {
                           </tbody>
                         </table>
                       </div>
-                      <div className="grid grid-cols-1 p-2">
-                        <TextField
-                          name="immediate_action"
-                          label="Immediate Action"
-                          control={controlAction}
-                          disabled
-                        />
-                      </div>
                     </div>
                   </div>
                 )}
@@ -974,7 +964,7 @@ function CategorizeIncident() {
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                       <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                        Suggested Team &nbsp;
+                        Suggested Team (Investigation Team) &nbsp;
                       </h3>
                     </div>
 
@@ -982,14 +972,17 @@ function CategorizeIncident() {
                       <table className="min-w-full border-collapse table-auto">
                         <thead>
                           <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[10%]">
                               Sl. No.
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[30%]">
+                              Employee ID
+                            </th>
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[30%]">
                               Name
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Employee ID
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[30%]">
+                              &nbsp;
                             </th>
                           </tr>
                         </thead>
@@ -1005,10 +998,10 @@ function CategorizeIncident() {
                                   {index + 1}
                                 </td>
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.name}
+                                  {item.id}
                                 </td>
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.id}
+                                  {item.name}
                                 </td>
                               </tr>
                             ))}
@@ -1029,17 +1022,17 @@ function CategorizeIncident() {
                       <table className="min-w-full border-collapse table-auto">
                         <thead>
                           <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[10%]">
                               Sl. No.
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[30%]">
                               Employee ID
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[30%]">
                               Name
                             </th>
 
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[30%]">
                               Department/Company
                             </th>
                           </tr>

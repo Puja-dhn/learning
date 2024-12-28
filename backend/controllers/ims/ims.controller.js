@@ -52,7 +52,7 @@ exports.getImsMasterData = async (req, res) => {
           t_inshe_context_definitions t1
       WHERE
         t1.is_deleted = 0
-        and definitions_type = "IMS_INJURY_TYPE"
+        and definitions_type = "IMS_LOG_INJURY_TYPE"
        
     `;
 
@@ -112,6 +112,47 @@ exports.getImsMasterData = async (req, res) => {
 
     const resultUsers = await simpleQuery(usersQuery, []);
 
+    const bodypartQuery = `
+    SELECT DISTINCT
+        t1.context_id id,
+        t1.context_name name
+    FROM
+        t_inshe_context_definitions t1
+    WHERE
+      t1.is_deleted = 0
+      and definitions_type = "IMS_INJURY_BODYPART"
+     
+  `;
+
+    const resultBodypart = await simpleQuery(bodypartQuery, []);
+
+    const injNatureQuery = `
+    SELECT DISTINCT
+        t1.context_id id,
+        t1.context_name name
+    FROM
+        t_inshe_context_definitions t1
+    WHERE
+      t1.is_deleted = 0
+      and definitions_type = "IMS_INJURY_NATURE"
+     
+  `;
+    const resultInjNature = await simpleQuery(injNatureQuery, []);
+
+    const injuryMedicalQuery = `
+  SELECT DISTINCT
+      t1.context_id id,
+      t1.context_name name
+  FROM
+      t_inshe_context_definitions t1
+  WHERE
+    t1.is_deleted = 0
+    and definitions_type = "IMS_INJURY_TYPE"
+   
+`;
+
+    const resultInjuryMedical = await simpleQuery(injuryMedicalQuery, []);
+
     const masterDetails = {
       DEPARTMENT: [...resultDepartments],
       INJURYTYPE: [...resultInjury],
@@ -119,6 +160,9 @@ exports.getImsMasterData = async (req, res) => {
       AREA: [...resultAreas],
       CONTRACTORS: [...resultUsers],
       USERS: [...resultUsers],
+      BODYPART: [...resultBodypart],
+      INJURYNATURE: [...resultInjNature],
+      INJURYMEDICAL: [...resultInjuryMedical],
     };
 
     res.status(200).json({ historyIMSMasterData: masterDetails });
@@ -148,8 +192,6 @@ exports.addNewIms = async (req, res) => {
     witness,
   } = req.body;
 
-  res.status(200).json({ message: "Data processed successfully." });
-
   const currentTime = new Date();
 
   // Fetch Area Head
@@ -169,9 +211,56 @@ exports.addNewIms = async (req, res) => {
   }
 
   const areaHead = resultArea[0].head_id;
+  let insertResult;
+  if (+injury_type === 10) {
+    // Insert into incident header
+    const insertQuery = `
+  INSERT INTO t_inshe_incident_header (
+    inc_date_time,
+    department,
+    area,
+    reported_by,
+    injury_type,
+    factors,
+    exact_location,
+    potential_outcome,
+    action_taken,
+    incident_details,
+    immediate_action,
+    status,
+    medical_status,
+    pending_on,
+    created_at,
+    created_by,
+    updated_at,
+    updated_by
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+    const insertValues = [
+      inc_date_time,
+      department,
+      area,
+      reported_by,
+      injury_type,
+      factors,
+      exact_location,
+      potential_outcome,
+      action_taken,
+      incident_details,
+      immediate_action,
+      "Submitted",
+      "Pending",
+      areaHead,
+      currentTime,
+      ID,
+      currentTime,
+      ID,
+    ];
 
-  // Insert into incident header
-  const insertQuery = `
+    insertResult = await simpleQuery(insertQuery, insertValues);
+  } else {
+    // Insert into incident header
+    const insertQuery = `
       INSERT INTO t_inshe_incident_header (
         inc_date_time,
         department,
@@ -191,35 +280,30 @@ exports.addNewIms = async (req, res) => {
         updated_at,
         updated_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-  const insertValues = [
-    inc_date_time,
-    department,
-    area,
-    reported_by,
-    injury_type,
-    factors,
-    exact_location,
-    potential_outcome,
-    action_taken,
-    incident_details,
-    immediate_action,
-    "Submitted",
-    areaHead,
-    currentTime,
-    ID,
-    currentTime,
-    ID,
-  ];
+      `;
+    const insertValues = [
+      inc_date_time,
+      department,
+      area,
+      reported_by,
+      injury_type,
+      factors,
+      exact_location,
+      potential_outcome,
+      action_taken,
+      incident_details,
+      immediate_action,
+      "Submitted",
+      areaHead,
+      currentTime,
+      ID,
+      currentTime,
+      ID,
+    ];
 
-  const insertResult = await simpleQuery(insertQuery, insertValues);
-  // console.log(insertResult.insertid);
-  // if (insertResult.affectedRows > 0) {
-  //   const lastInsertedIdQuery = "SELECT LAST_INSERT_ID() AS last_id";
-  //   const result = await simpleQuery(lastInsertedIdQuery);
-  //   const incidentId = result[0]?.last_id;
-  //   console.log("Last inserted ID:", incidentId);
-  // }
+    insertResult = await simpleQuery(insertQuery, insertValues);
+  }
+
   const incidentId = insertResult.insertId;
 
   // Helper function to parse and insert JSON data
@@ -333,8 +417,7 @@ exports.addNewIms = async (req, res) => {
     ID,
   ]);
 
-  console.log("Data inserted successfully.");
-  res.status(200).json({ message: "Data processed successfully." });
+  return res.status(200).json({ message: "Data processed successfully." });
 };
 exports.getImsData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
