@@ -93,6 +93,7 @@ exports.getSIOMasterData = async (req, res) => {
         t_inshe_users t1
     WHERE
       t1.status = 'active'
+       and t1.id !=1
      
   `;
 

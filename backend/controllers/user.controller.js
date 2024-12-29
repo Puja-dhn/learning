@@ -153,6 +153,7 @@ exports.getUserDetailsList = async (req, res) => {
                   t_inshe_users t1
                 WHERE
                  1=1
+                  and t1.id !=1
                   AND 
                   (
                     ${strSqlForID}   
@@ -195,6 +196,7 @@ exports.getUserDetailsList = async (req, res) => {
                   t_inshe_users t1
                 WHERE
                 1=1
+                 and t1.id !=1
                   ${strID}
                   ${strEmpName}
                   ${strEmail}
@@ -270,6 +272,7 @@ exports.updateUserDetails = async (req, res) => {
         t_inshe_users
     WHERE
         email = ?
+         and id !=1
     ORDER BY name DESC`;
     const resultUsers = await simpleQuery(selectSqlUsers, [email]);
     if (resultUsers && resultUsers.length > 0) {
