@@ -6,6 +6,12 @@ import ILogPTWForm from "../types/ptw/ILogPTWForm";
 import ILogPtwData from "../types/ptw/ILogPtwData";
 import ILogPtwFilterForm from "../types/ptw/ILogPtwFilterForm";
 import ILogPTWApproveForm from "../types/ptw/ILogPTWApproveForm";
+import ILogPTWCloseForm from "../types/ptw/ILogPTWCloseForm";
+import IViolationMasterData from "../types/ptw/IViolationMasterData";
+import ILogViolationForm from "../types/ptw/ILogViolationForm";
+import ILogViolationFilterForm from "../types/ptw/ILogViolationFilterForm";
+import ILogViolationData from "../types/ptw/ILogViolationData";
+import ILogVIOCloseForm from "../types/ptw/ILogVIOCloseForm";
 
 const getPTWMasterData = () => {
   return http.post<
@@ -36,6 +42,40 @@ const submitCustodianApproval = (pdcData: ILogPTWApproveForm) => {
     pdcData,
   });
 };
+const closePtw = (pdcData: ILogPTWCloseForm) => {
+  return http.post<any, AxiosResponse<string>>("/ptw/close-ptw", {
+    pdcData,
+  });
+};
+const getViolationMasterData = () => {
+  return http.post<
+    any,
+    AxiosResponse<{ historyViolationMasterData: IViolationMasterData[] }>
+  >("/ptw/get-violation-master-data");
+};
+const addNewViolationData = (formData: any) => {
+  return http.post<ILogViolationForm, AxiosResponse<string>>(
+    "/ptw/add-new-violation",
+    formData,
+  );
+};
+const getViolationData = (filterData: ILogViolationFilterForm) => {
+  return http.post<
+    ILogViolationFilterForm,
+    AxiosResponse<{ historyViolationData: ILogViolationData[] }>
+  >("/ptw/get-violation-data", filterData);
+};
+const getOpenViolationData = (filterData: ILogViolationFilterForm) => {
+  return http.post<
+    ILogViolationFilterForm,
+    AxiosResponse<{ historyViolationData: ILogViolationData[] }>
+  >("/ptw/get-openviolation-data", filterData);
+};
+const closeViolations = (pdcData: ILogVIOCloseForm) => {
+  return http.post<any, AxiosResponse<string>>("/ptw/close-violations", {
+    pdcData,
+  });
+};
 
 export {
   getPTWMasterData,
@@ -43,4 +83,10 @@ export {
   getPTWData,
   getOpenPTWData,
   submitCustodianApproval,
+  closePtw,
+  getViolationMasterData,
+  addNewViolationData,
+  getViolationData,
+  getOpenViolationData,
+  closeViolations
 };

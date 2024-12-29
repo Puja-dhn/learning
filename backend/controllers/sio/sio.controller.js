@@ -291,7 +291,7 @@ exports.getSioData = async (req, res) => {
     t1.obs_datetime,
     t2.name department,
     t3.name area,
-    t4.name category,
+    t4.context_name category,
     t1.severity,
     t1.obs_desc,
     t1.obs_sugg,
@@ -314,7 +314,7 @@ exports.getSioData = async (req, res) => {
     t_inshe_log_sio t1
     join t_inshe_org_structures t2 on t1.department = t2.id
     join t_inshe_org_structures t3 on t1.area = t3.id
-    join t_inshe_categories t4 on t1.category = t4.id
+    join t_inshe_context_definitions t4 on t1.category = t4.context_id
     left join t_inshe_users t5 on t1.pending_on = t5.id
     left join t_inshe_users t6 on t1.responsibilities = t6.id
     join t_inshe_users t7 on t1.created_by = t7.id
@@ -375,7 +375,7 @@ exports.getOpenSioData = async (req, res) => {
       t1.area area_id,
       t3.name area,
       t1.category category_id,
-      t4.name category,
+      t4.context_name category,
       t1.severity,
       t1.obs_desc,
       t1.obs_sugg,
@@ -399,7 +399,7 @@ exports.getOpenSioData = async (req, res) => {
       t_inshe_log_sio t1
       join t_inshe_org_structures t2 on t1.department = t2.id
       join t_inshe_org_structures t3 on t1.area = t3.id
-      join t_inshe_categories t4 on t1.category = t4.id
+      join t_inshe_context_definitions t4 on t1.category = t4.context_id
       join t_inshe_users t5 on t1.pending_on = t5.id
       left join t_inshe_users t6 on t1.responsibilities = t6.id
        join t_inshe_users t7 on t1.created_by = t7.id
@@ -514,7 +514,7 @@ exports.getAssignedSioData = async (req, res) => {
       t1.area area_id,
       t3.name area,
       t1.category category_id,
-      t4.name category,
+      t4.context_name category,
       t1.severity,
       t1.obs_desc,
       t1.obs_sugg,
@@ -538,7 +538,7 @@ exports.getAssignedSioData = async (req, res) => {
       t_inshe_log_sio t1
       join t_inshe_org_structures t2 on t1.department = t2.id
       join t_inshe_org_structures t3 on t1.area = t3.id
-      join t_inshe_categories t4 on t1.category = t4.id
+      join t_inshe_context_definitions t4 on t1.category = t4.context_id
       join t_inshe_users t5 on t1.pending_on = t5.id
       left join t_inshe_users t6 on t1.responsibilities = t6.id
        join t_inshe_users t7 on t1.created_by = t7.id

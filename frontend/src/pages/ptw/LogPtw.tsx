@@ -241,9 +241,14 @@ function LogPtw() {
         const ownDepartment = historyPTWMasterData[0].DEPARTMENT.filter(
           (item: any) => +item.id === +authState.DEPARTMENT,
         );
-        setDepartmentHeadName(ownDepartment[0].head_name);
-        setValue("department", ownDepartment[0].name, { shouldValidate: true });
-        setDepartmentId(ownDepartment[0].id.toString());
+        if (ownDepartment.length > 0) {
+          setDepartmentHeadName(ownDepartment[0].head_name);
+          setValue("department", ownDepartment[0].name, {
+            shouldValidate: true,
+          });
+          setDepartmentId(ownDepartment[0].id.toString());
+        }
+
         setConfigs(historyPTWMasterData[0].CONFIG);
         setAreas(historyPTWMasterData[0].AREA);
 
@@ -786,7 +791,7 @@ function LogPtw() {
                 <div className="p-1">
                   <TextArea
                     name="why_moc_remarks"
-                    label="Why MOC select No (Remarks) "
+                    label="Why MOC Not Required "
                     control={control}
                   />
                 </div>

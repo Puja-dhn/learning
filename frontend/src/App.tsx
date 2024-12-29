@@ -12,6 +12,9 @@ import CategorizeIncident from "./pages/ims/CategorizeIncident";
 import IncidentInvestigation from "./pages/ims/IncidentInvestigation";
 import Users from "./pages/master/Users";
 import CloseRecommendation from "./pages/ims/CloseRecommendation";
+import LogViolations from "./pages/ptw/LogViolations";
+import ViewViolations from "./pages/ptw/ViewViolations";
+import CloseViolations from "./pages/ptw/CloseViolations";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -90,6 +93,9 @@ function App() {
             <Route path="log-ptw" element={<LogPtw />} />
             <Route path="view-ptw" element={<ViewPtw />} />
             <Route path="approve-ptw" element={<ApprovePtw />} />
+            <Route path="log-violations" element={<LogViolations />} />
+            <Route path="view-violations" element={<ViewViolations />} />
+            <Route path="close-violations" element={<CloseViolations />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

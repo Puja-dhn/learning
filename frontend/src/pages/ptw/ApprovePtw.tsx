@@ -43,6 +43,7 @@ interface IAnxPerson {
 }
 const initialApproveValues: ILogPTWApproveForm = {
   id: 0,
+  issuer_id: "",
   comments: "",
 };
 const initialFilterValues: ILogPtwFilterForm = {

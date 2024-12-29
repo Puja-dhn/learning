@@ -60,31 +60,17 @@ exports.getPTWMasterData = async (req, res) => {
 
     const resultAreas = await simpleQuery(areasQuery, []);
 
-    //   const configsQuery = `
-    //   SELECT
-    //       t1.context_id id,
-    //       t1.definitions_type type,
-    //       t1.context_name checklist
-    //   FROM
-    //       t_inshe_context_definitions t1
-    //   WHERE
-    //     t1.is_deleted = 0
-    //     and t1.definitions_type in ('Hazard Identification','Risk Assessment','PPE Required','General Work',
-    //     'Hot Work','Work at Height','Confined Space','Lifiting Work','ESMS Work Permit','Tools and Equipment'
-    //     )
-
-    // `;
     const configsQuery = `
-      SELECT
-          t1.id,
-          t1.type,
-          t1.checklist
-      FROM
-          t_inshe_ptw_configs t1
-      WHERE
-        t1.status = 'Active'
-
-    `;
+    SELECT 
+        t1.id,
+        t1.type,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+     
+  `;
 
     const resultConfigs = await simpleQuery(configsQuery, []);
 
@@ -96,7 +82,6 @@ exports.getPTWMasterData = async (req, res) => {
         t_inshe_users t1
     WHERE
       t1.status = 'active'
-       and t1.id !=1
      
   `;
 
@@ -228,6 +213,8 @@ exports.getPtwData = async (req, res) => {
 };
 exports.getOpenPtwData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
+  const { id, department, category, area, date_from, date_to, status } =
+    req.body;
   const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
 
   const sioQuery = `
@@ -293,11 +280,12 @@ exports.getOpenPtwData = async (req, res) => {
         join t_inshe_users t7 on t1.created_by = t7.id
       WHERE
         1=1
+        and t1.status = ?
        and t1.pending_on = ? 
        order by t1.id desc
     `;
 
-  const resultPtw = await simpleQuery(sioQuery, [logged_user_id]);
+  const resultPtw = await simpleQuery(sioQuery, [status, logged_user_id]);
 
   res.status(200).json({
     historyLogPtwData: [...resultPtw],
@@ -305,15 +293,28 @@ exports.getOpenPtwData = async (req, res) => {
 };
 exports.submitPTWApprovalData = async (req, res) => {
   const { ID } = req.user;
-  const { id, comments } = req.body.pdcData;
+  const { id, issuer_id, comments } = req.body.pdcData;
+  const initiatorQuery = `
+  SELECT
+    t1.created_by
+  FROM
+    t_inshe_log_ptw t1
+  WHERE
+    t1.id = ?
+`;
+  const resultRows = await simpleQuery(initiatorQuery, [id]);
+  if (!resultRows.length) {
+    return res.status(404).json({ message: "Permit not found." });
+  }
 
+  const initiator = resultRows[0].created_by;
   try {
     const currentTime = new Date();
 
     const updateQuery = `
-        update t_inshe_log_ptw set custodian_comments = ?,  updated_at = ?, updated_by = ?, status = "Custodian Approved", pending_on = 0 where id=?
+        update t_inshe_log_ptw set custodian_comments = ?,  updated_at = ?, updated_by = ?, status = "Custodian Approved", issuer = ?, pending_on = ? where id=?
       `;
-    const updateValues = [, comments, currentTime, ID, id];
+    const updateValues = [comments, currentTime, ID, issuer_id, initiator, id];
 
     try {
       await simpleQuery(updateQuery, updateValues);
@@ -471,6 +472,185 @@ exports.addNewPTWData = async (req, res) => {
     await simpleQuery(query, values);
 
     res.status(200).json({ message: "Data added successfully." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
+  }
+};
+exports.closePtw = async (req, res) => {
+  const { ID } = req.user;
+  const { id, closure_remarks } = req.body.pdcData;
+  try {
+    const currentTime = new Date();
+
+    const updateQuery = `
+        update t_inshe_log_ptw set close_remarks = ?,  updated_at = ?, updated_by = ?, status = "Closed", pending_on = 0 where id=?
+      `;
+    const updateValues = [closure_remarks, currentTime, ID, id];
+
+    try {
+      await simpleQuery(updateQuery, updateValues);
+      console.log("Permit Closed Successfully.");
+    } catch (queryError) {
+      console.error("Error executing query:", queryError);
+      return res.status(500).json({ error: "Failed to insert data." });
+    }
+
+    res.status(200).json({ message: "Data processed successfully." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
+  }
+};
+exports.getViolationMasterData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+
+  const sioQuery = `
+    SELECT 
+      t1.id,
+      t1.job_description,
+      t2.contractor_name
+    FROM
+      t_inshe_log_ptw t1
+      join t_inshe_contractors t2 on t1.contractor = t2.id
+    WHERE
+      1=1
+      order by t1.id desc
+  `;
+
+  const resultPtw = await simpleQuery(sioQuery, []);
+
+  res.status(200).json({
+    historyViolationMasterData: [...resultPtw],
+  });
+};
+exports.addNewViolationData = async (req, res) => {
+  const { ID, DEPARTMENT } = req.user;
+  const { permit_no, contractor_name, job_description, violation_dtls } =
+    req.body;
+
+  try {
+    const currentTime = new Date();
+
+    // Fetch Department Head
+    const initiatorQuery = `
+      SELECT 
+        t1.created_by
+      FROM
+        t_inshe_log_ptw t1
+      WHERE
+       t1.id = ?
+    `;
+    const resultInitiator = await simpleQuery(initiatorQuery, [permit_no]);
+    if (!resultInitiator.length) {
+      return res.status(400).json({ message: "Department not found." });
+    }
+
+    const initiator = resultInitiator[0].created_by;
+    const query = `
+      INSERT INTO t_inshe_log_violations (
+        permit_no, violation_details, pending_on, status, created_at, created_by,updated_at, updated_by
+      ) VALUES (?, ?, ?, "Open", ?, ?, ?, ?)
+    `;
+
+    const values = [
+      permit_no,
+      violation_dtls,
+      initiator,
+      currentTime,
+      ID,
+      currentTime,
+      ID,
+    ];
+
+    // Execute the query
+    await simpleQuery(query, values);
+
+    res.status(200).json({ message: "Data added successfully." });
+  } catch (error) {
+    console.error("Error processing request:", error);
+    res.status(500).json({ error: "An error occurred while processing data." });
+  }
+};
+exports.getViolationData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const sioQuery = `
+    SELECT 
+      t1.id,
+      LPAD(t1.id, 6, '0') AS disp_logno,
+      LPAD(t1.permit_no, 6, '0') AS permit_no,
+      t1.created_at violation_date,
+      t3.contractor_name,
+      t1.violation_details,
+      t4.name pending_on,
+      t1.status
+    FROM
+      t_inshe_log_violations t1
+      join t_inshe_log_ptw t2 on t1.permit_no = t2.id
+      join t_inshe_contractors t3 on t2.contractor = t3.id
+      left join t_inshe_users t4 on t1.pending_on = t4.id
+    WHERE
+      1=1
+      and t1.created_by = ?
+      order by t1.id desc
+  `;
+
+  const resultPtw = await simpleQuery(sioQuery, [logged_user_id]);
+
+  res.status(200).json({
+    historyViolationData: [...resultPtw],
+  });
+};
+exports.getOpenViolationData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const sioQuery = `
+    SELECT 
+      t1.id,
+      LPAD(t1.id, 6, '0') AS disp_logno,
+      LPAD(t1.permit_no, 6, '0') AS permit_no,
+      t1.created_at violation_date,
+      t3.contractor_name,
+      t1.violation_details,
+      t4.name pending_on,
+      t1.status
+    FROM
+      t_inshe_log_violations t1
+      join t_inshe_log_ptw t2 on t1.permit_no = t2.id
+      join t_inshe_contractors t3 on t2.contractor = t3.id
+      join t_inshe_users t4 on t1.pending_on = t4.id
+    WHERE
+      1=1
+      and t1.pending_on = ?
+      and t1.status = "Open"
+      order by t1.id desc
+  `;
+
+  const resultPtw = await simpleQuery(sioQuery, [logged_user_id]);
+
+  res.status(200).json({
+    historyViolationData: [...resultPtw],
+  });
+};
+exports.closeViolations = async (req, res) => {
+  const { ID } = req.user;
+  const { id, closure_remarks } = req.body.pdcData;
+  try {
+    const currentTime = new Date();
+
+    const updateQuery = `
+        update t_inshe_log_violations set close_remarks = ?,  updated_at = ?, updated_by = ?, status = "Closed", pending_on = 0 where id=?
+      `;
+    const updateValues = [closure_remarks, currentTime, ID, id];
+
+    try {
+      await simpleQuery(updateQuery, updateValues);
+      console.log("Violation Closed Successfully.");
+    } catch (queryError) {
+      console.error("Error executing query:", queryError);
+      return res.status(500).json({ error: "Failed to insert data." });
+    }
+
+    res.status(200).json({ message: "Data processed successfully." });
   } catch (error) {
     console.error("Error processing request:", error);
     res.status(500).json({ error: "An error occurred while processing data." });

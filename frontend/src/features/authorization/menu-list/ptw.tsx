@@ -9,6 +9,9 @@ import IMenuItem from "../types/IMenuItem";
 import LogPtw from "@/pages/ptw/LogPtw";
 import ViewPtw from "@/pages/ptw/ViewPtw";
 import ApprovePtw from "@/pages/ptw/ApprovePtw";
+import LogViolations from "@/pages/ptw/LogViolations";
+import ViewViolations from "@/pages/ptw/ViewViolations";
+import CloseViolations from "@/pages/ptw/CloseViolations";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -65,6 +68,42 @@ const PTW_MENU_LIST: IMenuItem[] = [
     appId: 2,
     path: "approve-ptw",
     element: <ApprovePtw />,
+    children: [],
+    menuType: "Normal",
+  },
+
+  {
+    id: 12,
+    name: "Log Violations",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 3,
+    path: "log-violations",
+    element: <LogViolations />,
+    children: [],
+    menuType: "Normal",
+  },
+
+  {
+    id: 13,
+    name: "View Violations",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 3,
+    path: "view-violations",
+    element: <ViewViolations />,
+    children: [],
+    menuType: "Normal",
+  },
+
+  {
+    id: 14,
+    name: "Close Violations",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 3,
+    path: "close-violations",
+    element: <CloseViolations />,
     children: [],
     menuType: "Normal",
   },
