@@ -57,7 +57,7 @@ function App() {
           </Route>
           <Route
             path="master"
-            element={<PrivateRoutes outlet={<HomeLayout appId={1} />} />}
+            element={<PrivateRoutes outlet={<HomeLayout appId={0} />} />}
           >
             <Route index element={<MasterDashboard />} />
             <Route path="dashboard" element={<MasterDashboard />} />

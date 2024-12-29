@@ -43,7 +43,7 @@ function Dashboard() {
     }
 
     if (!isAppAccessDataLoading && appAccessData) {
-      const currAppData = APP_MENUS.filter((item) => item.appId === 1)[0];
+      const currAppData = APP_MENUS.filter((item) => item.appId === 0)[0];
       const currDashboardMenu = currAppData.menuList[0];
       setAppAccess(appAccessData);
       setSelMenu(currDashboardMenu);

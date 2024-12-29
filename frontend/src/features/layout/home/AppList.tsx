@@ -24,7 +24,7 @@ function AppList(props: IProps) {
   const navigate = useNavigate();
   const handleAppSelection = (appId: number) => {
     const currAppData = APP_MENUS.filter((item) => item.appId === appId)[0];
-    const currDashboardMenu = currAppData.menuList[1];
+    const currDashboardMenu = currAppData.menuList[0];
     setApp(appId);
     setSelMenu(currDashboardMenu);
     navigate(`/${currAppData.routeMaster}/${currDashboardMenu.path}`, {

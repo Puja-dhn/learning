@@ -55,7 +55,7 @@ function MenuItem(props: IProps) {
         const currAppData = APP_MENUS.filter(
           (item) => item.appId === menuItem.appId,
         )[0];
-        setApp(1);
+        setApp(0);
         navigate(`/${currAppData.routeMaster}/${path}`, { replace: true });
       } else {
         navigate(path, { replace: true });

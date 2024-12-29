@@ -7,25 +7,25 @@ import IMS_MENU_LIST from "./ims";
 
 const APP_MENUS = [
   {
-    appId: 1,
+    appId: 0,
     routeMaster: "master",
     menuList: MASTER_MENU_LIST,
     menuFlatList: [...getFlatMenuList(MASTER_MENU_LIST)],
   },
   {
-    appId: 2,
+    appId: 1,
     routeMaster: "sio",
     menuList: SIS_MENU_LIST,
     menuFlatList: [...getFlatMenuList(SIS_MENU_LIST)],
   },
   {
-    appId: 3,
+    appId: 2,
     routeMaster: "ptw",
     menuList: PTW_MENU_LIST,
     menuFlatList: [...getFlatMenuList(PTW_MENU_LIST)],
   },
   {
-    appId: 4,
+    appId: 3,
     routeMaster: "ims",
     menuList: IMS_MENU_LIST,
     menuFlatList: [...getFlatMenuList(IMS_MENU_LIST)],
