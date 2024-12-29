@@ -1,8 +1,6 @@
 const mysql2 = require("mysql2/promise");
-const database = require("../services/database.js");
-const jwtGenerator = require("../utils/jwt");
-const jwt = require("jsonwebtoken");
-const ldap = require("ldapjs");
+const fs = require("fs");
+const path = require("path");
 const { sendMail } = require("../services/mail.js");
 const logger = require("../utils/logger.js");
 const bcrypt = require("bcrypt");
@@ -96,7 +94,24 @@ exports.getUserDetailsList = async (req, res) => {
   let strSql = "";
   let strSqlSDT = "";
 
-  let strSqlRolesCol = ` '' roles `;
+  let strSqlRolesCol = `  COALESCE(
+        (
+        SELECT
+            GROUP_CONCAT(
+                CONCAT(t3.name, ' (', t3.id, ')')
+            ORDER BY
+                t3.name,
+                t3.id SEPARATOR ', '
+            )
+        FROM
+            t_inshe_roles t3
+        INNER JOIN t_inshe_user_role t4 ON
+            t3.id = t4.role_id
+        WHERE
+            t4.user_id = t1.id
+    ),
+    ''
+    ) AS roles `;
 
   if (show_roles || in_role_list.length > 0) {
     strSqlRolesCol = ` COALESCE(
@@ -129,6 +144,9 @@ exports.getUserDetailsList = async (req, res) => {
                   t1.id,
                   t1.name,
                   t1.email,
+                  t1.mobile,
+                  t1.designation,
+                  t1.status,
                   NVL(t1.profile_pic_url,'profile_photo_default.png') profile_pic_url,
                   ${strSqlRolesCol}
                 FROM
@@ -168,6 +186,9 @@ exports.getUserDetailsList = async (req, res) => {
                   t1.name,
                   NVL(t1.profile_pic_url,'profile_photo_default.png') profile_pic_url,
                   t1.email,
+                   t1.mobile,
+                   t1.designation,
+                   t1.status,
                   ${strSqlRolesCol}
                  
                 FROM
@@ -180,6 +201,7 @@ exports.getUserDetailsList = async (req, res) => {
                 ORDER BY 
                   name, 
                   id ASC`;
+      console.log(strSql);
       let resultUserList = await simpleQuery(strSql, []);
 
       result = [...resultUserList];
@@ -225,16 +247,14 @@ exports.updateUserDetails = async (req, res) => {
     id,
     name,
     email,
-    roles: user_roles,
+    mobile,
+    designation,
+    profile_pic_url,
+    status,
+    roles,
     is_profile_edit,
   } = req.body;
-
-  if (!id || id.length <= 0) {
-    return res.status(400).json({
-      errorMessage: "Invalid Request",
-      errorTransKey: "api_res_invalid_request",
-    });
-  }
+  const currentTime = new Date();
 
   if (!isEditAllowed) {
     return res.status(403).json({
@@ -242,92 +262,188 @@ exports.updateUserDetails = async (req, res) => {
       errorTransKey: "api_res_unathorized_update_data",
     });
   }
-
-  // update user details, if rfid is reset, if password is reset
-
-  let strSqlPass = "";
-  let strSqlImage = "";
-
-  if (is_password_reset.toString() === "1") {
-    const bycryptedPassword = await bcrypt
-      .hash(new_password, BCYRPT_SALT_ROUNDS)
-      .then((hash) => {
-        return hash;
-      })
-      .catch((err) => {
-        console.error(err.message);
-        return "$2b$10$LR0iYyz1Gbp93sgEmRDcluQtcYiQGWFI7LraVOTADes7OVFT3.7nS1";
+  if (!id || id.length <= 0) {
+    const BCYRPT_SALT_ROUNDS = 10;
+    const selectSqlUsers = `SELECT
+        *
+    FROM
+        t_inshe_users
+    WHERE
+        email = ?
+    ORDER BY name DESC`;
+    const resultUsers = await simpleQuery(selectSqlUsers, [email]);
+    if (resultUsers && resultUsers.length > 0) {
+      return res.status(403).json({
+        errorMessage: "Email id already exists.",
+        errorTransKey: "api_res_email_exists",
       });
+    } else {
+      const bycryptedPassword = await bcrypt
+        .hash(new_password, BCYRPT_SALT_ROUNDS)
+        .then((hash) => {
+          return hash;
+        })
+        .catch((err) => {
+          console.error(err.message);
+          return "$2b$10$LR0iYyz1Gbp93sgEmRDcluQtcYiQGWFI7LraVOTADes7OVFT3.7nS1";
+        });
+      if (is_profile_edit.toString() === "1") {
+        const imageDirPath = path.resolve(
+          __dirname,
+          "../static/api/images/profile/"
+        );
+        fs.rename(
+          `${imageDirPath}/${id}_temp.JPG`,
+          `${imageDirPath}/${id}.JPG`,
+          (err) => {
+            if (err) console.log("ERROR renaming profile pic: " + err);
+          }
+        );
+      }
+      const insertSqlUsers = `
+      INSERT into t_inshe_users(name,email,mobile,password,designation,status,profile_pic_url,created_at,created_by)values(
+      ?,?,?,?,?,?,?,?,?
+      )
+      `;
+      const resultUsers = await simpleQuery(insertSqlUsers, [
+        name,
+        email,
+        mobile,
+        bycryptedPassword,
+        designation,
+        status,
+        profile_pic_url,
+        currentTime,
+        logged_user_id,
+      ]);
+      const userId = resultUsers.insertId;
+      const selectSqlRoles = `SELECT
+        id,
+        name
+      FROM
+          t_inshe_roles
+      WHERE
+          status = 1
+      ORDER BY name DESC`;
+      const resultRoles = await simpleQuery(selectSqlRoles, []);
 
-    strSqlPass = ` password = '${bycryptedPassword}', `;
-  }
+      const strRoles = roles;
+      let arrRoles = [];
+      if (strRoles.length > 0) {
+        arrRoles = strRoles.split(", ");
+      }
+      arrRoles = arrRoles.map(
+        (item) =>
+          resultRoles.filter((role) => item === `${role.name} (${role.id})`)[0]
+            .id
+      );
 
-  if (is_profile_edit.toString() === "1") {
-    strSqlImage = ` profile_pic_url = '${EMP_ID}.JPG', `;
-  }
-  const resultSql = `UPDATE
+      for (let i = 0; i < arrRoles.length; i += 1) {
+        const insSqlRole = `INSERT INTO 
+                      t_inshe_user_role 
+                    (
+                      user_id,
+                      role_id
+                    )
+                    values
+                    (
+                      ?,
+                      ?  
+                    )`;
+        const resultInsertUserRole = await simpleQuery(insSqlRole, [
+          userId,
+          arrRoles[i],
+        ]);
+      }
+    }
+  } else {
+    // update user details, if rfid is reset, if password is reset
+
+    let strSqlPass = "";
+    let strSqlImage = "";
+    const BCYRPT_SALT_ROUNDS = 10;
+    if (is_password_reset.toString() === "1") {
+      const bycryptedPassword = await bcrypt
+        .hash(new_password, BCYRPT_SALT_ROUNDS)
+        .then((hash) => {
+          return hash;
+        })
+        .catch((err) => {
+          console.error(err.message);
+          return "$2b$10$LR0iYyz1Gbp93sgEmRDcluQtcYiQGWFI7LraVOTADes7OVFT3.7nS1";
+        });
+
+      strSqlPass = ` password = '${bycryptedPassword}', `;
+    }
+
+    if (is_profile_edit.toString() === "1") {
+      strSqlImage = ` profile_pic_url = '${id}.JPG', `;
+    }
+    const resultSql = `UPDATE
           t_inshe_users  
-        SET          
+        SET  
+        ${strSqlPass}
+          ${strSqlImage}         
           name = ?,
           email = ?,
-          ${strSqlPass}
-          ${strSqlImage} 
-          upd_by = ?,
-          upd_ts = SYSDATE
+          mobile = ?,
+          designation = ?
+          
+          
         WHERE
             id = ?`;
-  const resultUpdateUserDetails = await simpleQuery(resultSql, [
-    name,
-    email,
-    logged_user_id,
-    id,
-  ]);
+    const resultUpdateUserDetails = await simpleQuery(resultSql, [
+      name,
+      email,
+      mobile,
+      designation,
+      id,
+    ]);
 
-  if (is_profile_edit.toString() === "1") {
-    const imageDirPath = path.resolve(
-      __dirname,
-      "../static/api/images/profile/"
-    );
-    fs.rename(
-      `${imageDirPath}/${id}_temp.JPG`,
-      `${imageDirPath}/${id}.JPG`,
-      (err) => {
-        if (err) console.log("ERROR renaming profile pic: " + err);
-      }
-    );
-  }
+    if (is_profile_edit.toString() === "1") {
+      const imageDirPath = path.resolve(
+        __dirname,
+        "../static/api/images/profile/"
+      );
+      fs.rename(
+        `${imageDirPath}/${id}_temp.JPG`,
+        `${imageDirPath}/${id}.JPG`,
+        (err) => {
+          if (err) console.log("ERROR renaming profile pic: " + err);
+        }
+      );
+    }
 
-  // delete old roles
-  const resultSqlRoles = `DELETE          
+    // delete old roles
+    const resultSqlRoles = `DELETE  from        
           t_inshe_user_role
       WHERE
           user_id = ? `;
-  const resultDeleteOldRoles = await simpleQuery(resultSqlRoles, [id]);
+    const resultDeleteOldRoles = await simpleQuery(resultSqlRoles, [id]);
 
-  // add new roles
-  const selectSqlRoles = `SELECT
+    // add new roles
+    const selectSqlRoles = `SELECT
           id,
           name
       FROM
           t_inshe_roles
       WHERE
-          status = 'Active'
+          status = 1
       ORDER BY name DESC`;
-  const resultRoles = await simpleQuery(selectSqlRoles, []);
+    const resultRoles = await simpleQuery(selectSqlRoles, []);
 
-  const strRoles = user_roles;
-  let arrRoles = [];
-  if (strRoles.length > 0) {
-    arrRoles = strRoles.split(", ");
-  }
-  arrRoles = arrRoles.map(
-    (item) =>
-      resultRoles.rows.filter((role) => item === `${role.name} (${role.id})`)[0]
-        .ID
-  );
+    const strRoles = roles;
+    let arrRoles = [];
+    if (strRoles.length > 0) {
+      arrRoles = strRoles.split(", ");
+    }
+    arrRoles = arrRoles.map(
+      (item) =>
+        resultRoles.filter((role) => item === `${role.name} (${role.id})`)[0].id
+    );
 
-  for (let i = 0; i < arrRoles.length; i += 1) {
-    const insSqlRole = `INSERT INTO 
+    for (let i = 0; i < arrRoles.length; i += 1) {
+      const insSqlRole = `INSERT INTO 
                           t_inshe_user_role 
                         (
                           user_id,
@@ -338,7 +454,11 @@ exports.updateUserDetails = async (req, res) => {
                           ?,
                           ?  
                         )`;
-    const resultInsertUserRole = await simpleQuery(insSqlRole, []);
+      const resultInsertUserRole = await simpleQuery(insSqlRole, [
+        id,
+        arrRoles[i],
+      ]);
+    }
   }
 
   return res.status(200).json("success");

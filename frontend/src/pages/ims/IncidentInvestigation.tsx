@@ -9,6 +9,7 @@ import {
   ArrowDownTrayIcon,
   PlusIcon,
   TrashIcon,
+  PencilSquareIcon,
 } from "@heroicons/react/24/solid";
 import { useQueryClient } from "react-query";
 // import { utils, writeFile } from "xlsx";
@@ -16,31 +17,31 @@ import { useQueryClient } from "react-query";
 import Paper from "@mui/material/Paper";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import * as XLSX from "xlsx";
-import { ASSET_BASE_URL } from "@/features/common/constants";
+import { API_BASE_URL, ASSET_BASE_URL } from "@/features/common/constants";
 // import { IOptionList } from "@/features/ui/types";
 import { IconButton } from "@/features/ui/buttons";
 import { ModalPopup } from "@/features/ui/popup";
 import { DropdownList, TextArea, TextField } from "@/features/ui/form";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
-
-import ModalPopupMobile from "@/features/ui/popup/ModalPopupMobile";
-
-import { ILogSIOData } from "@/features/sis/types";
-import ISIOPDCAssignData from "@/features/sis/types/sis/ISIOPDCAssignData";
 import { IOptionList } from "@/features/ui/types";
 import IAreasList from "@/features/sis/types/sis/IAreasList";
 import ILogImsFilterForm from "@/features/ims/types/ILogImsFilterForm";
 import useIMSMasterDataQuery from "@/features/ims/hooks/useIMSMasterDataQuery";
 import ILogImsData from "@/features/ims/types/ILogImsData";
-import useImsLogDetailQuery from "@/features/ims/hooks/useImsLogDetailQuery";
-import { getIncidentOthersData } from "@/features/ims/services/ims.services";
-import { PencilSquareIcon } from "@heroicons/react/24/solid";
-import InputTextArea from "@/features/ui/elements/InputTextArea";
+
 import { InputText } from "@/features/ui/elements";
+import useImsInvestigationDetailQuery from "@/features/ims/hooks/useImsInvestigationDetailQuery";
+import ILogInvestigationData from "@/features/ims/types/ILogInvestigationData";
+import { submitInvestigationData } from "@/features/ims/services/ims.services";
 
 interface ILogImsTeamData {
   historyLogImsData: ILogImsData[];
+}
+interface DocumentRow {
+  id: number;
+  documentType: string;
+  document: string;
 }
 const initialViewImsValues: ILogImsData = {
   disp_logno: 0,
@@ -57,6 +58,7 @@ const initialViewImsValues: ILogImsData = {
   potential_outcome: "",
   action_taken: "",
   incident_details: "",
+  ims_photos: "",
   immediate_action: "",
   status: "",
   pending_on: "",
@@ -65,6 +67,38 @@ const initialViewImsValues: ILogImsData = {
   updated_at: "",
   updated_by: "",
   log_by: "",
+  close_remarks: "",
+};
+const initialInvestigationValues: ILogInvestigationData = {
+  disp_logno: 0,
+  incident_no: 0,
+  inc_date_time: "",
+  department_id: "",
+  department: "",
+  area_id: "",
+  area: 0,
+  injury_type: "",
+  factors: "",
+  reported_by: 0,
+  exact_location: "",
+  potential_outcome: "",
+  action_taken: "",
+  incident_details: "",
+  ims_photos: "",
+  immediate_action: "",
+  status: "",
+  risk_identified: "",
+  identified_control: "",
+  control_type: "",
+  control_description: "",
+  control_adequate_desc: "",
+  list_facts: "",
+  risk_management: "",
+  physical_factors: "",
+  human_factors: "",
+  system_factors: "",
+  recommendations: "",
+  documents: "",
 };
 const initialFilterValues: ILogImsFilterForm = {
   incident_no: null,
@@ -168,6 +202,21 @@ function IncidentInvestigation() {
     defaultValues: initialViewImsValues,
   });
 
+  const {
+    handleSubmit: handleSubmitInvestigation,
+    reset: resetInvestigation,
+    control: controlInvestigation,
+    setValue,
+    watch: watchInvestigation,
+  } = useForm<ILogInvestigationData>({
+    defaultValues: initialInvestigationValues,
+  });
+
+  const [modalImage, setModalImage] = useState<string>("");
+  const [showImageDialog, setShowImageDialog] = useState({
+    status: false,
+  });
+
   const handlePDCAssignDialogClose = () => {
     setShowPDCAssignDialog((oldState) => ({ ...oldState, status: false }));
   };
@@ -176,8 +225,9 @@ function IncidentInvestigation() {
     setShowInvestigationDialog((oldState) => ({ ...oldState, status: false }));
   };
 
-  const handleActionClick = (row: ILogImsData) => {
-    resetActionTaken({
+  const handleActionClick = (row: ILogInvestigationData) => {
+    setImagePreviews(JSON.parse(row.ims_photos));
+    resetInvestigation({
       disp_logno: row.disp_logno,
       incident_no: row.incident_no,
       inc_date_time: row.inc_date_time,
@@ -193,7 +243,6 @@ function IncidentInvestigation() {
       action_taken: row.action_taken,
       incident_details: row.incident_details,
       immediate_action: row.immediate_action,
-      status: row.status,
     });
     setShowInvestigationDialog({
       status: true,
@@ -212,6 +261,7 @@ function IncidentInvestigation() {
       (item) => item.header_id === row.incident_no,
     );
     setWitTeamFilterRow(wittFilter);
+    setImagePreviews(JSON.parse(row.ims_photos));
     resetActionTaken({
       disp_logno: row.disp_logno,
       incident_no: row.incident_no,
@@ -228,9 +278,7 @@ function IncidentInvestigation() {
       action_taken: row.action_taken,
       incident_details: row.incident_details,
       immediate_action: row.immediate_action,
-      status: row.status,
     });
-
     setShowPDCAssignDialog({
       status: true,
     });
@@ -284,18 +332,11 @@ function IncidentInvestigation() {
     authState.ROLES.length > 0 &&
     authState.ROLES.includes(2);
 
-  const CURR_OBS_STATUS_LIST = [
-    { id: "Open", name: "Open" },
-    { id: "Team Formed", name: "Team Formed" },
-    { id: "Investigation", name: "Investigation" },
-    { id: "Closed", name: "Closed" },
-  ];
-
   const {
     data: imsLogHistoryData,
     isLoading: isImsLogHistoryDataLoading,
     isError: isImsLogHistoryDataError,
-  } = useImsLogDetailQuery(filterList);
+  } = useImsInvestigationDetailQuery(filterList);
 
   const [showFilterDialog, setShowFilterDialog] = useState({
     status: false,
@@ -404,6 +445,13 @@ function IncidentInvestigation() {
     });
   };
 
+  const [factRows, setFactRows] = useState<any>([]);
+  const [facts, setFacts] = useState<string>("");
+  const [physicalFactorRows, setPhysicalFactorRows] = useState<any>([]);
+  const [humanFactorRows, setHumanFactorRows] = useState<any>([]);
+  const [systemFactorRows, setSystemFactorRows] = useState<any>([]);
+  const [recomendationRows, setRecomendationRows] = useState<any>([]);
+
   const formatDate = (date: any) => {
     const d = new Date(date);
     const day = String(d.getDate()).padStart(2, "0");
@@ -411,7 +459,14 @@ function IncidentInvestigation() {
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
   };
-
+  const handleImageDialogClose = () => {
+    setShowImageDialog((oldState) => ({ ...oldState, status: false }));
+    setModalImage("");
+  };
+  const openImageModal = (image: any) => {
+    setModalImage(image);
+    setShowImageDialog({ status: true });
+  };
   const handleExport = () => {
     const rows = teamData.historyLogImsData.map((item) => ({
       "Log No": item.disp_logno,
@@ -430,8 +485,57 @@ function IncidentInvestigation() {
     XLSX.writeFile(wb, "export.xlsx");
   };
 
-  const [factRows, setFactRows] = useState<any>([]);
-  const [facts, setFacts] = useState<string>("");
+  const handleInvestigationSubmit: SubmitHandler<ILogInvestigationData> = (
+    values,
+  ) => {
+    if (factRows.length === 0) {
+      alertToast.show("warning", "List Of Facts  required", true, 2000);
+    } else if (values.risk_identified === "") {
+      alertToast.show(
+        "warning",
+        "Please choose a option in Risk Management",
+        true,
+        2000,
+      );
+    } else if (physicalFactorRows.length === 0) {
+      alertToast.show("warning", "Physical factor is required", true, 2000);
+    } else if (humanFactorRows.length === 0) {
+      alertToast.show("warning", "Human factor is required", true, 2000);
+    } else if (systemFactorRows.length === 0) {
+      alertToast.show("warning", "Syatem factor is required", true, 2000);
+    } else if (recomendationRows.length === 0) {
+      alertToast.show("warning", "Recommendation is required", true, 2000);
+    } else {
+      loader.show();
+      submitInvestigationData(values)
+        .then(() => {
+          alertToast.show(
+            "success",
+            "Investigation Succesfully Completed",
+            true,
+            2000,
+          );
+
+          setShowInvestigationDialog((oldState) => ({
+            ...oldState,
+            status: false,
+          }));
+          queryClient.invalidateQueries({
+            predicate: (query) =>
+              query.queryKey[0] === "imsInvestigationDataQuery",
+          });
+        })
+
+        .catch((err) => {
+          if (err.response && err.response.status) {
+            alertToast.show("warning", err.response.data.message, true);
+          }
+        })
+        .finally(() => {
+          loader.hide();
+        });
+    }
+  };
 
   const handleInputChange = (factsname: string) => {
     setFacts(factsname);
@@ -445,15 +549,18 @@ function IncidentInvestigation() {
     };
     listArr.push(factsObject);
     setFactRows(listArr);
+    setValue("list_facts", JSON.stringify(listArr), { shouldValidate: true });
     setFacts("");
   };
 
   const removeFcatsRow = (id: number) => {
-    // Remove the row based on the id
-    setFactRows(factRows.filter((item: any) => item.id !== id));
+    const updatedFactRows = factRows.filter((item: any) => item.id !== id);
+    setFactRows(updatedFactRows);
+    setValue("list_facts", JSON.stringify(updatedFactRows), {
+      shouldValidate: true,
+    });
   };
 
-  const [physicalFactorRows, setPhysicalFactorRows] = useState<any>([]);
   const [physicalFactorDescription, setPhysicalFactorDescription] =
     useState<string>("");
 
@@ -469,17 +576,22 @@ function IncidentInvestigation() {
     };
     listArr.push(factsObject);
     setPhysicalFactorRows(listArr);
+    setValue("physical_factors", JSON.stringify(listArr), {
+      shouldValidate: true,
+    });
     setPhysicalFactorDescription("");
   };
 
   const removePhysicalFactorsRow = (id: number) => {
-    // Remove the row based on the id
-    setPhysicalFactorRows(
-      physicalFactorRows.filter((item: any) => item.id !== id),
+    const updatedFactRows = physicalFactorRows.filter(
+      (item: any) => item.id !== id,
     );
+    setPhysicalFactorRows(updatedFactRows);
+    setValue("physical_factors", JSON.stringify(updatedFactRows), {
+      shouldValidate: true,
+    });
   };
 
-  const [humanFactorRows, setHumanFactorRows] = useState<any>([]);
   const [humanFactorDescription, setHumanFactorDescription] =
     useState<string>("");
 
@@ -495,15 +607,22 @@ function IncidentInvestigation() {
     };
     listArr.push(factsObject);
     setHumanFactorRows(listArr);
+    setValue("human_factors", JSON.stringify(listArr), {
+      shouldValidate: true,
+    });
     setHumanFactorDescription("");
   };
 
   const removeHumanFactorsRow = (id: number) => {
-    // Remove the row based on the id
-    setHumanFactorRows(humanFactorRows.filter((item: any) => item.id !== id));
+    const updatedFactRows = humanFactorRows.filter(
+      (item: any) => item.id !== id,
+    );
+    setHumanFactorRows(updatedFactRows);
+    setValue("human_factors", JSON.stringify(updatedFactRows), {
+      shouldValidate: true,
+    });
   };
 
-  const [systemFactorRows, setSystemFactorRows] = useState<any>([]);
   const [systemFactorDescription, setSystemFactorDescription] =
     useState<string>("");
 
@@ -519,15 +638,22 @@ function IncidentInvestigation() {
     };
     listArr.push(factsObject);
     setSystemFactorRows(listArr);
+    setValue("system_factors", JSON.stringify(listArr), {
+      shouldValidate: true,
+    });
     setSystemFactorDescription("");
   };
 
   const removeSystemFactorsRow = (id: number) => {
-    // Remove the row based on the id
-    setSystemFactorRows(systemFactorRows.filter((item: any) => item.id !== id));
+    const updatedFactRows = systemFactorRows.filter(
+      (item: any) => item.id !== id,
+    );
+    setSystemFactorRows(updatedFactRows);
+    setValue("system_factors", JSON.stringify(updatedFactRows), {
+      shouldValidate: true,
+    });
   };
 
-  const [recomendationRows, setRecomendationRows] = useState<any>([]);
   const [recomDescription, setRecomDescription] = useState<string>("");
   const [recomResponsibility, setRecomResponsibility] = useState<string>("");
   const [recomFactor, setRecomFactor] = useState<string>("");
@@ -562,6 +688,9 @@ function IncidentInvestigation() {
     };
     listArr.push(factsObject);
     setRecomendationRows(listArr);
+    setValue("recommendations", JSON.stringify(listArr), {
+      shouldValidate: true,
+    });
     setRecomDescription("");
     setRecomResponsibility("");
     setRecomFactor("");
@@ -570,10 +699,44 @@ function IncidentInvestigation() {
   };
 
   const removeRecommendationRow = (id: number) => {
-    // Remove the row based on the id
-    setRecomendationRows(
-      recomendationRows.filter((item: any) => item.id !== id),
+    const updatedFactRows = recomendationRows.filter(
+      (item: any) => item.id !== id,
     );
+    setRecomendationRows(updatedFactRows);
+    setValue("recommendations", JSON.stringify(updatedFactRows), {
+      shouldValidate: true,
+    });
+  };
+
+  const [newDocument, setNewDocument] = useState<DocumentRow>({
+    id: 0,
+    documentType: "",
+    document: "",
+  });
+  const [documentsRow, setDocumentsRow] = useState<DocumentRow[]>([]);
+
+  // Add the new document to the table
+  const addNewDocument = () => {
+    if (!newDocument.documentType || !newDocument.document) {
+      alertToast.show(
+        "warning",
+        "Please fill out both the document type and upload a document.",
+        true,
+        2000,
+      );
+
+      return;
+    }
+    const updatedDocumentsRow = [
+      ...documentsRow,
+      { ...newDocument, id: documentsRow.length + 1 },
+    ];
+    console.log(updatedDocumentsRow);
+    setDocumentsRow(updatedDocumentsRow);
+    setNewDocument({ id: 0, documentType: "", document: "" }); // Reset the input fields
+    setValue("documents", JSON.stringify(updatedDocumentsRow), {
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -791,7 +954,7 @@ function IncidentInvestigation() {
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
                 name="factors"
-                label="Factors"
+                label="Cause Of Incident"
                 control={controlFilter}
                 optionList={[{ id: "All", name: "All" }, ...factors]}
               />
@@ -883,7 +1046,7 @@ function IncidentInvestigation() {
                 <div className="p-1">
                   <TextField
                     name="factors"
-                    label="Factors"
+                    label="Cause Of Incident"
                     control={controlAction}
                     disabled
                   />
@@ -910,7 +1073,7 @@ function IncidentInvestigation() {
                 <div className="p-1">
                   <TextArea
                     name="action_taken"
-                    label="Action taken"
+                    label="Immediate Action Taken"
                     control={controlAction}
                     disabled
                   />
@@ -924,6 +1087,27 @@ function IncidentInvestigation() {
                     control={controlAction}
                     disabled
                   />
+                </div>
+              </div>
+              <div className="py-1">
+                <div className="border-b-[#00000036] border-b-[1px] pb-2">
+                  <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
+                    Incident Photos:
+                  </span>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {imagePreviews.map((preview: any, index: any) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={`${ASSET_BASE_URL}imsimages/logims/${
+                            preview || ""
+                          }`}
+                          alt={`preview-${index}`}
+                          className="object-cover h-20 rounded-lg cursor-pointer w-30"
+                          onClick={() => openImageModal(preview)}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col gap-2">
@@ -964,9 +1148,7 @@ function IncidentInvestigation() {
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Sex
                               </th>
-                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                                Deployed Date
-                              </th>
+
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 BodyPart
                               </th>
@@ -1002,9 +1184,7 @@ function IncidentInvestigation() {
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.sex}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.deployed_date}
-                                </td>
+
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.body_part}
                                 </td>
@@ -1016,14 +1196,6 @@ function IncidentInvestigation() {
                           </tbody>
                         </table>
                       </div>
-                      <div className="grid grid-cols-1 p-2">
-                        <TextField
-                          name="immediate_action"
-                          label="Immediate Action"
-                          control={controlAction}
-                          disabled
-                        />
-                      </div>
                     </div>
                   </div>
                 )}
@@ -1031,7 +1203,7 @@ function IncidentInvestigation() {
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                       <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                        Suggested Team &nbsp;
+                        Suggested Team (Investigation Team) &nbsp;
                       </h3>
                     </div>
 
@@ -1039,14 +1211,14 @@ function IncidentInvestigation() {
                       <table className="min-w-full border-collapse table-auto">
                         <thead>
                           <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Sl. No.
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Name
-                            </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Employee ID
+                            </th>
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[50%]">
+                              Name
                             </th>
                           </tr>
                         </thead>
@@ -1059,10 +1231,10 @@ function IncidentInvestigation() {
                                   {index + 2}
                                 </td>
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.name}
+                                  {item.id}
                                 </td>
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.id}
+                                  {item.name}
                                 </td>
                               </tr>
                             ))}
@@ -1083,17 +1255,17 @@ function IncidentInvestigation() {
                       <table className="min-w-full border-collapse table-auto">
                         <thead>
                           <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Sl. No.
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Employee ID
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Name
                             </th>
 
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Department/Company
                             </th>
                           </tr>
@@ -1132,7 +1304,10 @@ function IncidentInvestigation() {
         heading="Incident Investigation"
         onClose={handleInvestigationDialogClose}
         openStatus={showInvestigationDialog.status}
-        hasSubmit={false}
+        hasSubmit
+        onSubmit={() => {
+          handleSubmitInvestigation(handleInvestigationSubmit)();
+        }}
         size="fullscreen"
         showError
         hasError={
@@ -1154,7 +1329,7 @@ function IncidentInvestigation() {
                     <TextField
                       name="inc_date_time"
                       label="Incident Date Time"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
@@ -1162,7 +1337,7 @@ function IncidentInvestigation() {
                     <TextField
                       name="department"
                       label="Department"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
@@ -1170,7 +1345,7 @@ function IncidentInvestigation() {
                     <TextField
                       name="area"
                       label="Area"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
@@ -1180,7 +1355,7 @@ function IncidentInvestigation() {
                     <TextField
                       name="reported_by"
                       label="Reported By"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
@@ -1188,15 +1363,15 @@ function IncidentInvestigation() {
                     <TextField
                       name="injury_type"
                       label="Injury Type"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
                   <div className="p-1">
                     <TextField
                       name="factors"
-                      label="Factors"
-                      control={controlAction}
+                      label="Cause Of Incident"
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
@@ -1207,7 +1382,7 @@ function IncidentInvestigation() {
                     <TextArea
                       name="exact_location"
                       label="Exact Location"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
@@ -1215,15 +1390,15 @@ function IncidentInvestigation() {
                     <TextArea
                       name="potential_outcome"
                       label="Potential Outcome"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
                   <div className="p-1">
                     <TextArea
                       name="action_taken"
-                      label="Action taken"
-                      control={controlAction}
+                      label="Immediate Action taken"
+                      control={controlInvestigation}
                       disabled
                     />
                   </div>
@@ -1233,9 +1408,191 @@ function IncidentInvestigation() {
                     <TextArea
                       name="incident_details"
                       label="Incident Details"
-                      control={controlAction}
+                      control={controlInvestigation}
                       disabled
                     />
+                  </div>
+                </div>
+                <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                  <div className="">
+                    <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                      <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                        List Of Facts &nbsp;
+                      </h3>
+                    </div>
+
+                    <div className="mt-1">
+                      <table className="min-w-full border-collapse table-auto ">
+                        <thead>
+                          <tr>
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                              Sl. No.
+                            </th>
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                              Facts
+                            </th>
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td className="px-4 py-2 border-b">1</td>
+
+                            <td className="px-4 py-2 border-b">
+                              <InputText
+                                type="text"
+                                value={facts}
+                                changeHandler={(e: any) => handleInputChange(e)}
+                                className="w-full"
+                              />
+                            </td>
+
+                            <td className="px-4 py-2 border-b">
+                              <IconButton onClick={addFactsRow}>
+                                <PlusIcon className="w-4 h-4" />
+                              </IconButton>
+                            </td>
+                          </tr>
+                          {factRows &&
+                            factRows.length > 0 &&
+                            factRows.map((item: any) => (
+                              <tr key={item.id}>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.id}
+                                </td>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.facts}
+                                </td>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  <IconButton
+                                    onClick={() => removeFcatsRow(item.id)}
+                                  >
+                                    <TrashIcon className="w-4 h-4" />
+                                  </IconButton>
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                  <div className="">
+                    <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                      <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                        Risk Management &nbsp;
+                      </h3>
+                    </div>
+
+                    <div className="mt-1">
+                      <div className="px-4 py-2 text-gray-700">
+                        <span>Was the risk identified in HIRA / JSA?</span>
+                        &nbsp;
+                        <input
+                          type="radio"
+                          name="risk_identified"
+                          value="Yes"
+                          onChange={(e) =>
+                            setValue("risk_identified", e.target.value, {
+                              shouldValidate: true,
+                            })
+                          }
+                        />
+                        &nbsp; Yes &nbsp;
+                        <input
+                          type="radio"
+                          name="risk_identified"
+                          value="No"
+                          onChange={(e) =>
+                            setValue("risk_identified", e.target.value, {
+                              shouldValidate: true,
+                            })
+                          }
+                        />
+                        &nbsp; No
+                      </div>
+                    </div>
+                    {watchInvestigation("risk_identified") === "Yes" && (
+                      <div className="mt-1">
+                        <div className="px-4 py-2 text-gray-700">
+                          <span>Was the identified control?</span>
+                          &nbsp;
+                          <input
+                            type="radio"
+                            name="identified_control"
+                            value="Yes"
+                            onChange={(e) =>
+                              setValue("identified_control", e.target.value, {
+                                shouldValidate: true,
+                              })
+                            }
+                          />
+                          &nbsp; Yes &nbsp;
+                          <input
+                            type="radio"
+                            name="identified_control"
+                            value="No"
+                            onChange={(e) =>
+                              setValue("identified_control", e.target.value, {
+                                shouldValidate: true,
+                              })
+                            }
+                          />
+                          &nbsp; No
+                        </div>
+                      </div>
+                    )}
+                    {watchInvestigation("identified_control") === "Yes" && (
+                      <div className="mt-1">
+                        <div className="grid grid-cols-1 md:grid-cols-3">
+                          <div className="px-4 py-2 text-gray-700 ">
+                            <span>What was the identified control ?</span>
+                            &nbsp;
+                            <select
+                              name="control_type"
+                              onChange={(e) =>
+                                setValue("control_type", e.target.value, {
+                                  shouldValidate: true,
+                                })
+                              }
+                              className="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 text-gray-700"
+                            >
+                              <option value="">Select</option>
+                              <option value="Engineering">Engineering</option>
+                              <option value="Administrative">
+                                Administrative
+                              </option>
+                              <option value="PPE">PPE</option>
+                            </select>
+                          </div>
+                          <div>
+                            <TextField
+                              name="control_description"
+                              control={controlInvestigation}
+                              className="w-full"
+                              label="Description"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {watchInvestigation("identified_control") === "Yes" && (
+                      <div className="mt-1">
+                        <div className="grid grid-cols-1 md:grid-cols-3">
+                          <div className="px-4 py-2 text-gray-700">
+                            <TextField
+                              name="control_adequate_desc"
+                              control={controlInvestigation}
+                              className="w-full"
+                              label=" Why Control was not adequate ?"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
@@ -1448,171 +1805,7 @@ function IncidentInvestigation() {
                     </div>
                   </div>
                 </div>
-                <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
-                  <div className="">
-                    <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
-                      <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                        List Of Facts &nbsp;
-                      </h3>
-                    </div>
 
-                    <div className="mt-1">
-                      <table className="min-w-full border-collapse table-auto ">
-                        <thead>
-                          <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Sl. No.
-                            </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Facts
-                            </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Action
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td className="px-4 py-2 border-b">1</td>
-
-                            <td className="px-4 py-2 border-b">
-                              <InputText
-                                type="text"
-                                value={facts}
-                                changeHandler={(e: any) => handleInputChange(e)}
-                                className="w-full"
-                              />
-                            </td>
-
-                            <td className="px-4 py-2 border-b">
-                              <IconButton onClick={addFactsRow}>
-                                <PlusIcon className="w-4 h-4" />
-                              </IconButton>
-                            </td>
-                          </tr>
-                          {factRows &&
-                            factRows.length > 0 &&
-                            factRows.map((item: any) => (
-                              <tr key={item.id}>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.id}
-                                </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.facts}
-                                </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  <IconButton
-                                    onClick={() => removeFcatsRow(item.id)}
-                                  >
-                                    <TrashIcon className="w-4 h-4" />
-                                  </IconButton>
-                                </td>
-                              </tr>
-                            ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
-                  <div className="">
-                    <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
-                      <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                        Hira Risk Management &nbsp;
-                      </h3>
-                    </div>
-
-                    <div className="mt-1">
-                      <table className="min-w-full border-collapse table-auto ">
-                        <thead>
-                          <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Sl. No.
-                            </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Description
-                            </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b" />
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              1
-                            </td>
-
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              Was the risk identified in HIRA / JSA ?
-                            </td>
-
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              <input
-                                type="radio"
-                                name="description1"
-                                value="Yes"
-                              />
-                              &nbsp; Yes &nbsp;
-                              <input
-                                type="radio"
-                                name="description1"
-                                value="No"
-                              />
-                              &nbsp; No
-                            </td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              2
-                            </td>
-
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              What was the identified control ?
-                              <select
-                                value={recomControltype}
-                                onChange={(e) =>
-                                  handleRecomControlTypeChange(e.target.value)
-                                }
-                                className="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 text-gray-700"
-                              >
-                                <option value="">Select</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Administrative">
-                                  Administrative
-                                </option>
-                                <option value="PPE">PPE</option>
-                              </select>
-                            </td>
-
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              <InputTextArea
-                                className="w-full"
-                                value={undefined}
-                              />
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              3
-                            </td>
-
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              Why Control was not adequate ?
-                            </td>
-
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              <InputTextArea
-                                className="w-full"
-                                value={undefined}
-                              />
-                            </td>
-                            <td />
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
                 {/* <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
@@ -1791,7 +1984,7 @@ function IncidentInvestigation() {
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   <IconButton
                                     onClick={() =>
-                                      removeHumanFactorsRow(item.id)
+                                      removeRecommendationRow(item.id)
                                     }
                                   >
                                     <TrashIcon className="w-4 h-4" />
@@ -1830,49 +2023,124 @@ function IncidentInvestigation() {
                           </tr>
                         </thead>
                         <tbody>
+                          {/* First row for adding a new document */}
                           <tr>
-                            <td className="px-4 py-2 border-b">1</td>
-
-                            <td className="px-4 py-2 border-b">
-                              <InputText
+                            <td className="px-4 py-2 border-b">--</td>
+                            <td className="px-4 py-2 text-gray-700 border-b">
+                              <input
                                 type="text"
-                                value={undefined}
-                                className="w-full"
+                                value={newDocument.documentType}
+                                onChange={(e) =>
+                                  setNewDocument({
+                                    ...newDocument,
+                                    documentType: e.target.value,
+                                  })
+                                }
+                                className="w-full px-2 py-1 border border-gray-300 rounded"
+                                placeholder="Enter document type"
                               />
                             </td>
-                            <td className="px-4 py-2 border-b">
-                              <InputText
+                            <td className="px-4 py-2 text-gray-700 border-b">
+                              <input
                                 type="file"
-                                value={undefined}
-                                className="w-full"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]; // Get the single file
+                                  if (!file) return; // Exit if no file is selected
+
+                                  const now = new Date();
+                                  const date = now
+                                    .toISOString()
+                                    .slice(0, 10)
+                                    .replace(/-/g, "");
+                                  const time = now
+                                    .toTimeString()
+                                    .slice(0, 8)
+                                    .replace(/:/g, "");
+                                  const filename = `${date}_${time}_${file.name}`; // Construct the filename
+
+                                  const formData = new FormData();
+                                  formData.append("filename", filename);
+                                  formData.append("originalname", file.name);
+                                  formData.append("file", file); // Add the file itself
+
+                                  fetch(
+                                    `${API_BASE_URL}uploadInvestigationImage`,
+                                    {
+                                      method: "POST",
+                                      body: formData,
+                                    },
+                                  )
+                                    .then(async (response) => {
+                                      if (!response.ok) {
+                                        throw new Error(
+                                          "Failed to upload the image.",
+                                        );
+                                      }
+                                      setImagePreviews((prev: any) => [
+                                        ...prev,
+                                        filename,
+                                      ]); // Add the uploaded file to previews
+                                      setNewDocument({
+                                        ...newDocument,
+                                        document: filename, // Update the document in state
+                                      });
+                                    })
+                                    .catch(() => {
+                                      alertToast.show(
+                                        "error",
+                                        "Error uploading image",
+                                        true,
+                                      );
+                                    });
+                                }}
+                                className="w-full px-2 py-1 border border-gray-300 rounded"
                               />
                             </td>
-
                             <td className="px-4 py-2 border-b">
-                              <IconButton onClick={addFactsRow}>
+                              <IconButton onClick={addNewDocument}>
                                 <PlusIcon className="w-4 h-4" />
                               </IconButton>
                             </td>
                           </tr>
-                          {factRows &&
-                            factRows.length > 0 &&
-                            factRows.map((item: any) => (
-                              <tr key={item.id}>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.id}
-                                </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.facts}
-                                </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  <IconButton
-                                    onClick={() => removeFcatsRow(item.id)}
-                                  >
-                                    <TrashIcon className="w-4 h-4" />
-                                  </IconButton>
-                                </td>
-                              </tr>
-                            ))}
+
+                          {/* Render added rows */}
+                          {documentsRow.map((row, index) => (
+                            <tr key={row.id}>
+                              <td className="px-4 py-2 text-gray-700 border-b">
+                                {index + 1}
+                              </td>
+                              <td className="px-4 py-2 text-gray-700 border-b">
+                                {row.documentType}
+                              </td>
+                              <td className="px-4 py-2 text-gray-700 border-b">
+                                {row.document || "N/A"}
+                              </td>
+                              <td className="px-4 py-2 text-gray-700 border-b">
+                                <IconButton
+                                  onClick={() => {
+                                    const updatedDocumentsRow =
+                                      documentsRow.filter(
+                                        (r) => r.id !== row.id,
+                                      );
+
+                                    // Update the documentsRow state
+                                    setDocumentsRow(updatedDocumentsRow);
+
+                                    // Update the form value with the updated row list
+                                    setValue(
+                                      "documents",
+                                      JSON.stringify(updatedDocumentsRow),
+                                      {
+                                        shouldValidate: true,
+                                      },
+                                    );
+                                  }}
+                                >
+                                  <TrashIcon className="w-4 h-4" />
+                                </IconButton>
+                              </td>
+                            </tr>
+                          ))}
                         </tbody>
                       </table>
                     </div>
@@ -1881,6 +2149,21 @@ function IncidentInvestigation() {
               </div>
             </div>
           </div>
+        </div>
+      </ModalPopup>
+      <ModalPopup
+        heading="View Image"
+        onClose={handleImageDialogClose}
+        openStatus={showImageDialog.status}
+        hasSubmit={false}
+        size="fullscreen"
+      >
+        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+          <img
+            src={`${ASSET_BASE_URL}imsimages/logims/${modalImage || ""}`}
+            alt="previewimage"
+            className="object-cover w-full h-full rounded-lg"
+          />
         </div>
       </ModalPopup>
     </div>

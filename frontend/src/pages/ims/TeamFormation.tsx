@@ -61,6 +61,7 @@ const initialViewImsValues: ILogImsData = {
   potential_outcome: "",
   action_taken: "",
   incident_details: "",
+  ims_photos: "",
   immediate_action: "",
   status: "",
   pending_on: "",
@@ -69,6 +70,7 @@ const initialViewImsValues: ILogImsData = {
   updated_at: "",
   updated_by: "",
   log_by: "",
+  close_remarks: "",
 };
 const initialFilterValues: ILogImsFilterForm = {
   incident_no: null,
@@ -164,6 +166,7 @@ function TeamFormation() {
   const [injuryFilterRow, setInjuryFilterRow] = useState<any[]>([]);
   const [witTeamFilterRow, setWitTeamFilterRow] = useState<any[]>([]);
   const [suggTeamFilterRow, setSuggTeamFilterRow] = useState<any[]>([]);
+  const [modalImage, setModalImage] = useState<string>("");
 
   const {
     handleSubmit: handleSubmitPDCDetails,
@@ -183,15 +186,19 @@ function TeamFormation() {
       (item) => item.header_id === row.incident_no,
     );
     setInjuryFilterRow(injFilter);
-    const suggFilter = suggTeamRow.filter(
-      (item) => item.header_id === row.incident_no,
-    );
+    const suggFilter = suggTeamRow
+      .filter((item) => item.header_id === row.incident_no)
+      .map((item) => ({
+        id: item.employee_id,
+        name: item.name,
+      }));
     setSuggTeamFilterRow(suggFilter);
 
     const wittFilter = witTeamRow.filter(
       (item) => item.header_id === row.incident_no,
     );
     setWitTeamFilterRow(wittFilter);
+    setImagePreviews(JSON.parse(row.ims_photos));
     resetActionTaken({
       disp_logno: row.disp_logno,
       incident_no: row.incident_no,
@@ -216,6 +223,10 @@ function TeamFormation() {
       status: true,
     });
   };
+
+  const [showImageDialog, setShowImageDialog] = useState({
+    status: false,
+  });
 
   const handleAssignPDCSubmit: SubmitHandler<IImsTeamFormData> = (values) => {
     loader.show();
@@ -412,6 +423,15 @@ function TeamFormation() {
     const month = d.toLocaleString("en-US", { month: "short" });
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
+  };
+
+  const handleImageDialogClose = () => {
+    setShowImageDialog((oldState) => ({ ...oldState, status: false }));
+    setModalImage("");
+  };
+  const openImageModal = (image: any) => {
+    setModalImage(image);
+    setShowImageDialog({ status: true });
   };
 
   const handleExport = () => {
@@ -692,7 +712,7 @@ function TeamFormation() {
             <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
               <DropdownList
                 name="factors"
-                label="Factors"
+                label="Cause Of Incident"
                 control={controlFilter}
                 optionList={[{ id: "All", name: "All" }, ...factors]}
               />
@@ -712,18 +732,6 @@ function TeamFormation() {
                 name="date_to"
                 label="Date To"
                 control={controlFilter}
-              />
-            </div>
-
-            <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/4">
-              <DropdownList
-                name="status"
-                label="Status"
-                control={controlFilter}
-                optionList={[
-                  { id: "All", name: "All Status" },
-                  ...CURR_OBS_STATUS_LIST,
-                ]}
               />
             </div>
           </div>
@@ -799,7 +807,7 @@ function TeamFormation() {
                 <div className="p-1">
                   <TextField
                     name="factors"
-                    label="Factors"
+                    label="Cause Of Incident"
                     control={controlAction}
                     disabled
                   />
@@ -826,7 +834,7 @@ function TeamFormation() {
                 <div className="p-1">
                   <TextArea
                     name="action_taken"
-                    label="Action taken"
+                    label="Immediate Action Taken"
                     control={controlAction}
                     disabled
                   />
@@ -840,6 +848,27 @@ function TeamFormation() {
                     control={controlAction}
                     disabled
                   />
+                </div>
+              </div>
+              <div className="py-1">
+                <div className="border-b-[#00000036] border-b-[1px] pb-2">
+                  <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
+                    Incident Photos:
+                  </span>
+                  <div className="grid grid-cols-3 gap-2 mt-2">
+                    {imagePreviews.map((preview: any, index: any) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={`${ASSET_BASE_URL}imsimages/logims/${
+                            preview || ""
+                          }`}
+                          alt={`preview-${index}`}
+                          className="object-cover h-20 rounded-lg cursor-pointer w-30"
+                          onClick={() => openImageModal(preview)}
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="flex flex-col gap-2">
@@ -880,9 +909,7 @@ function TeamFormation() {
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Sex
                               </th>
-                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                                Deployed Date
-                              </th>
+
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 BodyPart
                               </th>
@@ -918,9 +945,7 @@ function TeamFormation() {
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.sex}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.deployed_date}
-                                </td>
+
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.body_part}
                                 </td>
@@ -932,14 +957,6 @@ function TeamFormation() {
                           </tbody>
                         </table>
                       </div>
-                      <div className="grid grid-cols-1 p-2">
-                        <TextField
-                          name="immediate_action"
-                          label="Immediate Action"
-                          control={controlAction}
-                          disabled
-                        />
-                      </div>
                     </div>
                   </div>
                 )}
@@ -947,7 +964,7 @@ function TeamFormation() {
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                       <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
-                        Suggested Team &nbsp;
+                        Suggested Team (Investigation Team) &nbsp;
                       </h3>
                     </div>
 
@@ -955,60 +972,65 @@ function TeamFormation() {
                       <table className="min-w-full border-collapse table-auto">
                         <thead>
                           <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Sl. No.
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Name
-                            </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Employee ID
                             </th>
-
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
+                              Name
+                            </th>
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Action
                             </th>
                           </tr>
                         </thead>
                         <tbody>
                           {/* Input row for adding new rows */}
-                          <tr>
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              1
-                            </td>
-                            <td className="px-4 py-2 text-gray-700 border-b">
-                              <select
-                                value={suggTeamNewRow.name}
-                                onChange={(e) =>
-                                  handleSuggTeamInputChange(
-                                    "name",
-                                    e.target.value,
-                                  )
-                                }
-                                className="text-gray-700 bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"
-                              >
-                                <option value="">Select</option>
-                                {users &&
-                                  users.length > 0 &&
-                                  users.map((item) => (
-                                    <option value={item.id}>{item.name}</option>
-                                  ))}
-                              </select>
-                            </td>
-                            <td className="px-4 py-2 border-b">
-                              <InputText
-                                type="text"
-                                value={suggTeamNewRow.id}
-                                className="w-full text-gray-700"
-                                disabled
-                              />
-                            </td>
-                            <td className="px-4 py-2 border-b">
-                              <IconButton onClick={addSuggTeamRow}>
-                                <PlusIcon className="w-4 h-4" />
-                              </IconButton>
-                            </td>
-                          </tr>
+                          {watchValues("injury_type") ===
+                            "Medical Center FAC" && (
+                            <tr>
+                              <td className="px-4 py-2 text-gray-700 border-b">
+                                1
+                              </td>
+                              <td className="px-4 py-2 border-b">
+                                <InputText
+                                  type="text"
+                                  value={suggTeamNewRow.id}
+                                  className="w-full text-gray-700"
+                                  disabled
+                                />
+                              </td>
+                              <td className="px-4 py-2 text-gray-700 border-b">
+                                <select
+                                  value={suggTeamNewRow.name}
+                                  onChange={(e) =>
+                                    handleSuggTeamInputChange(
+                                      "name",
+                                      e.target.value,
+                                    )
+                                  }
+                                  className="text-gray-700 bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                                >
+                                  <option value="">Select</option>
+                                  {users &&
+                                    users.length > 0 &&
+                                    users.map((item) => (
+                                      <option value={item.id}>
+                                        {item.name}
+                                      </option>
+                                    ))}
+                                </select>
+                              </td>
+
+                              <td className="px-4 py-2 border-b">
+                                <IconButton onClick={addSuggTeamRow}>
+                                  <PlusIcon className="w-4 h-4" />
+                                </IconButton>
+                              </td>
+                            </tr>
+                          )}
 
                           {/* Render additional rows from injuryRow */}
                           {suggTeamFilterRow &&
@@ -1016,21 +1038,25 @@ function TeamFormation() {
                             suggTeamFilterRow.map((item, index) => (
                               <tr key={index}>
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  {index + 2}
+                                  {index + 1}
+                                </td>
+
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {item.id}
                                 </td>
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.name}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.id}
-                                </td>
 
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  <IconButton
-                                    onClick={() => removeSuggTeamRow(index)}
-                                  >
-                                    <TrashIcon className="w-4 h-4" />
-                                  </IconButton>
+                                  {watchValues("injury_type") ===
+                                    "Medical Center FAC" && (
+                                    <IconButton
+                                      onClick={() => removeSuggTeamRow(index)}
+                                    >
+                                      <TrashIcon className="w-4 h-4" />
+                                    </IconButton>
+                                  )}
                                 </td>
                               </tr>
                             ))}
@@ -1051,17 +1077,17 @@ function TeamFormation() {
                       <table className="min-w-full border-collapse table-auto">
                         <thead>
                           <tr>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Sl. No.
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Employee ID
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Name
                             </th>
 
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b w-[25%]">
                               Department/Company
                             </th>
                           </tr>
@@ -1091,9 +1117,33 @@ function TeamFormation() {
                     </div>
                   </div>
                 </div>
+                {watchValues("injury_type") !== "Medical Center FAC" && (
+                  <div className="grid grid-cols-1 p-2">
+                    <TextField
+                      name="close_remarks"
+                      label="Closure Remarks"
+                      control={controlAction}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
+        </div>
+      </ModalPopup>
+      <ModalPopup
+        heading="View Image"
+        onClose={handleImageDialogClose}
+        openStatus={showImageDialog.status}
+        hasSubmit={false}
+        size="fullscreen"
+      >
+        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+          <img
+            src={`${ASSET_BASE_URL}imsimages/logims/${modalImage || ""}`}
+            alt="previewimage"
+            className="object-cover w-full h-full rounded-lg"
+          />
         </div>
       </ModalPopup>
     </div>

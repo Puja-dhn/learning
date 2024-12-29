@@ -13,6 +13,7 @@ interface ILogImsData {
     potential_outcome: string;
     action_taken: string;
     incident_details: string;
+    ims_photos: string;
     immediate_action: string;
     status: string;
     pending_on: string;
@@ -21,6 +22,7 @@ interface ILogImsData {
     updated_at: string;
     updated_by: string;
     log_by: string;
+    close_remarks: string;
   }
   
   export default ILogImsData;

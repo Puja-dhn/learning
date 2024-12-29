@@ -21,5 +21,15 @@ router.post(
   imsController.getImsCategorizationData
 );
 router.post("/submit-incident-category", imsController.submitIncidentCategory);
+router.post(
+  "/get-ims-investigation-data",
+  imsController.getImsInvestigationData
+);
+router.post(
+  "/submit-investigation-data",
+  imsController.submitInvestigationData
+);
+router.post("/get-recommendation-data", imsController.getRecommendationData);
+router.post("/close-recommendation", imsController.closeRecommendation);
 
 module.exports = router;

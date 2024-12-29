@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -16,6 +16,7 @@ import useIMSMasterDataQuery from "@/features/ims/hooks/useIMSMasterDataQuery";
 import ILogImsForm from "@/features/ims/types/ILogImsForm";
 import { InputText } from "@/features/ui/elements";
 import { addNewImsData } from "@/features/ims/services/ims.services";
+import { API_BASE_URL, ASSET_BASE_URL } from "@/features/common/constants";
 
 const initialFormValues: ILogImsForm = {
   inc_date_time: "",
@@ -29,6 +30,7 @@ const initialFormValues: ILogImsForm = {
   action_taken: "",
   injury_details: "",
   incident_details: "",
+  ims_photos: "",
   immediate_action: "",
   suggested_team: "",
   witness: "",
@@ -49,6 +51,7 @@ function LogIms() {
   const alertToast = useAlertConfig();
   const loader = useLoaderConfig();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const [departments, setDepartments] = useState<IOptionList[]>([]);
   const [injuryType, setInjuryType] = useState<IOptionList[]>([]);
@@ -59,6 +62,7 @@ function LogIms() {
   const [bodypartList, setBodypartList] = useState<IOptionList[]>([]);
   const [injuryNameList, setInjuryNameList] = useState<IOptionList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<any>([]);
 
   const [injuryRow, setInjuryRow] = useState<any[]>([]);
   const [newRow, setNewRow] = useState({
@@ -152,18 +156,23 @@ function LogIms() {
   }, [watchValues("department")]);
 
   const handleFormSubmit: SubmitHandler<ILogImsForm> = (values) => {
+    if (imagePreviews.length === 0) {
+      alertToast.show("warning", "Incident Photos are required", true, 5000);
+      return;
+    }
     if (+watchValues("injury_type") === 10) {
       if (watchValues("injury_details") === "") {
         alertToast.show("warning", "Injury details required", true, 2000);
       }
     }
-    console.log(values);
+    values.ims_photos = JSON.stringify(imagePreviews);
     loader.show();
 
     addNewImsData(values)
       .then(() => {
         alertToast.show("success", "Data added successfully", true, 2000);
         handleReset();
+        setImagePreviews([]);
         setInjuryRow([]);
         setSuggTeamRow([]);
         setWitTeamRow([]);
@@ -335,6 +344,69 @@ function LogIms() {
     });
   };
 
+  const handleFileChange = (e: any) => {
+    const files = Array.from(e.target.files);
+    const filenames = files.map((file: any, index: number) => {
+      const now = new Date();
+      const date = now.toISOString().slice(0, 10).replace(/-/g, "");
+      const time = now.toTimeString().slice(0, 8).replace(/:/g, "");
+      return `${date}_${time}_${index + 1}_${file.name}`;
+    });
+
+    const formData = new FormData();
+    formData.append("filenames", JSON.stringify(filenames));
+    formData.append(
+      "orginalnames",
+      JSON.stringify(files.map((file: any) => file.name)),
+    );
+    files.forEach((file: any) => {
+      formData.append("files[]", file);
+    });
+
+    fetch(`${API_BASE_URL}uploadImsImage`, {
+      method: "POST",
+      body: formData,
+    })
+      .then(async () => {
+        setImagePreviews(() => [...filenames]);
+      })
+      .catch(() => {
+        alertToast.show("error", "Error Uploading Image", true);
+      });
+  };
+
+  const handleDelete = (image: string) => {
+    setImagePreviews((prevPreviews: any) =>
+      prevPreviews.filter((item: any) => item !== image),
+    );
+
+    fetch(`${API_BASE_URL}deleteImsImage`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        imageName: image, // The image name that needs to be deleted
+      }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          alertToast.show("success", "Image deleted successfully", true);
+        } else {
+          alertToast.show("error", "Error deleting image", true);
+        }
+      })
+      .catch(() => {
+        alertToast.show("error", "Error deleting image", true);
+      });
+  };
+  const handleButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
   return (
     <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
       <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
@@ -438,6 +510,58 @@ function LogIms() {
                   control={control}
                 />
               </div>
+            </div>
+            <div className="grid grid-cols-1 ">
+              <div className="p-1">
+                <button
+                  type="button"
+                  className="flex items-center px-4 py-2 text-white bg-[#9fa5b1] rounded-lg focus:outline-none hover:bg-[#9fa5b1]"
+                  onClick={handleButtonClick}
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    className="w-5 h-5 mr-2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Upload Photos
+                </button>
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                  ref={fileInputRef}
+                  accept=".jpg,.jpeg,.png"
+                />
+              </div>
+            </div>
+            <div className="flex mt-4 space-x-4 overflow-x-auto">
+              {imagePreviews.map((preview: any, index: any) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <div key={index} className="relative">
+                  <img
+                    src={`${ASSET_BASE_URL}imsimages/logims/${preview || ""}`}
+                    alt={`preview-${index}`}
+                    className="object-cover w-24 h-24 rounded-lg"
+                  />
+                  <button
+                    onClick={() => handleDelete(preview)}
+                    className="absolute top-0 right-0 p-1 text-xs text-white bg-red-500 rounded-full hover:bg-red-700"
+                    type="button"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
             </div>
             <div className="flex flex-col gap-2">
               {watchValues("injury_type") === "10" && (
@@ -688,7 +812,7 @@ function LogIms() {
                   </div>
                 </div>
               )}
-              <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+              <div className="mt-2 grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                 <div className="">
                   <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                     <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">

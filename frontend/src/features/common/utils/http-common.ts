@@ -23,11 +23,11 @@ instance.interceptors.request.use((config) => {
       // if (Object.keys(encConfigData).length > 0) {
       //   config.data = encConfigData;
       // }
-      if (!currConfigData["refresh"] || currConfigData["refresh"] === "no") {
+      if (!currConfigData.refresh || currConfigData.refresh === "no") {
         const encKey = encryptData("encPayload");
         config.data = {};
         config.data[encKey] = encryptData(JSON.stringify(currConfigData));
-        config.data["refresh"] = "no";
+        config.data.refresh = "no";
       } else {
         config.data = currConfigData;
       }

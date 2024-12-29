@@ -11,6 +11,7 @@ import CloseIncident from "./pages/ims/CloseIncident";
 import CategorizeIncident from "./pages/ims/CategorizeIncident";
 import IncidentInvestigation from "./pages/ims/IncidentInvestigation";
 import Users from "./pages/master/Users";
+import CloseRecommendation from "./pages/ims/CloseRecommendation";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -109,6 +110,10 @@ function App() {
             <Route
               path="incident-investigation"
               element={<IncidentInvestigation />}
+            />
+            <Route
+              path="close-recommendation"
+              element={<CloseRecommendation />}
             />
             <Route path="*" element={<PageNotFound />} />
           </Route>

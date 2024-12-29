@@ -10,6 +10,10 @@ import IInjuryDtls from "../types/IInjuryDtls";
 import IImsTeamFormData from "../types/IImsTeamFormData";
 import IImsCloseFormData from "../types/IImsCloseFormData";
 import IImsMedicalFormData from "../types/IImsMedicalFormData";
+import ILogInvestigationData from "../types/ILogInvestigationData";
+import ILogRecomFilterForm from "../types/ILogRecomFilterForm";
+import ILogRecommendationData from "../types/ILogRecommendationData";
+import IRecomCloseForm from "../types/IRecomCloseForm";
 
 const addNewImsData = (formData: any) => {
   return http.post<ILogImsForm, AxiosResponse<string>>(
@@ -98,6 +102,41 @@ const submitIncidentCategory = (pdcData: IImsMedicalFormData) => {
   );
 };
 
+const getIMSInvestigationData = (filterData: ILogImsFilterForm) => {
+  return http.post<
+    ILogImsFilterForm,
+    AxiosResponse<{
+      historyLogImsData: ILogImsData[];
+      INJURY_DETAILS: IInjuryDtls[];
+      SUGG_TEAM: ITeamDtls[];
+      WITNESS_TEAM: ITeamDtls[];
+    }>
+  >("/ims/get-ims-investigation-data", filterData);
+};
+
+const submitInvestigationData = (pdcData: ILogInvestigationData) => {
+  return http.post<any, AxiosResponse<string>>(
+    "/ims/submit-investigation-data",
+    {
+      pdcData,
+    },
+  );
+};
+
+const getRecommendationData = (filterData: ILogRecomFilterForm) => {
+  return http.post<
+    ILogRecomFilterForm,
+    AxiosResponse<{
+      historyLogImsData: ILogRecommendationData[];
+    }>
+  >("/ims/get-recommendation-data", filterData);
+};
+const closeRecommendation = (pdcData: IRecomCloseForm) => {
+  return http.post<any, AxiosResponse<string>>("/ims/close-recommendation", {
+    pdcData,
+  });
+};
+
 export {
   getIMSMasterData,
   addNewImsData,
@@ -109,4 +148,8 @@ export {
   closeIncident,
   getIMSCategorizationData,
   submitIncidentCategory,
+  getIMSInvestigationData,
+  submitInvestigationData,
+  getRecommendationData,
+  closeRecommendation
 };

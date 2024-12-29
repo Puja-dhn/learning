@@ -9,7 +9,6 @@ const DB_CONFIG = {
 };
 
 async function simpleQuery(statement, binds) {
-  // console.log(statement, binds);
   let conn;
   try {
     conn = await mysql2.createConnection(DB_CONFIG);
@@ -187,6 +186,7 @@ exports.addNewIms = async (req, res) => {
     action_taken,
     injury_details,
     incident_details,
+    ims_photos,
     immediate_action,
     suggested_team,
     witness,
@@ -226,6 +226,7 @@ exports.addNewIms = async (req, res) => {
     potential_outcome,
     action_taken,
     incident_details,
+    ims_photos,
     immediate_action,
     status,
     medical_status,
@@ -234,7 +235,7 @@ exports.addNewIms = async (req, res) => {
     created_by,
     updated_at,
     updated_by
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
     const insertValues = [
       inc_date_time,
@@ -247,6 +248,7 @@ exports.addNewIms = async (req, res) => {
       potential_outcome,
       action_taken,
       incident_details,
+      ims_photos || "",
       immediate_action,
       "Submitted",
       "Pending",
@@ -272,6 +274,7 @@ exports.addNewIms = async (req, res) => {
         potential_outcome,
         action_taken,
         incident_details,
+        ims_photos,
         immediate_action,
         status,
         pending_on,
@@ -279,7 +282,7 @@ exports.addNewIms = async (req, res) => {
         created_by,
         updated_at,
         updated_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
     const insertValues = [
       inc_date_time,
@@ -292,6 +295,7 @@ exports.addNewIms = async (req, res) => {
       potential_outcome,
       action_taken,
       incident_details,
+      ims_photos || "",
       immediate_action,
       "Submitted",
       areaHead,
@@ -450,7 +454,7 @@ exports.getImsData = async (req, res) => {
   const imsQuery = `
   SELECT 
     t1.id incident_no,
-    t1.inc_date_time,
+   DATE_FORMAT(t1.inc_date_time, '%d-%b-%Y %h:%i:%s %p') AS inc_date_time,
     t1.department department_id,
     t2.name department,
     t1.area area_id,
@@ -462,6 +466,7 @@ exports.getImsData = async (req, res) => {
     t1.potential_outcome,
     t1.action_taken,
     t1.incident_details,
+    t1.ims_photos,
     t1.immediate_action,
     t5.name pending_on,
     t1.status,
@@ -668,7 +673,7 @@ exports.getImsTeamFormationData = async (req, res) => {
   const imsQuery = `
   SELECT 
     t1.id incident_no,
-    t1.inc_date_time,
+    DATE_FORMAT(t1.inc_date_time, '%d-%b-%Y %h:%i:%s %p') AS inc_date_time,
     t1.department department_id,
     t2.name department,
     t1.area area_id,
@@ -680,6 +685,7 @@ exports.getImsTeamFormationData = async (req, res) => {
     t1.potential_outcome,
     t1.action_taken,
     t1.incident_details,
+    t1.ims_photos,
     t1.immediate_action,
     t5.name pending_on,
     t1.status,
@@ -805,44 +811,48 @@ exports.submitTeamFormationdata = async (req, res) => {
     updated_at,
     updated_by,
     log_by,
+    close_remarks,
     suggested_team,
   } = req.body.pdcData;
 
   const currentTime = new Date();
-  const checkHeaderExistsQuery =
-    "SELECT * FROM t_inshe_incident_team WHERE header_id = ? and team_type='SUGGESTED_TEAM'";
-  const headerExists = await simpleQuery(checkHeaderExistsQuery, [incident_no]);
+  if (injury_type === "Medical Center FAC") {
+    const checkHeaderExistsQuery =
+      "SELECT * FROM t_inshe_incident_team WHERE header_id = ? and team_type='SUGGESTED_TEAM'";
+    const headerExists = await simpleQuery(checkHeaderExistsQuery, [
+      incident_no,
+    ]);
 
-  // Delete existing data if header_id exists
-  if (headerExists.length > 0) {
-    const deleteQuery =
-      "DELETE FROM t_inshe_incident_team WHERE header_id = ? and team_type='SUGGESTED_TEAM'";
-    await simpleQuery(deleteQuery, [incident_no]);
-    console.log("Existing data for header_id", incident_no, "deleted");
-  }
+    // Delete existing data if header_id exists
+    if (headerExists.length > 0) {
+      const deleteQuery =
+        "DELETE FROM t_inshe_incident_team WHERE header_id = ? and team_type='SUGGESTED_TEAM'";
+      await simpleQuery(deleteQuery, [incident_no]);
+      console.log("Existing data for header_id", incident_no, "deleted");
+    }
 
-  // Helper function to parse and insert JSON data
-  const parseAndInsert = async (jsonString, query, mapValues) => {
-    if (jsonString) {
-      let parsedData;
-      try {
-        parsedData = JSON.parse(jsonString);
-        console.log(parsedData);
-      } catch (error) {
-        console.error("Error parsing JSON:", error);
-        return;
-      }
+    // Helper function to parse and insert JSON data
+    const parseAndInsert = async (jsonString, query, mapValues) => {
+      if (jsonString) {
+        let parsedData;
+        try {
+          parsedData = JSON.parse(jsonString);
+          console.log(parsedData);
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+          return;
+        }
 
-      if (Array.isArray(parsedData) && parsedData.length > 0) {
-        for (const item of parsedData) {
-          const values = mapValues(item);
-          await simpleQuery(query, values);
+        if (Array.isArray(parsedData) && parsedData.length > 0) {
+          for (const item of parsedData) {
+            const values = mapValues(item);
+            await simpleQuery(query, values);
+          }
         }
       }
-    }
-  };
-  // Insert suggested team
-  const suggestedInsertQuery = `
+    };
+    // Insert suggested team
+    const suggestedInsertQuery = `
       INSERT INTO t_inshe_incident_team (
         header_id,
         team_type,
@@ -854,25 +864,49 @@ exports.submitTeamFormationdata = async (req, res) => {
         updated_by
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
-  await parseAndInsert(suggested_team, suggestedInsertQuery, (sugg) => [
-    incident_no,
-    "SUGGESTED_TEAM",
-    sugg.id,
-    sugg.name,
-    currentTime,
-    ID,
-    currentTime,
-    ID,
-  ]);
+    await parseAndInsert(suggested_team, suggestedInsertQuery, (sugg) => [
+      incident_no,
+      "SUGGESTED_TEAM",
+      sugg.id,
+      sugg.name,
+      currentTime,
+      ID,
+      currentTime,
+      ID,
+    ]);
 
-  const updateHeaderQuery = `
+    const pendingOnIds = JSON.parse(suggested_team)
+      .map((item) => item.id)
+      .join(",");
+    const updateHeaderQuery = `
     UPDATE t_inshe_incident_header
     SET status = 'Team Formed',
+        pending_on = ?,
         updated_at = ?,
         updated_by = ?
     WHERE id = ?
   `;
-  await simpleQuery(updateHeaderQuery, [currentTime, ID, incident_no]);
+    await simpleQuery(updateHeaderQuery, [
+      pendingOnIds,
+      currentTime,
+      ID,
+      incident_no,
+    ]);
+  } else {
+    const updateHeaderQuery = `
+    UPDATE t_inshe_incident_header
+    SET status = 'Closed', pending_on = ?, updated_at = ?, updated_by = ?, close_date = ?, close_remarks = ?
+    WHERE id = ?
+  `;
+    await simpleQuery(updateHeaderQuery, [
+      0,
+      currentTime,
+      ID,
+      currentTime,
+      close_remarks,
+      incident_no,
+    ]);
+  }
 
   console.log("Data inserted successfully.");
   res.status(200).json({ message: "Data processed successfully." });
@@ -908,7 +942,7 @@ exports.getImsCloseData = async (req, res) => {
   const imsQuery = `
   SELECT 
     t1.id incident_no,
-    t1.inc_date_time,
+    DATE_FORMAT(t1.inc_date_time, '%d-%b-%Y %h:%i:%s %p') AS inc_date_time,
     t1.department department_id,
     t2.name department,
     t1.area area_id,
@@ -920,6 +954,7 @@ exports.getImsCloseData = async (req, res) => {
     t1.potential_outcome,
     t1.action_taken,
     t1.incident_details,
+    t1.ims_photos,
     t1.immediate_action,
     t5.name pending_on,
     t1.status,
@@ -939,7 +974,7 @@ exports.getImsCloseData = async (req, res) => {
     join t_inshe_users t7 on t1.created_by = t7.id
   WHERE
     1=1
-    and t1.status='Investigation'
+    and t1.status='Investigated'
     and t1.pending_on = ?
     ${strId}
     ${strDepartment}
@@ -1103,7 +1138,7 @@ exports.getImsCategorizationData = async (req, res) => {
   const imsQuery = `
   SELECT 
     t1.id incident_no,
-    t1.inc_date_time,
+    DATE_FORMAT(t1.inc_date_time, '%d-%b-%Y %h:%i:%s %p') AS inc_date_time,
     t1.department department_id,
     t2.name department,
     t1.area area_id,
@@ -1115,6 +1150,7 @@ exports.getImsCategorizationData = async (req, res) => {
     t1.potential_outcome,
     t1.action_taken,
     t1.incident_details,
+    t1.ims_photos,
     t1.immediate_action,
     'Medical Team' pending_on,
     t1.status,
@@ -1267,5 +1303,394 @@ exports.submitIncidentCategory = async (req, res) => {
   // await simpleQuery(updateHeaderQuery, [currentTime, ID, incident_no]);
 
   console.log("Data updated successfully.");
+  res.status(200).json({ message: "Data processed successfully." });
+};
+exports.getImsInvestigationData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
+
+  const {
+    incident_no,
+    department,
+    area,
+    injury_type,
+    factors,
+    date_from,
+    date_to,
+    status,
+  } = req.body;
+
+  const strId = incident_no > 0 ? ` and t1.id=${id}` : "";
+  const strDepartment =
+    department !== "All" ? ` and t1.department=${department}` : "";
+  const strArea = area !== "All" ? ` and t1.area=${area}` : "";
+  const strInjuryType =
+    injury_type !== "All" ? ` and t1.injury_type=${injury_type}` : "";
+  const strFactors = factors !== "All" ? ` and t1.factors='${factors}'` : "";
+  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
+  const strFromDate =
+    date_from !== "" ? ` and DATE(t1.obs_datetime) >='${date_from}'` : "";
+  const strToDate =
+    date_to !== "" ? ` and DATE(t1.obs_datetime) <='${date_to}'` : "";
+
+  const imsQuery = `
+  SELECT 
+    t1.id incident_no,
+    DATE_FORMAT(t1.inc_date_time, '%d-%b-%Y %h:%i:%s %p') AS inc_date_time,
+    t1.department department_id,
+    t2.name department,
+    t1.area area_id,
+    t3.name area,
+    t4.context_name injury_type,
+    t8.context_name factors,
+    t1.reported_by,
+    t1.exact_location,
+    t1.potential_outcome,
+    t1.action_taken,
+    t1.incident_details,
+    t1.ims_photos,
+    t1.immediate_action,
+    t5.name pending_on,
+    t1.status,
+    t1.created_at,
+    t1.created_by,
+    t1.updated_at,
+    t1.updated_by,
+    t7.name log_by,
+    LPAD(t1.id, 6, '0') AS disp_logno
+  FROM
+    t_inshe_incident_header t1
+    join t_inshe_org_structures t2 on t1.department = t2.id
+    join t_inshe_org_structures t3 on t1.area = t3.id
+    left join t_inshe_context_definitions t4 on t1.injury_type = t4.context_id
+    left join t_inshe_context_definitions t8 on t1.factors = t8.context_id
+    left join t_inshe_users t5 on t1.pending_on = t5.id
+    join t_inshe_users t7 on t1.created_by = t7.id
+  WHERE
+    1=1
+    and t1.status = "Team Formed"
+    and  FIND_IN_SET(?, t1.pending_on) > 0
+    ${strId}
+    ${strDepartment}
+    ${strArea}
+    ${strInjuryType}
+    ${strFactors}
+    ${strStatus}
+    ${strFromDate}
+    ${strToDate}
+    order by t1.id desc
+`;
+
+  const resultIms = await simpleQuery(imsQuery, [logged_user_id]);
+
+  const injuryQuery = `
+      SELECT 
+          t1.id,
+          t1.header_id,
+          t1.company_type,
+          t1.employee_id,
+          t1.name,
+          t1.department,
+          t1.company,
+          t1.age,
+          t1.sex,
+          t1.deployed_date,
+          t1.body_part,
+          t1.injury_nature
+      FROM
+          t_inshe_incident_injury_dtls t1
+      WHERE
+       1=1
+       
+    `;
+
+  const resultInjury = await simpleQuery(injuryQuery, []);
+
+  const suggTeamQuery = `
+      SELECT DISTINCT
+          t1.id,
+          t1.header_id,
+          t1.team_type,
+          t1.employee_id,
+          t1.name,
+          t1.department
+      FROM
+          t_inshe_incident_team t1
+      WHERE
+        1=1
+        and team_type = "SUGGESTED_TEAM"
+       
+    `;
+
+  const resultSuggTeams = await simpleQuery(suggTeamQuery, []);
+
+  const witTeamQuery = `
+      SELECT DISTINCT
+          t1.id,
+          t1.header_id,
+          t1.team_type,
+          t1.employee_id,
+          t1.name,
+          t1.department
+      FROM
+          t_inshe_incident_team t1
+      WHERE
+        1=1
+        and team_type = "WITNESS_TEAM"
+       
+    `;
+
+  const resultWittTeams = await simpleQuery(witTeamQuery, []);
+
+  res.status(200).json({
+    historyLogImsData: [...resultIms],
+    INJURY_DETAILS: [...resultInjury],
+    SUGG_TEAM: [...resultSuggTeams],
+    WITNESS_TEAM: [...resultWittTeams],
+  });
+};
+exports.submitInvestigationData = async (req, res) => {
+  const { ID } = req.user;
+  const {
+    disp_logno,
+    incident_no,
+    inc_date_time,
+    department_id,
+    department,
+    area_id,
+    area,
+    injury_type,
+    factors,
+    reported_by,
+    exact_location,
+    potential_outcome,
+    action_taken,
+    incident_details,
+    status,
+    immediate_action,
+    risk_identified,
+    identified_control,
+    control_type,
+    control_description,
+    control_adequate_desc,
+    list_facts,
+    physical_factors,
+    human_factors,
+    system_factors,
+    recommendations,
+    documents,
+  } = req.body.pdcData;
+  // console.log(req.body.pdcData);
+
+  // Fetch Area Head
+  const areaQuery = `
+    SELECT DISTINCT
+      t1.id,
+      t1.name,
+      t1.head_user_id head_id
+    FROM
+      t_inshe_org_structures t1
+    WHERE
+      t1.is_deleted = 0 AND t1.id = ?
+  `;
+  const resultArea = await simpleQuery(areaQuery, [area_id]);
+  if (!resultArea.length) {
+    return res.status(404).json({ message: "Area not found." });
+  }
+
+  const areaHead = resultArea[0].head_id;
+
+  const currentTime = new Date();
+  const investigationInsertQuery = `
+  INSERT INTO t_inshe_incident_investigation (
+    incident_id,
+    list_facts,
+    physical_factors,
+    human_factors,
+    system_factors,
+    status,
+    risk_identified,
+    identified_control,
+    control_type,
+    control_description,
+    control_adequate_desc,
+    created_at,
+    created_by,
+    updated_at,
+    updated_by
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+`;
+  await simpleQuery(investigationInsertQuery, [
+    incident_no,
+    list_facts,
+    physical_factors,
+    human_factors,
+    system_factors,
+    "Submitted",
+    risk_identified,
+    identified_control,
+    control_type,
+    control_description,
+    control_adequate_desc,
+    currentTime,
+    ID,
+    currentTime,
+    ID,
+  ]);
+
+  // Helper function to parse and insert JSON data
+  const parseAndInsert = async (jsonString, query, mapValues) => {
+    if (jsonString) {
+      let parsedData;
+      try {
+        parsedData = JSON.parse(jsonString);
+        console.log(parsedData);
+      } catch (error) {
+        console.error("Error parsing JSON:", error);
+        return;
+      }
+
+      if (Array.isArray(parsedData) && parsedData.length > 0) {
+        for (const item of parsedData) {
+          const values = mapValues(item);
+          await simpleQuery(query, values);
+        }
+      }
+    }
+  };
+
+  const recommendationInsertQuery = `
+      INSERT INTO t_inshe_incident_recommendation (
+        incident_id,
+        recommendation,
+        responsibility,
+        factor,
+        control_type,
+        target_date,
+        status,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at,
+        pending_on
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+  await parseAndInsert(recommendations, recommendationInsertQuery, (recom) => [
+    incident_no,
+    recom.recommendation,
+    recom.responsibility,
+    recom.factor,
+    recom.control_type,
+    recom.target_date,
+    "Submitted",
+    ID,
+    currentTime,
+    ID,
+    currentTime,
+    areaHead,
+  ]);
+
+  const documentInsertQuery = `
+      INSERT INTO t_inshe_incident_documents (
+        incident_id,
+        document_type,
+        document,
+        status,
+        created_by,
+        created_at,
+        updated_by,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+  await parseAndInsert(documents, documentInsertQuery, (doc) => [
+    incident_no,
+    doc.documentType,
+    doc.document,
+    "Submitted",
+    ID,
+    currentTime,
+    ID,
+    currentTime,
+  ]);
+  const updateHeaderQuery = `
+  UPDATE t_inshe_incident_header
+  SET status = 'Investigated',
+      updated_at = ?,
+      updated_by = ?
+  WHERE id = ?
+`;
+  await simpleQuery(updateHeaderQuery, [currentTime, ID, incident_no]);
+  console.log("Data inserted successfully.");
+  res.status(200).json({ message: "Data processed successfully." });
+};
+exports.getRecommendationData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
+
+  const { incident_no, date_from, date_to, status } = req.body;
+
+  const strId = incident_no > 0 ? ` and t1.incident_id=${id}` : "";
+
+  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
+  const strFromDate =
+    date_from !== "" ? ` and DATE(t1.created_at) >='${date_from}'` : "";
+  const strToDate =
+    date_to !== "" ? ` and DATE(t1.created_at) <='${date_to}'` : "";
+
+  const imsQuery = `
+  SELECT 
+    t8.id incident_no,
+    DATE_FORMAT(t8.inc_date_time, '%d-%b-%Y %h:%i:%s %p') AS inc_date_time,
+    t8.department department_id,
+    t2.name department,
+    t8.area area_id,
+    t8.ims_photos,
+    t3.name area,
+    t1.recommendation,
+    t1.responsibility,
+    t1.factor,
+    t1.control_type,
+    t1.target_date,
+    t1.status,
+    LPAD(t1.id, 6, '0') AS disp_logno,
+    t1.id
+  FROM
+    t_inshe_incident_recommendation t1
+    join t_inshe_incident_header t8 on t1.incident_id = t8.id
+    join t_inshe_org_structures t2 on t8.department = t2.id
+    join t_inshe_org_structures t3 on t8.area = t3.id
+  WHERE
+    1=1
+    and t1.pending_on = ?
+    ${strId}
+    ${strStatus}
+    ${strFromDate}
+    ${strToDate}
+    order by t1.id desc
+`;
+
+  const resultIms = await simpleQuery(imsQuery, [logged_user_id]);
+
+  res.status(200).json({
+    historyLogImsData: [...resultIms],
+  });
+};
+exports.closeRecommendation = async (req, res) => {
+  const { ID } = req.user;
+  const { id, close_remarks } = req.body.pdcData;
+
+  const currentTime = new Date();
+
+  const updateHeaderQuery = `
+  UPDATE t_inshe_incident_recommendation 
+  SET status = 'Closed', 
+      closure_remarks = ?,
+      updated_at = ?, 
+      updated_by = ? ,
+     
+  WHERE id = ?
+`;
+  await simpleQuery(updateHeaderQuery, [close_remarks, currentTime, ID, id]);
+
   res.status(200).json({ message: "Data processed successfully." });
 };

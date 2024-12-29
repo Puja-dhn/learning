@@ -15,6 +15,7 @@ import TeamFormation from "@/pages/ims/TeamFormation";
 import CloseIncident from "@/pages/ims/CloseIncident";
 import CategorizeIncident from "@/pages/ims/CategorizeIncident";
 import IncidentInvestigation from "@/pages/ims/IncidentInvestigation";
+import CloseRecommendation from "@/pages/ims/CloseRecommendation";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -31,7 +32,7 @@ const IMS_MENU_LIST: IMenuItem[] = [
     menuType: "Static",
   },
   {
-    id: 11,
+    id: 24,
     name: "Dashboard",
     icon: <HomeIcon className="w-5 h-5" />,
     iconSelected: <HomeIconSolid className="w-5 h-5" />,
@@ -109,6 +110,17 @@ const IMS_MENU_LIST: IMenuItem[] = [
     appId: 4,
     path: "close-incident",
     element: <CloseIncident />,
+    children: [],
+    menuType: "Normal",
+  },
+  {
+    id: 21,
+    name: "Recommendation Close",
+    icon: <DocumentPlusIcon className="w-5 h-5" />,
+    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    appId: 4,
+    path: "close-recommendation",
+    element: <CloseRecommendation />,
     children: [],
     menuType: "Normal",
   },

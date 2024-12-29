@@ -60,17 +60,31 @@ exports.getPTWMasterData = async (req, res) => {
 
     const resultAreas = await simpleQuery(areasQuery, []);
 
+    //   const configsQuery = `
+    //   SELECT
+    //       t1.context_id id,
+    //       t1.definitions_type type,
+    //       t1.context_name checklist
+    //   FROM
+    //       t_inshe_context_definitions t1
+    //   WHERE
+    //     t1.is_deleted = 0
+    //     and t1.definitions_type in ('Hazard Identification','Risk Assessment','PPE Required','General Work',
+    //     'Hot Work','Work at Height','Confined Space','Lifiting Work','ESMS Work Permit','Tools and Equipment'
+    //     )
+
+    // `;
     const configsQuery = `
-    SELECT 
-        t1.id,
-        t1.type,
-        t1.checklist
-    FROM
-        t_inshe_ptw_configs t1
-    WHERE
-      t1.status = 'Active'
-     
-  `;
+      SELECT
+          t1.id,
+          t1.type,
+          t1.checklist
+      FROM
+          t_inshe_ptw_configs t1
+      WHERE
+        t1.status = 'Active'
+
+    `;
 
     const resultConfigs = await simpleQuery(configsQuery, []);
 

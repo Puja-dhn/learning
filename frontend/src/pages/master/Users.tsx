@@ -8,6 +8,7 @@ import {
   ArrowPathIcon,
   ArrowDownTrayIcon,
   PencilSquareIcon,
+  PlusIcon,
 } from "@heroicons/react/24/solid";
 import { useQueryClient } from "react-query";
 import { utils, writeFile } from "xlsx";
@@ -53,14 +54,9 @@ interface IExportCol {
 }
 
 const filterSchema = Yup.object().shape({
-  EMP_ID: Yup.string().max(50, "Maximum 50 characters can be entered"),
-  EMP_NAME: Yup.string().max(200, "Maximum 200 characters can be entered"),
-  EMAIL: Yup.string().max(200, "Maximum 200 characters can be entered"),
-  PERSONNEL_SUBAREA: Yup.string().max(
-    200,
-    "Maximum 200 characters can be entered",
-  ),
-  USERNAME: Yup.string().max(100, "Maximum 200 characters can be entered"),
+  id: Yup.string().max(50, "Maximum 50 characters can be entered"),
+  name: Yup.string().max(200, "Maximum 200 characters can be entered"),
+  email: Yup.string().max(200, "Maximum 200 characters can be entered"),
 });
 
 const tableColumns = [
@@ -72,20 +68,32 @@ const tableColumns = [
   },
   {
     label: "Name",
-    minWidth: "min-w-[140px]",
+    minWidth: "min-w-[240px]",
     dbCol: "name",
     colType: "Normal",
   },
   {
     label: "Email",
-    minWidth: "min-w-[200px]",
+    minWidth: "min-w-[240px]",
     dbCol: "email",
     colType: "Normal",
   },
   {
     label: "Mobile",
-    minWidth: "min-w-[140px]",
+    minWidth: "min-w-[240px]",
     dbCol: "mobile",
+    colType: "Normal",
+  },
+  {
+    label: "Designation",
+    minWidth: "min-w-[240px]",
+    dbCol: "designation",
+    colType: "Normal",
+  },
+  {
+    label: "Status",
+    minWidth: "min-w-[200px]",
+    dbCol: "status",
     colType: "Normal",
   },
 ];
@@ -95,6 +103,8 @@ const initialEditValues: IUserDataEdit = {
   name: "",
   email: "",
   mobile: "",
+  designation: "",
+  status: "",
   profile_pic_url: "",
   roles: "",
   is_profile_edit: 0,
@@ -105,18 +115,18 @@ const editSchema = Yup.object().shape({
   name: Yup.string()
     .required("Emp Name is required")
     .max(255, "Maximum 255 characters can be entered"),
-  profile_pic_users: Yup.string()
-    .required("Profile Picture is Required")
-    .max(255, "Maximum 255 characters can be entered"),
   email: Yup.string()
     .required("Email is Required")
     .max(255, "Maximum 255 characters can be entered"),
-  new_password: Yup.string().when("is_password_reset", {
-    is: (val: number) => val === 1,
-    then: Yup.string()
-      .required("New Password must be set for the user")
-      .max(18, "Maximum 18 characters can be entered"),
-  }),
+  mobile: Yup.string()
+    .required("Mobile is Required")
+    .max(255, "Maximum 255 characters can be entered"),
+  designation: Yup.string()
+    .required("Designation is Required")
+    .max(255, "Maximum 255 characters can be entered"),
+  status: Yup.string()
+    .required("Status is Required")
+    .max(255, "Maximum 255 characters can be entered"),
 });
 
 function Users() {
@@ -245,6 +255,25 @@ function Users() {
     setShowEditDialog((oldState) => ({ ...oldState, status: false }));
   };
 
+  const handleAddDialogOpen = () => {
+    const currRow = {
+      ...initialEditValues,
+    };
+    resetEdit({
+      ...currRow,
+      status: "active",
+    });
+    setShowEditDialog({
+      status: true,
+      formInitialValues: {
+        ...currRow,
+      },
+    });
+    if (imgRef && imgRef.current) {
+      imgRef.current.value = "";
+    }
+  };
+
   const {
     data: userDBListData,
     isLoading: isUserDBListDataLoading,
@@ -345,12 +374,8 @@ function Users() {
       })
       .catch((err) => {
         if (err.response && err.response.status) {
-          if (err.response.data && err.response.data.errorTransKey) {
-            alertToast.show(
-              "warning",
-              t(`form.errors.${err.response.data.errorTransKey}`),
-              true,
-            );
+          if (err.response.data && err.response.data.errorMessage) {
+            alertToast.show("warning", err.response.data.errorMessage, true);
           } else {
             alertToast.show("error", t("form.errors.defaultError"), true);
           }
@@ -677,7 +702,8 @@ function Users() {
     >
       <div className="h-[50px] flex justify-between items-center p-1.5 px-2.5 border-[1px] text-md font-semibold text-center bg-[#f0f8ff] rounded-lg shadow-md dark:bg-gray-600 dark:text-cyan-200 dark:border-gray-500">
         <div className="flex items-center justify-center gap-2">
-          <div>
+          <span className="text-gray-700">Add / Update Users</span>
+          {/* <div>
             <InputText
               value={filterTicketNo}
               changeHandler={(data) => {
@@ -688,9 +714,12 @@ function Users() {
               className="w-[240px] bg-transparent"
               placeholder="Search by Ticket No/ Name"
             />
-          </div>
+          </div> */}
         </div>
         <div className="flex items-center justify-end gap-4 ml-20">
+          <IconButton onClick={handleAddDialogOpen}>
+            <PlusIcon className="w-4 h-4" />
+          </IconButton>
           <IconButton onClick={handelExcelExport}>
             <ArrowDownTrayIcon className="w-4 h-4" />
           </IconButton>
@@ -875,7 +904,7 @@ function Users() {
                 </div>
               </div>
             )}
-            {isSuperUser && (
+            {/* {isSuperUser && (
               <div className="flex flex-wrap items-center p-2 basis-full justify-evenly bg-gray-50 dark:bg-gray-700">
                 <div className="p-2 basis-full lg:basis-1/4">
                   <DropdownList
@@ -917,22 +946,18 @@ function Users() {
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </form>
       </ModalPopup>
       <ModalPopup
-        heading="Edit User"
+        heading="Add / Edit User"
         onClose={handleEditDialogClose}
         openStatus={showEditDialog.status}
         hasSubmit
         onSubmit={() => {
           handleSubmitEdit(handleEditFormSubmit)();
         }}
-        // onReset={() => {
-        //   handleEditReset();
-        // }}
-        // hasReset
         size="fullscreen"
         showError
         hasError={
@@ -943,7 +968,7 @@ function Users() {
           <div className="w-full h-full grid grid-cols-[7fr_2fr] gap-4 ">
             <div className="h-full grid grid-rows-[auto_1fr] gap-4 overflow-auto">
               <div className="flex flex-wrap justify-evenly items-center p-4 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500">
-                <div className="p-2 basis-full lg:basis-1/4">
+                <div className="p-2 basis-full lg:basis-1/3">
                   <TextField
                     disabled
                     name="id"
@@ -951,18 +976,36 @@ function Users() {
                     control={controlEdit}
                   />
                 </div>
-                <div className="p-2 basis-full lg:basis-1/4">
+                <div className="p-2 basis-full lg:basis-1/3">
                   <TextField name="name" label="Name" control={controlEdit} />
                 </div>
 
-                <div className="p-2 basis-full lg:basis-1/4">
+                <div className="p-2 basis-full lg:basis-1/3">
                   <TextField name="email" label="Email" control={controlEdit} />
                 </div>
-                <div className="p-2 basis-full lg:basis-1/4">
+                <div className="p-2 basis-full lg:basis-1/3">
                   <TextField
                     name="mobile"
                     label="Mobile"
                     control={controlEdit}
+                  />
+                </div>
+                <div className="p-2 basis-full lg:basis-1/3">
+                  <TextField
+                    name="designation"
+                    label="Designation"
+                    control={controlEdit}
+                  />
+                </div>
+                <div className="p-2 basis-full lg:basis-1/3">
+                  <DropdownList
+                    name="status"
+                    label="Status"
+                    control={controlFilter}
+                    optionList={[
+                      { id: "active", name: "Active" },
+                      { id: "inactive", name: "InActive" },
+                    ]}
                   />
                 </div>
               </div>
@@ -1012,42 +1055,6 @@ function Users() {
                     </div>
                   </div>
                 </div>
-                <div className="h-full flex flex-wrap justify-evenly items-center p-4 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500 overflow-auto">
-                  <div className="h-full w-full grid grid-rows-[auto_1fr] overflow-auto">
-                    <div className="h-[35px] text-sm font-semibold text-cyan-700 dark:text-cyan-200 text-center">
-                      User Roles
-                    </div>
-                    <div className="h-full overflow-auto bg-gray-50 dark:bg-gray-700">
-                      <div className=" p-4 basis-full grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))]  gap-4 items-start  justify-evenly overflow-auto">
-                        {dbList.roleList.map((role) => (
-                          <div
-                            key={role.id}
-                            className="border-[1px] border-gray-300 rounded-lg dark:border-gray-500 shadow-md "
-                          >
-                            <label
-                              htmlFor={`userrole-check-${role.id}`}
-                              className="flex items-center justify-start w-full gap-2 p-4 text-sm rounded text-cyan-700 dark:text-gray-300"
-                            >
-                              <input
-                                id={`userrole-check-${role.id}`}
-                                type="checkbox"
-                                checked={getUserRoleCheckStatus(+role.id)}
-                                onChange={(event) => {
-                                  handleUserRoleChecked(event, +role.id);
-                                }}
-                                name={`userrole-check-${role.id}`}
-                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                              />
-                              {role.name}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="grid h-[250px] grid-cols-1 gap-4 overflow-auto">
                 <div className="h-full flex flex-wrap justify-evenly items-center p-4 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500 overflow-auto">
                   <div className="h-full w-full grid grid-rows-[auto_1fr] overflow-auto">
                     <div className="h-[35px] text-sm font-semibold text-cyan-700 dark:text-cyan-200 text-center">

@@ -29,7 +29,7 @@ const SIS_MENU_LIST: IMenuItem[] = [
     menuType: "Static",
   },
   {
-    id: 7,
+    id: 22,
     name: "Dashboard",
     icon: <HomeIcon className="w-5 h-5" />,
     iconSelected: <HomeIconSolid className="w-5 h-5" />,

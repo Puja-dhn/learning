@@ -65,6 +65,7 @@ const initialViewImsValues: ILogImsData = {
   potential_outcome: "",
   action_taken: "",
   incident_details: "",
+  ims_photos: "",
   immediate_action: "",
   status: "",
   pending_on: "",
@@ -73,6 +74,7 @@ const initialViewImsValues: ILogImsData = {
   updated_at: "",
   updated_by: "",
   log_by: "",
+  close_remarks: "",
 };
 const initialFilterValues: ILogImsFilterForm = {
   incident_no: null,
@@ -214,6 +216,7 @@ function CategorizeIncident() {
       (item) => item.header_id === row.incident_no,
     );
     setWitTeamFilterRow(wittFilter);
+    setImagePreviews(JSON.parse(row.ims_photos));
     resetActionTaken({
       disp_logno: row.disp_logno,
       incident_no: row.incident_no,

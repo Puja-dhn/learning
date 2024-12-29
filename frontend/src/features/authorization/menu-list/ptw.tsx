@@ -25,7 +25,7 @@ const PTW_MENU_LIST: IMenuItem[] = [
     menuType: "Static",
   },
   {
-    id: 5,
+    id: 23,
     name: "Dashboard",
     icon: <HomeIcon className="w-5 h-5" />,
     iconSelected: <HomeIconSolid className="w-5 h-5" />,

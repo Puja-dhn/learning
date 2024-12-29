@@ -10,6 +10,7 @@ interface ILogImsForm {
   action_taken: string;
   injury_details: string;
   incident_details: string;
+  ims_photos: string;
   immediate_action: string;
   suggested_team: string;
   witness: string;
