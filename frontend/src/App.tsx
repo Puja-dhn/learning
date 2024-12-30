@@ -15,6 +15,7 @@ import CloseRecommendation from "./pages/ims/CloseRecommendation";
 import LogViolations from "./pages/ptw/LogViolations";
 import ViewViolations from "./pages/ptw/ViewViolations";
 import CloseViolations from "./pages/ptw/CloseViolations";
+import UserProfile from "./pages/master/UserProfile";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -64,6 +65,7 @@ function App() {
           >
             <Route index element={<MasterDashboard />} />
             <Route path="dashboard" element={<MasterDashboard />} />
+            <Route path="user-profile" element={<UserProfile />} />
             <Route path="users" element={<Users />} />
             <Route
               path="context-definations"

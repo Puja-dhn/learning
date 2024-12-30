@@ -5,6 +5,7 @@ import {
   ArrowRightOnRectangleIcon,
   EllipsisVerticalIcon,
   HomeIcon,
+  UserIcon,
 } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "react-query";
@@ -109,6 +110,17 @@ function OptionsToggler(props: IProps) {
             className="w-[100%] text-[11px] cursor-pointer flex gap-2 font-bold"
           >
             <HomeIcon className="w-5 h-4 " /> Home
+          </button>
+        </div>
+        <div className="p-2 font-normal text-[#06235b] hover:bg-slate-50">
+          <button
+            onClick={() => {
+              navigate("/master/user-profile", { replace: true });
+            }}
+            type="button"
+            className="w-[100%] text-[11px] cursor-pointer flex gap-2 font-bold"
+          >
+            <UserIcon className="w-5 h-4 " /> Profile
           </button>
         </div>
         <div className="p-2 font-normal text-[#06235b] hover:bg-slate-50">

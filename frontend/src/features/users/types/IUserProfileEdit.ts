@@ -1,10 +1,8 @@
 import IUserData from "./IUserData";
 
 interface IUserProfileEdit extends IUserData {
-  IS_RFID_RESET: number;
-  IS_PASSWORD_RESET: number;
-  MOBILE: string;
-  IS_PROFILE_EDIT: number;
+  is_profile_edit: number;
+  new_password: string;
 }
 
 export default IUserProfileEdit;

@@ -434,7 +434,7 @@ function LogSis() {
                 </div>
 
                 <div className="w-[100%]   gap-4  justify-evenly">
-                  <div className="grid grid-cols-1 md:grid-cols-3">
+                  <div className="grid grid-cols-1 ">
                     <div className="p-1">
                       <TextArea
                         name="CLOSE_DESC"

@@ -87,7 +87,6 @@ exports.getUserDetailsList = async (req, res) => {
     in_mapping_list,
     is_filter_query,
   } = filterList;
-
   let result = [];
   let resultSDT = [];
 
@@ -136,7 +135,7 @@ exports.getUserDetailsList = async (req, res) => {
 
   const isTicketNotNumber = isNaN(filterTicketNo);
   const strSqlForID = !isTicketNotNumber
-    ? ` t1.emp_no = ${filterTicketNo} OR `
+    ? ` t1.id = ${filterTicketNo} OR `
     : ``;
 
   if (filterTicketNo > 0 && is_filter_query !== 1) {
@@ -155,18 +154,18 @@ exports.getUserDetailsList = async (req, res) => {
                   t_inshe_users t1
                 WHERE
                  1=1
-                  and t1.id !=1
+                 
                   AND 
                   (
-                    ${strSqlForID}   
-                    t1.emp_no = '${filterTicketNo}'   OR
+                    t1.id = ${filterTicketNo}   OR
                     LOWER(t1.name) LIKE '%${filterTicketNo}%'   OR
                     LOWER(t1.email) LIKE '%${filterTicketNo}%'   
                   )
                 ORDER BY 
                   name, 
                   id ASC`;
-    if (filterTicketNo.length > 0) {
+
+    if (filterTicketNo > 0) {
       let resultUserList = await simpleQuery(strSql, []);
       result = [...resultUserList];
     } else {
@@ -552,5 +551,65 @@ exports.updateUserDetails = async (req, res) => {
     }
   }
 
+  return res.status(200).json("success");
+};
+
+exports.updateUserProfile = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const { id, emp_no, is_profile_edit, mobile, new_password } = req.body;
+
+  if (!id || id <= 0) {
+    return res.status(400).json({
+      errorMessage: "Invalid Request",
+      errorTransKey: "api_res_invalid_request",
+    });
+  }
+
+  let strSqlImage = "";
+
+  if (is_profile_edit === 1) {
+    strSqlImage = ` profile_pic_url = '${id}.JPG', `;
+  }
+  let strSqlPass = "";
+  const BCYRPT_SALT_ROUNDS = 10;
+  if (new_password !== "") {
+    const bycryptedPassword = await bcrypt
+      .hash(new_password, BCYRPT_SALT_ROUNDS)
+      .then((hash) => {
+        return hash;
+      })
+      .catch((err) => {
+        console.error(err.message);
+        return "$2b$10$LR0iYyz1Gbp93sgEmRDcluQtcYiQGWFI7LraVOTADes7OVFT3.7nS1";
+      });
+
+    strSqlPass = ` password = '${bycryptedPassword}', `;
+  }
+
+  const resultSql = `UPDATE
+  t_inshe_users  
+  SET 
+  ${strSqlPass}
+  ${strSqlImage}  
+    mobile = ?
+    
+  WHERE
+      id = ?`;
+  const resultUpdateUserDetails = await simpleQuery(resultSql, [mobile, id]);
+
+  if (is_profile_edit === 1) {
+    const imageDirPath = path.resolve(
+      __dirname,
+      "../static/api/images/profile/"
+    );
+    fs.rename(
+      `${imageDirPath}/${id}_temp.JPG`,
+      `${imageDirPath}/${id}.JPG`,
+      (err) => {
+        if (err) console.log("ERROR renaming profile pic: " + err);
+      }
+    );
+  }
+  console.log("UPDATED User Details Data ", resultUpdateUserDetails);
   return res.status(200).json("success");
 };
