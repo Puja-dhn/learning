@@ -136,16 +136,18 @@ exports.getUserDetailsList = async (req, res) => {
 
   const isTicketNotNumber = isNaN(filterTicketNo);
   const strSqlForID = !isTicketNotNumber
-    ? ` t1.id = ${filterTicketNo} OR `
+    ? ` t1.emp_no = ${filterTicketNo} OR `
     : ``;
 
   if (filterTicketNo > 0 && is_filter_query !== 1) {
     strSql = `SELECT
                   t1.id,
                   t1.name,
+                  t1.emp_no,
                   t1.email,
                   t1.mobile,
                   t1.designation,
+                  t1.emp_type,
                   t1.status,
                   NVL(t1.profile_pic_url,'profile_photo_default.png') profile_pic_url,
                   ${strSqlRolesCol}
@@ -157,7 +159,7 @@ exports.getUserDetailsList = async (req, res) => {
                   AND 
                   (
                     ${strSqlForID}   
-                    t1.id = '${filterTicketNo}'   OR
+                    t1.emp_no = '${filterTicketNo}'   OR
                     LOWER(t1.name) LIKE '%${filterTicketNo}%'   OR
                     LOWER(t1.email) LIKE '%${filterTicketNo}%'   
                   )
@@ -172,7 +174,7 @@ exports.getUserDetailsList = async (req, res) => {
     }
   } else {
     if (is_filter_query) {
-      let strID = id > 0 ? ` AND t1.id = ${id}  ` : ``;
+      let strID = id > 0 ? ` AND t1.emp_no = ${id}  ` : ``;
       let strEmpName =
         name.length > 0
           ? ` AND LOWER(t1.name) LIKE '%${name.toLowerCase()}%'  `
@@ -184,11 +186,13 @@ exports.getUserDetailsList = async (req, res) => {
 
       strSql = `SELECT
                   t1.id,
+                  t1.emp_no,
                   t1.name,
                   NVL(t1.profile_pic_url,'profile_photo_default.png') profile_pic_url,
                   t1.email,
                    t1.mobile,
                    t1.designation,
+                   t1.emp_type,
                    t1.status,
                   ${strSqlRolesCol}
                  
@@ -203,7 +207,6 @@ exports.getUserDetailsList = async (req, res) => {
                 ORDER BY 
                   name, 
                   id ASC`;
-      console.log(strSql);
       let resultUserList = await simpleQuery(strSql, []);
 
       result = [...resultUserList];
@@ -228,7 +231,7 @@ exports.getUserDetailsList = async (req, res) => {
       } else {
         let hasRole = true;
         for (let iRole = 0; iRole < in_role_list.length; iRole++) {
-          if (user.roles && user.ROLES.includes(`${in_role_list[iRole]}`)) {
+          if (user.roles && user.roles.includes(`${in_role_list[iRole]}`)) {
             hasRole = false;
           }
         }
@@ -247,15 +250,18 @@ exports.updateUserDetails = async (req, res) => {
     is_password_reset,
     new_password,
     id,
+    emp_no,
     name,
     email,
     mobile,
     designation,
+    emp_type,
     profile_pic_url,
     status,
     roles,
     is_profile_edit,
   } = req.body;
+
   const currentTime = new Date();
 
   if (!isEditAllowed) {
@@ -281,6 +287,18 @@ exports.updateUserDetails = async (req, res) => {
         errorTransKey: "api_res_email_exists",
       });
     } else {
+      const generatePassword = () => {
+        const characters =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let password = "";
+        for (let i = 0; i < 6; i++) {
+          const randomIndex = Math.floor(Math.random() * characters.length);
+          password += characters[randomIndex];
+        }
+        return password;
+      };
+
+      const new_password = generatePassword();
       const bycryptedPassword = await bcrypt
         .hash(new_password, BCYRPT_SALT_ROUNDS)
         .then((hash) => {
@@ -304,16 +322,18 @@ exports.updateUserDetails = async (req, res) => {
         );
       }
       const insertSqlUsers = `
-      INSERT into t_inshe_users(name,email,mobile,password,designation,status,profile_pic_url,created_at,created_by)values(
-      ?,?,?,?,?,?,?,?,?
+      INSERT into t_inshe_users(emp_no,name,email,mobile,password,designation,emp_type,status,profile_pic_url,created_at,created_by)values(
+      ?,?,?,?,?,?,?,?,?,?,?
       )
       `;
       const resultUsers = await simpleQuery(insertSqlUsers, [
+        emp_no,
         name,
         email,
         mobile,
         bycryptedPassword,
         designation,
+        emp_type,
         status,
         profile_pic_url,
         currentTime,
@@ -359,6 +379,70 @@ exports.updateUserDetails = async (req, res) => {
         ]);
       }
     }
+    let htmlContent = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Registration Successful</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f0f0f0;">
+        <table cellpadding="0" cellspacing="0" border="0" width="100%" style="max-width: 600px; margin: 20px auto; background-color: #ffffff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            <tr>
+                <td style="background-color: #24579d; color: #ffffff; padding: 15px; text-align: center; font-size: 20px; font-weight: bold; border-radius: 5px 5px 0 0;">
+                    Registration Successful
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">
+                    <p style="font-family: Verdana, sans-serif; font-size: 14px; color: #000080; margin: 0 0 10px;">
+                        Dear <strong style="color: #000080;">${name},</strong>
+                    </p>
+                    <p style="font-family: Verdana, sans-serif; font-size: 14px; color: #000080; margin: 0 0 10px;">
+                        Thank you for registering with [Company/Platform Name]. Please find your account details for further action.
+                    </p>
+                    <p style="font-family: Verdana, sans-serif; font-size: 14px; color: #000080; margin: 0 0 10px;">
+                        <b><u>Your Account Details</u></b>
+                    </p>
+                    <ul style="font-family: Verdana, sans-serif; font-size: 14px; color: #000080; margin: 0 0 20px; padding-left: 20px;">
+                        <li><b>Email:</b> ${email}</li>
+                        <li><b>Password:</b> ${new_password}</li>
+                    </ul>
+                    <p style="font-family: Verdana, sans-serif; font-size: 14px; color: #000080; margin: 0;">
+                        Please keep this information secure and do not share it with anyone.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 20px;">
+                    <p style="font-family: Verdana, sans-serif; font-size: 14px; color: #000080; margin: 0 0 10px;">
+                        With Regards,
+                    </p>
+                    <p style="font-family: Verdana, sans-serif; font-size: 14px; color: #000080; margin: 0;">
+                        [Company/Platform Name]
+                    </p>
+                    <p style="font-family: Verdana, sans-serif; font-size: 12px; color: red; margin: 20px 0 0;">
+                        [Note: Please do not reply to this mail as it is auto-generated.]
+                    </p>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+`;
+    try {
+      await sendMail(
+        `${email}`,
+        ``,
+        `Registration Successfull`,
+        `${htmlContent}`
+      );
+      console.log("Email sent successfully");
+    } catch (error) {
+      console.error("Error sending email:", error);
+      throw error;
+    }
   } else {
     // update user details, if rfid is reset, if password is reset
 
@@ -386,20 +470,24 @@ exports.updateUserDetails = async (req, res) => {
           t_inshe_users  
         SET  
         ${strSqlPass}
-          ${strSqlImage}         
+          ${strSqlImage}  
+          emp_no = ?,       
           name = ?,
           email = ?,
           mobile = ?,
-          designation = ?
+          designation = ?,
+          emp_type = ?
           
           
         WHERE
             id = ?`;
     const resultUpdateUserDetails = await simpleQuery(resultSql, [
+      emp_no,
       name,
       email,
       mobile,
       designation,
+      emp_type,
       id,
     ]);
 

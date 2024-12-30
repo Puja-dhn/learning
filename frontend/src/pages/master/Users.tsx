@@ -67,6 +67,12 @@ const tableColumns = [
     colType: "Normal",
   },
   {
+    label: "Employee ID",
+    minWidth: "min-w-[240px]",
+    dbCol: "emp_no",
+    colType: "Normal",
+  },
+  {
     label: "Name",
     minWidth: "min-w-[240px]",
     dbCol: "name",
@@ -74,7 +80,7 @@ const tableColumns = [
   },
   {
     label: "Email",
-    minWidth: "min-w-[240px]",
+    minWidth: "min-w-[270px]",
     dbCol: "email",
     colType: "Normal",
   },
@@ -91,6 +97,12 @@ const tableColumns = [
     colType: "Normal",
   },
   {
+    label: "Employee Type",
+    minWidth: "min-w-[240px]",
+    dbCol: "emp_type",
+    colType: "Normal",
+  },
+  {
     label: "Status",
     minWidth: "min-w-[200px]",
     dbCol: "status",
@@ -100,10 +112,12 @@ const tableColumns = [
 
 const initialEditValues: IUserDataEdit = {
   id: 0,
+  emp_no: "",
   name: "",
   email: "",
   mobile: "",
   designation: "",
+  emp_type: "",
   status: "",
   profile_pic_url: "",
   roles: "",
@@ -839,7 +853,7 @@ function Users() {
               <TextField
                 type="number"
                 name="id"
-                label="ID"
+                label="Employee ID"
                 control={controlFilter}
               />
             </div>
@@ -968,7 +982,7 @@ function Users() {
           <div className="w-full h-full grid grid-cols-[7fr_2fr] gap-4 ">
             <div className="h-full grid grid-rows-[auto_1fr] gap-4 overflow-auto">
               <div className="flex flex-wrap justify-evenly items-center p-4 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500">
-                <div className="p-2 basis-full lg:basis-1/3">
+                <div className="p-2 basis-full lg:basis-1/4">
                   <TextField
                     disabled
                     name="id"
@@ -976,28 +990,48 @@ function Users() {
                     control={controlEdit}
                   />
                 </div>
-                <div className="p-2 basis-full lg:basis-1/3">
+                <div className="p-2 basis-full lg:basis-1/4">
+                  <TextField
+                    name="emp_no"
+                    label="Emp No"
+                    control={controlEdit}
+                  />
+                </div>
+                <div className="p-2 basis-full lg:basis-1/4">
                   <TextField name="name" label="Name" control={controlEdit} />
                 </div>
 
-                <div className="p-2 basis-full lg:basis-1/3">
+                <div className="p-2 basis-full lg:basis-1/4">
                   <TextField name="email" label="Email" control={controlEdit} />
                 </div>
-                <div className="p-2 basis-full lg:basis-1/3">
+                <div className="p-2 basis-full lg:basis-1/4">
                   <TextField
                     name="mobile"
                     label="Mobile"
                     control={controlEdit}
                   />
                 </div>
-                <div className="p-2 basis-full lg:basis-1/3">
+                <div className="p-2 basis-full lg:basis-1/4">
                   <TextField
                     name="designation"
                     label="Designation"
                     control={controlEdit}
                   />
                 </div>
-                <div className="p-2 basis-full lg:basis-1/3">
+                <div className="p-2 basis-full lg:basis-1/4">
+                  <DropdownList
+                    name="emp_type"
+                    label="Employee Type"
+                    control={controlEdit}
+                    optionList={[
+                      { id: "Permanent", name: "Permanent" },
+                      { id: "Contractor", name: "Contractor" },
+                      { id: "Intern", name: "Intern" },
+                      { id: "Trainee", name: "Trainee" },
+                    ]}
+                  />
+                </div>
+                <div className="p-2 basis-full lg:basis-1/4">
                   <DropdownList
                     name="status"
                     label="Status"
@@ -1011,49 +1045,51 @@ function Users() {
               </div>
               <div className="h-full grid grid-cols-[1fr_3fr] gap-4 overflow-auto">
                 <div className="flex flex-wrap justify-evenly items-center p-4 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500">
-                  <div className="h-full w-full grid grid-rows-[auto_1fr]">
-                    <div className="h-[35px] text-sm font-semibold text-cyan-700 dark:text-cyan-200 text-center">
-                      Reset Password
-                    </div>
-                    <div className="grid items-start grid-cols-1 gap-2 p-4 bg-gray-50 dark:bg-gray-700">
-                      <div>
-                        <label
-                          htmlFor="passwordreset-check"
-                          className="flex items-center justify-start w-full gap-2 p-2 text-sm rounded text-cyan-700 dark:text-gray-300"
-                        >
-                          <input
-                            id="passwordreset-check"
-                            type="checkbox"
-                            checked={getValuesEdit("is_password_reset") === 1}
-                            onChange={() => {
-                              if (getValuesEdit("is_password_reset") === 0) {
-                                setValueEdit("is_password_reset", 1, {
-                                  shouldValidate: true,
-                                });
-                              } else {
-                                setValueEdit("is_password_reset", 0, {
-                                  shouldValidate: true,
-                                });
-                                setValueEdit("new_password", "", {
-                                  shouldValidate: true,
-                                });
-                              }
-                            }}
-                            name="passwordreset-check"
-                            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                  {getValuesEdit("id") > 0 && (
+                    <div className="h-full w-full grid grid-rows-[auto_1fr]">
+                      <div className="h-[35px] text-sm font-semibold text-cyan-700 dark:text-cyan-200 text-center">
+                        Reset Password
+                      </div>
+                      <div className="grid items-start grid-cols-1 gap-2 p-4 bg-gray-50 dark:bg-gray-700">
+                        <div>
+                          <label
+                            htmlFor="passwordreset-check"
+                            className="flex items-center justify-start w-full gap-2 p-2 text-sm rounded text-cyan-700 dark:text-gray-300"
+                          >
+                            <input
+                              id="passwordreset-check"
+                              type="checkbox"
+                              checked={getValuesEdit("is_password_reset") === 1}
+                              onChange={() => {
+                                if (getValuesEdit("is_password_reset") === 0) {
+                                  setValueEdit("is_password_reset", 1, {
+                                    shouldValidate: true,
+                                  });
+                                } else {
+                                  setValueEdit("is_password_reset", 0, {
+                                    shouldValidate: true,
+                                  });
+                                  setValueEdit("new_password", "", {
+                                    shouldValidate: true,
+                                  });
+                                }
+                              }}
+                              name="passwordreset-check"
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                            />
+                            Update Password
+                          </label>
+                          <TextField
+                            showLabel={false}
+                            type="password"
+                            name="new_password"
+                            label="New Password"
+                            control={controlEdit}
                           />
-                          Update Password
-                        </label>
-                        <TextField
-                          showLabel={false}
-                          type="password"
-                          name="new_password"
-                          label="New Password"
-                          control={controlEdit}
-                        />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 <div className="h-full flex flex-wrap justify-evenly items-center p-4 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500 overflow-auto">
                   <div className="h-full w-full grid grid-rows-[auto_1fr] overflow-auto">
