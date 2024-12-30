@@ -129,7 +129,10 @@ function ApprovePtw() {
         const ownDepartment = historyPTWMasterData[0].DEPARTMENT.filter(
           (item: any) => +item.id === +authState.DEPARTMENT,
         );
-        setDepartmentHeadName(ownDepartment[0].head_name);
+        if (ownDepartment.length > 0) {
+          setDepartmentHeadName(ownDepartment[0].head_name);
+        }
+
         setConfigs(historyPTWMasterData[0].CONFIG);
         setAreas(historyPTWMasterData[0].AREA);
 

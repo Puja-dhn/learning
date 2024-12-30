@@ -118,6 +118,7 @@ function LogPtw() {
   const [configs, setConfigs] = useState<IConfigsList[]>([]);
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
+  const [departments, setDepartments] = useState<IOptionList[]>([]);
 
   const [contractors, setContractors] = useState<IOptionList[]>([]);
 
@@ -241,6 +242,7 @@ function LogPtw() {
         const ownDepartment = historyPTWMasterData[0].DEPARTMENT.filter(
           (item: any) => +item.id === +authState.DEPARTMENT,
         );
+        setDepartments(historyPTWMasterData[0].DEPARTMENT);
         if (ownDepartment.length > 0) {
           setDepartmentHeadName(ownDepartment[0].head_name);
           setValue("department", ownDepartment[0].name, {
@@ -349,6 +351,15 @@ function LogPtw() {
       predicate: (query) => query.queryKey[0] === "ptwMasterDataQuery",
     });
   }, []);
+
+  useEffect(() => {
+    if (+watchValues("department") > 0) {
+      const fArea = areas.filter(
+        (item) => +item.parent_id === +watchValues("department"),
+      );
+      setFilteredAreas(fArea);
+    }
+  }, [watchValues("department")]);
 
   const handleReset = () => {
     reset({
@@ -680,12 +691,18 @@ function LogPtw() {
 
             <div className="grid grid-cols-1 md:grid-cols-3">
               <div className="p-1">
-                <TextField
+                <DropdownList
+                  name="department"
+                  label="Department"
+                  control={control}
+                  optionList={[{ id: "", name: "Select" }, ...departments]}
+                />
+                {/* <TextField
                   name="department"
                   label="Department"
                   control={control}
                   disabled
-                />
+                /> */}
               </div>
               <div className="p-1">
                 <DropdownList

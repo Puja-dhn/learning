@@ -5,6 +5,12 @@ import DocumentPlusIcon from "@heroicons/react/24/outline/DocumentPlusIcon";
 import DocumentPlusIconSolid from "@heroicons/react/24/solid/DocumentPlusIcon";
 import DocumentMagnifyingGlassIcon from "@heroicons/react/24/outline/DocumentMagnifyingGlassIcon";
 import DocumentMagnifyingGlassIconSolid from "@heroicons/react/24/solid/DocumentMagnifyingGlassIcon";
+import DocumentTextIcon from "@heroicons/react/24/outline/DocumentTextIcon";
+import DocumentTextIconSolid from "@heroicons/react/24/solid/DocumentTextIcon";
+import ChartBarSquareIconSolid from "@heroicons/react/24/solid/ChartBarSquareIcon";
+import ChartBarSquareIcon from "@heroicons/react/24/outline/ChartBarSquareIcon";
+import ClipboardDocumentCheckIconSolid from "@heroicons/react/24/solid/ClipboardDocumentCheckIcon";
+import ClipboardDocumentCheckIcon from "@heroicons/react/24/outline/ClipboardDocumentCheckIcon";
 
 import IMenuItem from "../types/IMenuItem";
 
@@ -18,10 +24,10 @@ const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
 const SIS_MENU_LIST: IMenuItem[] = [
   {
-    id: 7,
+    id: 5,
     name: "",
-    icon: <HomeIcon className="w-5 h-5" />,
-    iconSelected: <HomeIconSolid className="w-5 h-5" />,
+    icon: <ChartBarSquareIcon className="w-5 h-5" />,
+    iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 1,
     path: "",
     element: <LogSis />,
@@ -29,10 +35,10 @@ const SIS_MENU_LIST: IMenuItem[] = [
     menuType: "Static",
   },
   {
-    id: 22,
+    id: 4,
     name: "Dashboard",
-    icon: <HomeIcon className="w-5 h-5" />,
-    iconSelected: <HomeIconSolid className="w-5 h-5" />,
+    icon: <ChartBarSquareIcon className="w-5 h-5" />,
+    iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 1,
     path: "dashboard",
     element: <LogSis />,
@@ -40,7 +46,7 @@ const SIS_MENU_LIST: IMenuItem[] = [
     menuType: "Normal",
   },
   {
-    id: 1,
+    id: 5,
     name: "Log SIO",
     icon: <DocumentPlusIcon className="w-5 h-5" />,
     iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
@@ -51,7 +57,7 @@ const SIS_MENU_LIST: IMenuItem[] = [
     menuType: "Normal",
   },
   {
-    id: 2,
+    id: 6,
     name: "View SIO",
     icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
     iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
@@ -62,10 +68,10 @@ const SIS_MENU_LIST: IMenuItem[] = [
     menuType: "Normal",
   },
   {
-    id: 3,
+    id: 7,
     name: "Assign PDC",
-    icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
-    iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
+    icon: <ClipboardDocumentCheckIcon className="w-5 h-5" />,
+    iconSelected: <ClipboardDocumentCheckIconSolid className="w-5 h-5" />,
     appId: 1,
     path: "assign-pdc",
     element: <AssignPDC />,
@@ -73,10 +79,10 @@ const SIS_MENU_LIST: IMenuItem[] = [
     menuType: "Normal",
   },
   {
-    id: 4,
+    id: 8,
     name: "Action Taken",
-    icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
-    iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
+    icon: <DocumentTextIcon className="w-5 h-5" />,
+    iconSelected: <DocumentTextIconSolid className="w-5 h-5" />,
     appId: 1,
     path: "action-taken",
     element: <ActionTaken />,

@@ -4,11 +4,14 @@ import HomeIconSolid from "@heroicons/react/24/solid/HomeIcon";
 import DocumentPlusIcon from "@heroicons/react/24/outline/DocumentPlusIcon";
 import DocumentPlusIconSolid from "@heroicons/react/24/solid/DocumentPlusIcon";
 
+import ChartBarSquareIconSolid from "@heroicons/react/24/solid/ChartBarSquareIcon";
+import ChartBarSquareIcon from "@heroicons/react/24/outline/ChartBarSquareIcon";
+import DocumentMagnifyingGlassIcon from "@heroicons/react/24/outline/DocumentMagnifyingGlassIcon";
+import ClipboardDocumentCheckIconSolid from "@heroicons/react/24/solid/ClipboardDocumentCheckIcon";
+import DocumentMagnifyingGlassIconSolid from "@heroicons/react/24/solid/DocumentMagnifyingGlassIcon";
+import ClipboardDocumentCheckIcon from "@heroicons/react/24/outline/ClipboardDocumentCheckIcon";
+import { UserGroupIcon } from "@heroicons/react/24/outline";
 import IMenuItem from "../types/IMenuItem";
-
-import LogPtw from "@/pages/ptw/LogPtw";
-import ViewPtw from "@/pages/ptw/ViewPtw";
-import ApprovePtw from "@/pages/ptw/ApprovePtw";
 import LogIms from "@/pages/ims/LogIms";
 import ViewIms from "@/pages/ims/ViewIms";
 import TeamFormation from "@/pages/ims/TeamFormation";
@@ -21,10 +24,10 @@ const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
 const IMS_MENU_LIST: IMenuItem[] = [
   {
-    id: 11,
+    id: 18,
     name: "",
-    icon: <HomeIcon className="w-5 h-5" />,
-    iconSelected: <HomeIconSolid className="w-5 h-5" />,
+    icon: <ChartBarSquareIcon className="w-5 h-5" />,
+    iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 3,
     path: "",
     element: <LogIms />,
@@ -32,10 +35,10 @@ const IMS_MENU_LIST: IMenuItem[] = [
     menuType: "Static",
   },
   {
-    id: 24,
+    id: 17,
     name: "Dashboard",
-    icon: <HomeIcon className="w-5 h-5" />,
-    iconSelected: <HomeIconSolid className="w-5 h-5" />,
+    icon: <ChartBarSquareIcon className="w-5 h-5" />,
+    iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 3,
     path: "dashboard",
     element: <LogIms />,
@@ -43,8 +46,8 @@ const IMS_MENU_LIST: IMenuItem[] = [
     menuType: "Normal",
   },
   {
-    id: 11,
-    name: "Log IMS",
+    id: 18,
+    name: "Log Incident",
     icon: <DocumentPlusIcon className="w-5 h-5" />,
     iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
     appId: 3,
@@ -55,10 +58,10 @@ const IMS_MENU_LIST: IMenuItem[] = [
   },
 
   {
-    id: 16,
-    name: "View IMS",
-    icon: <DocumentPlusIcon className="w-5 h-5" />,
-    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    id: 19,
+    name: "View Incident",
+    icon: <DocumentMagnifyingGlassIcon className="w-5 h-5" />,
+    iconSelected: <DocumentMagnifyingGlassIconSolid className="w-5 h-5" />,
     appId: 3,
     path: "view-ims",
     element: <ViewIms />,
@@ -67,10 +70,10 @@ const IMS_MENU_LIST: IMenuItem[] = [
   },
 
   {
-    id: 17,
+    id: 20,
     name: "Team Formation",
-    icon: <DocumentPlusIcon className="w-5 h-5" />,
-    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    icon: <UserGroupIcon className="w-5 h-5" />,
+    iconSelected: <UserGroupIcon className="w-5 h-5" />,
     appId: 3,
     path: "team-formation",
     element: <TeamFormation />,
@@ -79,10 +82,10 @@ const IMS_MENU_LIST: IMenuItem[] = [
   },
 
   {
-    id: 19,
+    id: 21,
     name: "Incident Categorization",
-    icon: <DocumentPlusIcon className="w-5 h-5" />,
-    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    icon: <ClipboardDocumentCheckIcon className="w-5 h-5" />,
+    iconSelected: <ClipboardDocumentCheckIconSolid className="w-5 h-5" />,
     appId: 3,
     path: "incident-categorization",
     element: <CategorizeIncident />,
@@ -91,10 +94,10 @@ const IMS_MENU_LIST: IMenuItem[] = [
   },
 
   {
-    id: 20,
+    id: 22,
     name: "Investigation",
-    icon: <DocumentPlusIcon className="w-5 h-5" />,
-    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    icon: <ClipboardDocumentCheckIcon className="w-5 h-5" />,
+    iconSelected: <ClipboardDocumentCheckIconSolid className="w-5 h-5" />,
     appId: 3,
     path: "incident-investigation",
     element: <IncidentInvestigation />,
@@ -103,10 +106,10 @@ const IMS_MENU_LIST: IMenuItem[] = [
   },
 
   {
-    id: 18,
+    id: 23,
     name: "Close Incident",
-    icon: <DocumentPlusIcon className="w-5 h-5" />,
-    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    icon: <ClipboardDocumentCheckIcon className="w-5 h-5" />,
+    iconSelected: <ClipboardDocumentCheckIconSolid className="w-5 h-5" />,
     appId: 3,
     path: "close-incident",
     element: <CloseIncident />,
@@ -114,10 +117,10 @@ const IMS_MENU_LIST: IMenuItem[] = [
     menuType: "Normal",
   },
   {
-    id: 21,
-    name: "Recommendation Close",
-    icon: <DocumentPlusIcon className="w-5 h-5" />,
-    iconSelected: <DocumentPlusIconSolid className="w-5 h-5" />,
+    id: 24,
+    name: "Recomm. Closure",
+    icon: <UserGroupIcon className="w-5 h-5" />,
+    iconSelected: <UserGroupIcon className="w-5 h-5" />,
     appId: 3,
     path: "close-recommendation",
     element: <CloseRecommendation />,

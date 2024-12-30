@@ -63,6 +63,7 @@ function LogIms() {
   const [injuryNameList, setInjuryNameList] = useState<IOptionList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
+  const [injuryName, setInjuryName] = useState<string>("");
 
   const [injuryRow, setInjuryRow] = useState<any[]>([]);
   const [newRow, setNewRow] = useState({
@@ -155,12 +156,21 @@ function LogIms() {
     }
   }, [watchValues("department")]);
 
+  useEffect(() => {
+    if (+watchValues("injury_type") > 0) {
+      const injName = injuryType.filter(
+        (item) => +item.id === +watchValues("injury_type"),
+      )[0].name;
+      setInjuryName(injName);
+    }
+  }, [watchValues("injury_type")]);
+
   const handleFormSubmit: SubmitHandler<ILogImsForm> = (values) => {
     if (imagePreviews.length === 0) {
       alertToast.show("warning", "Incident Photos are required", true, 5000);
       return;
     }
-    if (+watchValues("injury_type") === 10) {
+    if (injuryName === "Medical Center FAC") {
       if (watchValues("injury_details") === "") {
         alertToast.show("warning", "Injury details required", true, 2000);
       }
@@ -199,7 +209,6 @@ function LogIms() {
       newRow.companyType &&
       newRow.employeeId &&
       newRow.name &&
-      newRow.department &&
       newRow.company &&
       newRow.age &&
       newRow.sex &&
@@ -564,7 +573,7 @@ function LogIms() {
               ))}
             </div>
             <div className="flex flex-col gap-2">
-              {watchValues("injury_type") === "10" && (
+              {injuryName === "Medical Center FAC" && (
                 <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
@@ -581,7 +590,7 @@ function LogIms() {
                               Sl. No.
                             </th>
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Company Type
+                              Emp. Type
                             </th>
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                               Employee ID
@@ -589,9 +598,9 @@ function LogIms() {
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                               Name
                             </th>
-                            <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                            {/* <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                               Department
-                            </th>
+                            </th> */}
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                               Company
                             </th>
@@ -652,7 +661,7 @@ function LogIms() {
                                 className="w-full"
                               />
                             </td>
-                            <td className="px-4 py-2 border-b">
+                            {/* <td className="px-4 py-2 border-b">
                               <InputText
                                 type="text"
                                 value={newRow.department}
@@ -661,7 +670,7 @@ function LogIms() {
                                 }
                                 className="w-full"
                               />
-                            </td>
+                            </td> */}
                             <td className="px-4 py-2 border-b">
                               {newRow.companyType === "Contractor" ? (
                                 <select
@@ -784,9 +793,9 @@ function LogIms() {
                               <td className="px-4 py-2 border-b">
                                 {item.name}
                               </td>
-                              <td className="px-4 py-2 border-b">
+                              {/* <td className="px-4 py-2 border-b">
                                 {item.department}
-                              </td>
+                              </td> */}
                               <td className="px-4 py-2 border-b">
                                 {item.company}
                               </td>

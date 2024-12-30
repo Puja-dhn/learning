@@ -16,6 +16,8 @@ import LogViolations from "./pages/ptw/LogViolations";
 import ViewViolations from "./pages/ptw/ViewViolations";
 import CloseViolations from "./pages/ptw/CloseViolations";
 import UserProfile from "./pages/master/UserProfile";
+import OrgStructure from "./pages/master/OrgStructure";
+import ClosePtw from "./pages/ptw/ClosePtw";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -71,6 +73,7 @@ function App() {
               path="context-definations"
               element={<ContextDefinations />}
             />
+            <Route path="org-structure" element={<OrgStructure />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 
@@ -95,6 +98,7 @@ function App() {
             <Route path="log-ptw" element={<LogPtw />} />
             <Route path="view-ptw" element={<ViewPtw />} />
             <Route path="approve-ptw" element={<ApprovePtw />} />
+            <Route path="close-ptw" element={<ClosePtw />} />
             <Route path="log-violations" element={<LogViolations />} />
             <Route path="view-violations" element={<ViewViolations />} />
             <Route path="close-violations" element={<CloseViolations />} />
