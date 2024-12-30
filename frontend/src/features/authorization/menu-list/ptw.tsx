@@ -18,6 +18,7 @@ import LogViolations from "@/pages/ptw/LogViolations";
 import ViewViolations from "@/pages/ptw/ViewViolations";
 import CloseViolations from "@/pages/ptw/CloseViolations";
 import ClosePtw from "@/pages/ptw/ClosePtw";
+import PtwDashboard from "@/pages/ptw/PtwDashboard";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -29,7 +30,7 @@ const PTW_MENU_LIST: IMenuItem[] = [
     iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 2,
     path: "",
-    element: <LogPtw />,
+    element: <PtwDashboard />,
     children: [],
     menuType: "Static",
   },
@@ -40,7 +41,7 @@ const PTW_MENU_LIST: IMenuItem[] = [
     iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 2,
     path: "dashboard",
-    element: <LogPtw />,
+    element: <PtwDashboard />,
     children: [],
     menuType: "Normal",
   },

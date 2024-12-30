@@ -19,6 +19,7 @@ import ViewSio from "@/pages/sis/ViewSio";
 import LogSis from "@/pages/sis/LogSis";
 import AssignPDC from "@/pages/sis/AssignPDC";
 import ActionTaken from "@/pages/sis/ActionTaken";
+import SioDashboard from "@/pages/sis/SioDashboard";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -30,7 +31,7 @@ const SIS_MENU_LIST: IMenuItem[] = [
     iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 1,
     path: "",
-    element: <LogSis />,
+    element: <SioDashboard />,
     children: [],
     menuType: "Static",
   },
@@ -41,7 +42,7 @@ const SIS_MENU_LIST: IMenuItem[] = [
     iconSelected: <ChartBarSquareIconSolid className="w-5 h-5" />,
     appId: 1,
     path: "dashboard",
-    element: <LogSis />,
+    element: <SioDashboard />,
     children: [],
     menuType: "Normal",
   },

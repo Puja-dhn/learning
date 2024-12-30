@@ -889,7 +889,7 @@ function TeamFormation() {
                                 Sl. No.
                               </th>
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                                Company Type
+                                Emp. Type
                               </th>
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Employee ID
@@ -988,7 +988,7 @@ function TeamFormation() {
                         </thead>
                         <tbody>
                           {/* Input row for adding new rows */}
-                          {watchValues("injury_type") ===
+                          {watchView("injury_type") ===
                             "Medical Center FAC" && (
                             <tr>
                               <td className="px-4 py-2 text-gray-700 border-b">
@@ -1049,7 +1049,7 @@ function TeamFormation() {
                                 </td>
 
                                 <td className="px-4 py-2 text-gray-700 border-b">
-                                  {watchValues("injury_type") ===
+                                  {watchView("injury_type") ===
                                     "Medical Center FAC" && (
                                     <IconButton
                                       onClick={() => removeSuggTeamRow(index)}
@@ -1117,7 +1117,8 @@ function TeamFormation() {
                     </div>
                   </div>
                 </div>
-                {watchValues("injury_type") !== "Medical Center FAC" && (
+
+                {watchView("injury_type") !== "Medical Center FAC" && (
                   <div className="grid grid-cols-1 p-2">
                     <TextField
                       name="close_remarks"

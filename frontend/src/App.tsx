@@ -18,6 +18,8 @@ import CloseViolations from "./pages/ptw/CloseViolations";
 import UserProfile from "./pages/master/UserProfile";
 import OrgStructure from "./pages/master/OrgStructure";
 import ClosePtw from "./pages/ptw/ClosePtw";
+import SioDashboard from "./pages/sis/SioDashboard";
+import PtwDashboard from "./pages/ptw/PtwDashboard";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -81,8 +83,8 @@ function App() {
             path="sio"
             element={<PrivateRoutes outlet={<HomeLayout appId={1} />} />}
           >
-            <Route index element={<LogSis />} />
-            <Route path="dashboard" element={<LogSis />} />
+            <Route index element={<SioDashboard />} />
+            <Route path="dashboard" element={<SioDashboard />} />
             <Route path="log-sio" element={<LogSis />} />
             <Route path="view-sio" element={<ViewSio />} />
             <Route path="assign-pdc" element={<AssignPDC />} />
@@ -93,8 +95,8 @@ function App() {
             path="ptw"
             element={<PrivateRoutes outlet={<HomeLayout appId={2} />} />}
           >
-            <Route index element={<LogPtw />} />
-            <Route path="dashboard" element={<LogPtw />} />
+            <Route index element={<PtwDashboard />} />
+            <Route path="dashboard" element={<PtwDashboard />} />
             <Route path="log-ptw" element={<LogPtw />} />
             <Route path="view-ptw" element={<ViewPtw />} />
             <Route path="approve-ptw" element={<ApprovePtw />} />

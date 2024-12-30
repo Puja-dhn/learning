@@ -179,7 +179,7 @@ function CategorizeIncident() {
     employee_id: "",
     name: "",
     department: "",
-    company: "TML",
+    company: "",
     age: "",
     sex: "",
     deployed_date: "",

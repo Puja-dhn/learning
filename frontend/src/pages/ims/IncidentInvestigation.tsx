@@ -1135,9 +1135,7 @@ function IncidentInvestigation() {
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Name
                               </th>
-                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                                Department
-                              </th>
+
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Company
                               </th>
@@ -1171,9 +1169,7 @@ function IncidentInvestigation() {
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.name}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.department}
-                                </td>
+
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.company}
                                 </td>

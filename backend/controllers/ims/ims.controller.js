@@ -559,11 +559,34 @@ exports.getImsData = async (req, res) => {
 
   const resultWittTeams = await simpleQuery(witTeamQuery, []);
 
+  const investigationQuery = `
+  SELECT DISTINCT
+      t1.id,
+      t1.incident_id,
+      t1.list_facts,
+      t1.physical_factors,
+      t1.human_factors,
+      t1.syatem_factors,
+      t1.status,
+      t1.risk_identified,
+      t1.identified_control,
+      t1.control_type,
+      t1.control_description,
+      t1.control_adequate_desc
+  FROM
+      t_inshe_incident_investigation t1
+  WHERE
+    1=1 
+`;
+
+  const resultInvestigation = await simpleQuery(investigationQuery, []);
+
   res.status(200).json({
     historyLogImsData: [...resultIms],
     INJURY_DETAILS: [...resultInjury],
     SUGG_TEAM: [...resultSuggTeams],
     WITNESS_TEAM: [...resultWittTeams],
+    INVESTIGATION_DATE: [...resultInvestigation],
   });
 };
 exports.getImsOthersData = async (req, res) => {
