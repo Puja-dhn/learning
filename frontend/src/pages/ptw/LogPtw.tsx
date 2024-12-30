@@ -20,6 +20,7 @@ import IContractorList from "@/features/ptw/types/ptw/IContractorList";
 import { InputText } from "@/features/ui/elements";
 import { addNewPTWData } from "@/features/ptw/services/ptw.services";
 import IAreasList from "@/features/sis/types/sis/IAreasList";
+import IDepartmentList from "@/features/ptw/types/ptw/IDepartmentList";
 
 const today = new Date();
 
@@ -118,7 +119,7 @@ function LogPtw() {
   const [configs, setConfigs] = useState<IConfigsList[]>([]);
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
-  const [departments, setDepartments] = useState<IOptionList[]>([]);
+  const [departments, setDepartments] = useState<IDepartmentList[]>([]);
 
   const [contractors, setContractors] = useState<IOptionList[]>([]);
 
@@ -357,6 +358,10 @@ function LogPtw() {
       const fArea = areas.filter(
         (item) => +item.parent_id === +watchValues("department"),
       );
+      const dept = departments.filter(
+        (item) => +item.id === +watchValues("department"),
+      );
+      setDepartmentHeadName(dept[0].head_name);
       setFilteredAreas(fArea);
     }
   }, [watchValues("department")]);

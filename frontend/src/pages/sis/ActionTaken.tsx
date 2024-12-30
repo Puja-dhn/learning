@@ -84,6 +84,7 @@ function ActionTaken() {
   const closureFileInputRef = useRef<HTMLInputElement | null>(null);
   const [closureImagePreviews, setClosureImagePreviews] = useState<any>([]);
   const [modalImage, setModalImage] = useState<string>("");
+  const queryClient = useQueryClient();
   const {
     data: sioMasterData,
     isLoading: isSIOMasterDataLoading,
@@ -191,6 +192,9 @@ function ActionTaken() {
       submitActionTaken(values)
         .then(() => {
           alertToast.show("success", "SIO Closed Succesfully", true, 2000);
+          queryClient.invalidateQueries({
+            predicate: (query) => query.queryKey[0] === "sioAssignedDataQuery",
+          });
           setShowPDCAssignDialog((oldState) => ({
             ...oldState,
             status: false,
@@ -218,6 +222,9 @@ function ActionTaken() {
       submitActionTaken(values)
         .then(() => {
           alertToast.show("success", "SIO Closed Succesfully", true, 2000);
+          queryClient.invalidateQueries({
+            predicate: (query) => query.queryKey[0] === "sioAssignedDataQuery",
+          });
           setShowLogDetailsDialog((oldState) => ({
             ...oldState,
             status: false,
@@ -266,7 +273,6 @@ function ActionTaken() {
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
   // ]);
-  const queryClient = useQueryClient();
 
   const [filterList, setFilterList] = useState<ILogSioFilterForm>({
     ...initialFilterValues,

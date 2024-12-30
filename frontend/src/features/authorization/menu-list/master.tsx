@@ -10,7 +10,7 @@ import ChartBarSquareIconSolid from "@heroicons/react/24/solid/ChartBarSquareIco
 import { CogIcon } from "@heroicons/react/24/outline";
 import IMenuItem from "../types/IMenuItem";
 import Users from "@/pages/master/Users";
-import OrgStructure from "@/pages/master/OrgStructure";
+import OrgStructures from "@/pages/master/OrgStructures";
 
 const Dashboard = React.lazy(() => import("@/pages/master/Dashboard"));
 const ContextDefinations = React.lazy(
@@ -60,7 +60,7 @@ const MASTER_MENU_LIST: IMenuItem[] = [
     iconSelected: <UserGroupIcon className="w-5 h-5" />,
     appId: 0,
     path: "org-structure",
-    element: <OrgStructure />,
+    element: <OrgStructures />,
     children: [],
     menuType: "Normal",
   },

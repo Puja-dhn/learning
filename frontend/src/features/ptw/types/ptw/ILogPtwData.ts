@@ -53,6 +53,7 @@ interface ILogPTWData {
   log_by: string;
   disp_logno: string;
   equipment: string;
+  why_moc_remarks: string;
 }
 
 export default ILogPTWData;

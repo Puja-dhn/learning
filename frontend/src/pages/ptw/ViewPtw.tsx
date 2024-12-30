@@ -284,53 +284,54 @@ function ViewPtw() {
   const handleViewPtwDialogClose = () => {
     setShowViewPtwDialog((oldState) => ({ ...oldState, status: false }));
   };
-  const handleDownloadClick = async () => {
-    if (!containerRef.current) {
-      console.error("Container ref is null");
-      return;
-    }
+  const handleDownloadClick = async (row: any) => {
+    console.log(row);
+    // if (!containerRef.current) {
+    //   console.error("Container ref is null");
+    //   return;
+    // }
 
-    try {
-      const scale = 2; // Increased scale for better quality
-      const container = containerRef.current;
+    // try {
+    //   const scale = 2; // Increased scale for better quality
+    //   const container = containerRef.current;
 
-      // Get the bounding rectangle of the container
-      const { top, left, width, height } = container.getBoundingClientRect();
+    //   // Get the bounding rectangle of the container
+    //   const { top, left, width, height } = container.getBoundingClientRect();
 
-      // Calculate the offset to exclude header
-      const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-      const footerHeight = document.querySelector("footer")?.offsetHeight || 0;
+    //   // Calculate the offset to exclude header
+    //   const headerHeight = document.querySelector("header")?.offsetHeight || 0;
+    //   const footerHeight = document.querySelector("footer")?.offsetHeight || 0;
 
-      const canvas = await html2canvas(document.documentElement, {
-        scale: scale,
-        x: left,
-        y: top + headerHeight,
-        width: width,
-        height: height - headerHeight - footerHeight,
-        useCORS: true,
-        allowTaint: true,
-      });
+    //   const canvas = await html2canvas(document.documentElement, {
+    //     scale: scale,
+    //     x: left,
+    //     y: top + headerHeight,
+    //     width: width,
+    //     height: height - headerHeight - footerHeight,
+    //     useCORS: true,
+    //     allowTaint: true,
+    //   });
 
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: width > height ? "l" : "p",
-        unit: "px",
-        format: [width, height - headerHeight - footerHeight],
-      });
+    //   const imgData = canvas.toDataURL("image/png");
+    //   const pdf = new jsPDF({
+    //     orientation: width > height ? "l" : "p",
+    //     unit: "px",
+    //     format: [width, height - headerHeight - footerHeight],
+    //   });
 
-      pdf.addImage(
-        imgData,
-        "PNG",
-        0,
-        0,
-        width,
-        height - headerHeight - footerHeight,
-      );
-      pdf.save("foundry-report.pdf");
-    } catch (error) {
-      console.error("Error generating PDF:", error);
-    } finally {
-    }
+    //   pdf.addImage(
+    //     imgData,
+    //     "PNG",
+    //     0,
+    //     0,
+    //     width,
+    //     height - headerHeight - footerHeight,
+    //   );
+    //   pdf.save("foundry-report.pdf");
+    // } catch (error) {
+    //   console.error("Error generating PDF:", error);
+    // } finally {
+    // }
     // const content = document.getElementById("content");
 
     // if (!content) {
@@ -608,6 +609,7 @@ function ViewPtw() {
       hot_work_checklist: row.hot_work_checklist,
       equipment_checklist: row.equipment_checklist,
       equipment: row.equipment,
+      why_moc_remarks: row.why_moc_remarks,
     });
 
     setShowViewPtwDialog({
@@ -627,12 +629,14 @@ function ViewPtw() {
           >
             <EyeIcon className="w-4 h-4" />
           </IconButton>
-          {/* <IconButton
-            className="ml-2"
-            onClick={() => handleDownloadClick(params.row)}
-          >
-            <ArrowDownTrayIcon className="w-4 h-4" />
-          </IconButton> */}
+          {params.row.status !== "Open" && (
+            <IconButton
+              className="ml-2"
+              onClick={() => handleDownloadClick(params.row)}
+            >
+              <ArrowDownTrayIcon className="w-4 h-4" />
+            </IconButton>
+          )}
         </>
       ),
     },
@@ -640,8 +644,9 @@ function ViewPtw() {
     { field: "department", headerName: "Department", width: 240 },
     { field: "status", headerName: "Status", width: 120 },
     { field: "area", headerName: "Area", width: 250 },
-    { field: "datetime_from", headerName: "Time From", width: 220 },
-    { field: "datetime_to", headerName: "Time To", width: 220 },
+    { field: "datetime_from", headerName: "Period From", width: 220 },
+    { field: "datetime_to", headerName: "Period To", width: 220 },
+    { field: "job_description", headerName: "Job Description", width: 220 },
     { field: "work_location", headerName: "Work Location", width: 200 },
     { field: "pending_on", headerName: "Pending On", width: 200 },
     { field: "log_by", headerName: "Log By", width: 200 },
@@ -990,7 +995,7 @@ function ViewPtw() {
               <TextField
                 type="number"
                 name="id"
-                label="Obs No"
+                label="Permit No"
                 control={controlFilter}
               />
             </div>
@@ -1053,8 +1058,6 @@ function ViewPtw() {
         hasSubmit={false}
         size="fullscreen"
         showError
-        onReset={handleDownloadClick}
-        hasReset
         hasError={
           !(Object.keys(errorsFilter).length === 0) && submitCountFilter > 0
         }
@@ -1105,7 +1108,7 @@ function ViewPtw() {
                   <div className="p-1">
                     <TextField
                       name="datetime_from"
-                      label="Date Time From"
+                      label="Period From"
                       control={controlView}
                       disabled
                     />
@@ -1113,7 +1116,7 @@ function ViewPtw() {
                   <div className="p-1">
                     <TextField
                       name="datetime_to"
-                      label="Date Time To"
+                      label="Period To"
                       control={controlView}
                       disabled
                     />
@@ -1182,7 +1185,7 @@ function ViewPtw() {
                     <div className="p-1">
                       <TextArea
                         name="why_moc_remarks"
-                        label="Why MOC select No (Remarks) "
+                        label="Why MOC Not Required "
                         control={controlView}
                         disabled
                       />
@@ -1747,7 +1750,7 @@ function ViewPtw() {
                             return (
                               <tr key={index}>
                                 <td className="px-4 py-2 border-b">
-                                  {index + 2}
+                                  {index + 1}
                                 </td>{" "}
                                 {/* Display row number starting from 2 */}
                                 <td className="px-4 py-2 border-b">
@@ -1835,42 +1838,43 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assConfinedChecklist && assConfinedChecklist.length > 0 && (
-                        <div>
-                          {assConfinedChecklist
-                            .reduce((rows: any, item: any, index: any) => {
-                              if (index % 4 === 0) rows.push([]);
-                              rows[rows.length - 1].push(item);
-                              return rows;
-                            }, [])
-                            .map((row: any, rowIndex: any) => (
-                              <div
-                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                key={rowIndex}
-                              >
-                                {row.map((item2: any, index: any) => (
-                                  <div
-                                    className="p-1 text-gray-700"
-                                    key={index}
-                                  >
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                        value="Yes"
-                                        checked={handleCheckedAssConfinedChecklist(
-                                          item2.id,
-                                        )}
-                                      />
-                                      &nbsp;
-                                      {item2.name}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                        </div>
-                      )}
+                      {assConfinedChecklist &&
+                        assConfinedChecklist.length > 0 && (
+                          <div>
+                            {assConfinedChecklist
+                              .reduce((rows: any, item: any, index: any) => {
+                                if (index % 4 === 0) rows.push([]);
+                                rows[rows.length - 1].push(item);
+                                return rows;
+                              }, [])
+                              .map((row: any, rowIndex: any) => (
+                                <div
+                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                  key={rowIndex}
+                                >
+                                  {row.map((item2: any, index: any) => (
+                                    <div
+                                      className="p-1 text-gray-700"
+                                      key={index}
+                                    >
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                          value="Yes"
+                                          checked={handleCheckedAssConfinedChecklist(
+                                            item2.id,
+                                          )}
+                                        />
+                                        &nbsp;
+                                        {item2.name}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
                     </div>
                     <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                       <TextField
@@ -1918,42 +1922,43 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assLiftingChecklist && assLiftingChecklist.length > 0 && (
-                        <div>
-                          {assLiftingChecklist
-                            .reduce((rows: any, item: any, index: any) => {
-                              if (index % 4 === 0) rows.push([]);
-                              rows[rows.length - 1].push(item);
-                              return rows;
-                            }, [])
-                            .map((row: any, rowIndex: any) => (
-                              <div
-                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                key={rowIndex}
-                              >
-                                {row.map((item2: any, index: any) => (
-                                  <div
-                                    className="p-1 text-gray-700"
-                                    key={index}
-                                  >
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                        value="Yes"
-                                        checked={handleCheckeAssLiftingChecklist(
-                                          item2.id,
-                                        )}
-                                      />
-                                      &nbsp;
-                                      {item2.name}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                        </div>
-                      )}
+                      {assLiftingChecklist &&
+                        assLiftingChecklist.length > 0 && (
+                          <div>
+                            {assLiftingChecklist
+                              .reduce((rows: any, item: any, index: any) => {
+                                if (index % 4 === 0) rows.push([]);
+                                rows[rows.length - 1].push(item);
+                                return rows;
+                              }, [])
+                              .map((row: any, rowIndex: any) => (
+                                <div
+                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                  key={rowIndex}
+                                >
+                                  {row.map((item2: any, index: any) => (
+                                    <div
+                                      className="p-1 text-gray-700"
+                                      key={index}
+                                    >
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                          value="Yes"
+                                          checked={handleCheckeAssLiftingChecklist(
+                                            item2.id,
+                                          )}
+                                        />
+                                        &nbsp;
+                                        {item2.name}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>

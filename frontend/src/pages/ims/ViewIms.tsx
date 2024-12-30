@@ -33,9 +33,17 @@ import useIMSMasterDataQuery from "@/features/ims/hooks/useIMSMasterDataQuery";
 import ILogImsData from "@/features/ims/types/ILogImsData";
 import useImsLogDetailQuery from "@/features/ims/hooks/useImsLogDetailQuery";
 import { getIncidentOthersData } from "@/features/ims/services/ims.services";
+import IInvestigation from "@/features/ims/types/IInvestigation";
+import IRecommendations from "@/features/ims/types/IRecommendations";
+import IDocuments from "@/features/ims/types/IDocuments";
+import internal from "stream";
+import { InputText } from "@/features/ui/elements";
 
 interface ILogImsTeamData {
   historyLogImsData: ILogImsData[];
+  INVESTIGATION_DATA: IInvestigation[];
+  RECOMMENDATION_DATA: IRecommendations[];
+  DOCUMENTS_DATA: IDocuments[];
 }
 const initialViewImsValues: ILogImsData = {
   disp_logno: 0,
@@ -132,10 +140,16 @@ function ViewIms() {
   }, []);
   const [teamData, setTeamData] = useState<ILogImsTeamData>({
     historyLogImsData: [],
+    INVESTIGATION_DATA: [],
+    RECOMMENDATION_DATA: [],
+    DOCUMENTS_DATA: [],
   });
 
   const [logDetails, setLogDetails] = useState<ILogImsTeamData>({
     historyLogImsData: [],
+    INVESTIGATION_DATA: [],
+    RECOMMENDATION_DATA: [],
+    DOCUMENTS_DATA: [],
   });
 
   const [showLogDetailsDialog, setShowLogDetailsDialog] = useState({
@@ -155,6 +169,14 @@ function ViewIms() {
   const [injuryFilterRow, setInjuryFilterRow] = useState<any[]>([]);
   const [witTeamFilterRow, setWitTeamFilterRow] = useState<any[]>([]);
   const [suggTeamFilterRow, setSuggTeamFilterRow] = useState<any[]>([]);
+
+  const [factRows, setFactRows] = useState<any>([]);
+  const [physicalFactorRows, setPhysicalFactorRows] = useState<any>([]);
+  const [humanFactorRows, setHumanFactorRows] = useState<any>([]);
+  const [systemFactorRows, setSystemFactorRows] = useState<any>([]);
+  const [recomendationRows, setRecomendationRows] = useState<any>([]);
+  const [investigations, setInvestigations] = useState<any>([]);
+  const [documentsRow, setDocumentsRow] = useState<any>([]);
 
   const {
     reset: resetActionTaken,
@@ -180,6 +202,31 @@ function ViewIms() {
       (item) => item.header_id === row.incident_no,
     );
     setWitTeamFilterRow(wittFilter);
+
+    if (teamData.INVESTIGATION_DATA.length > 0) {
+      const invData = teamData.INVESTIGATION_DATA.filter(
+        (item) => +item.incident_id === +row.incident_no,
+      );
+      const recomdata = teamData.RECOMMENDATION_DATA.filter(
+        (item) => +item.incident_id === +row.incident_no,
+      );
+      const imagedata = teamData.DOCUMENTS_DATA.filter(
+        (item) => +item.incident_id === +row.incident_no,
+      );
+      if (invData[0].list_facts !== "") {
+        setFactRows(JSON.parse(invData[0].list_facts));
+        setPhysicalFactorRows(JSON.parse(invData[0].physical_factors));
+        setHumanFactorRows(JSON.parse(invData[0].human_factors));
+        setSystemFactorRows(JSON.parse(invData[0].system_factors));
+        setInvestigations(invData[0]);
+      }
+      if (recomdata.length > 0) {
+        setRecomendationRows(recomdata);
+      }
+      if (imagedata.length > 0) {
+        setDocumentsRow(imagedata);
+      }
+    }
 
     setImagePreviews(JSON.parse(row.ims_photos));
     resetActionTaken({
@@ -322,13 +369,23 @@ function ViewIms() {
             ),
           ]
         : [...imsLogHistoryData.historyLogImsData];
-
-      setTeamData({
+      setTeamData((prevState) => ({
+        ...prevState,
         historyLogImsData,
-      });
+        INVESTIGATION_DATA: imsLogHistoryData.INVESTIGATION_DATA,
+        RECOMMENDATION_DATA: imsLogHistoryData.RECOMMENDATION_DATA,
+        DOCUMENTS_DATA: imsLogHistoryData.DOCUMENTS_DATA,
+      }));
+
       setInjuryRow(imsLogHistoryData.INJURY_DETAILS);
       setSuggTeamRow(imsLogHistoryData.SUGG_TEAM);
       setWitTeamRow(imsLogHistoryData.WITNESS_TEAM);
+      if (imsLogHistoryData.INVESTIGATION_DATA.length > 0) {
+        const factsList = imsLogHistoryData.INVESTIGATION_DATA[0].list_facts;
+        if (factsList !== "") {
+          setFactRows(JSON.parse(factsList));
+        }
+      }
     }
   }, [imsLogHistoryData, isImsLogHistoryDataLoading, isImsLogHistoryDataError]);
 
@@ -359,7 +416,14 @@ function ViewIms() {
         (item) => item.incident_no === logNo,
       ),
     ];
-    setLogDetails({ historyLogImsData });
+    setLogDetails((prevState) => ({
+      ...prevState,
+      historyLogImsData,
+      INVESTIGATION_DATA: teamData.INVESTIGATION_DATA,
+      RECOMMENDATION_DATA: teamData.RECOMMENDATION_DATA,
+      DOCUMENTS_DATA: teamData.DOCUMENTS_DATA,
+    }));
+    //setLogDetails({ historyLogImsData, RECOMMENDATION_DATA: [] });
 
     setShowLogDetailsDialog({
       status: true,
@@ -776,7 +840,11 @@ function ViewIms() {
                           }`}
                           alt={`preview-${index}`}
                           className="object-cover h-20 rounded-lg cursor-pointer w-30"
-                          onClick={() => openImageModal(preview)}
+                          onClick={() =>
+                            openImageModal(
+                              `${ASSET_BASE_URL}imsimages/logims/${preview}`,
+                            )
+                          }
                         />
                       </div>
                     ))}
@@ -968,6 +1036,394 @@ function ViewIms() {
                     </div>
                   </div>
                 </div>
+                {factRows.length > 0 && (
+                  <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                    <div className="">
+                      <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                        <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                          List Of Facts &nbsp;
+                        </h3>
+                      </div>
+
+                      <div className="mt-1">
+                        <table className="min-w-full border-collapse table-auto ">
+                          <thead>
+                            <tr>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Sl. No.
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Facts
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {factRows &&
+                              factRows.length > 0 &&
+                              factRows.map((item: any) => (
+                                <tr key={item.id}>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.id}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.facts}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {investigations && (
+                  <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                    <div className="">
+                      <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                        <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                          Risk Management &nbsp;
+                        </h3>
+                      </div>
+
+                      <div className="mt-1">
+                        <div className="px-4 py-2 text-gray-700">
+                          <span>Was the risk identified in HIRA / JSA?</span>
+                          &nbsp;
+                          <input
+                            type="radio"
+                            name="risk_identified"
+                            value="Yes"
+                            checked={investigations.risk_identified === "Yes"}
+                          />
+                          &nbsp; Yes &nbsp;
+                          <input
+                            type="radio"
+                            name="risk_identified"
+                            value="No"
+                            checked={investigations.risk_identified === "No"}
+                          />
+                          &nbsp; No
+                        </div>
+                      </div>
+                      {investigations.risk_identified === "Yes" && (
+                        <div className="mt-1">
+                          <div className="px-4 py-2 text-gray-700">
+                            <span>Was the identified control?</span>
+                            &nbsp;
+                            <input
+                              type="radio"
+                              name="identified_control"
+                              value="Yes"
+                              checked={
+                                investigations.identified_control === "Yes"
+                              }
+                            />
+                            &nbsp; Yes &nbsp;
+                            <input
+                              type="radio"
+                              name="identified_control"
+                              value="No"
+                              checked={
+                                investigations.identified_control === "No"
+                              }
+                            />
+                            &nbsp; No
+                          </div>
+                        </div>
+                      )}
+                      {investigations.identified_control === "Yes" && (
+                        <div className="mt-1">
+                          <div className="grid grid-cols-1 md:grid-cols-3">
+                            <div className="px-4 py-2 text-gray-700 ">
+                              <span className="">
+                                What was the identified control ?
+                              </span>
+                              &nbsp;
+                              <select
+                                name="control_type"
+                                value={investigations.control_type}
+                                disabled
+                                className=" bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 text-gray-700"
+                              >
+                                <option value="">Select</option>
+                                <option value="Engineering">Engineering</option>
+                                <option value="Administrative">
+                                  Administrative
+                                </option>
+                                <option value="PPE">PPE</option>
+                              </select>
+                            </div>
+                            <div className="mt-[10px]">
+                              <span className="text-gray-700">Description</span>
+                              <InputText
+                                value={investigations.control_description}
+                                className="w-full "
+                                disabled
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {investigations.identified_control === "Yes" && (
+                        <div className="mt-1">
+                          <div className="grid grid-cols-1 md:grid-cols-3">
+                            <div className="px-4 py-2 text-gray-700">
+                              <span>Why Control was not adequate</span>
+                              <InputText
+                                value={investigations.control_description}
+                                className="w-full"
+                                disabled
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+                {physicalFactorRows.length > 0 && (
+                  <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                    <div className="">
+                      <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                        <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                          Physical Factors &nbsp;
+                        </h3>
+                      </div>
+
+                      <div className="mt-1">
+                        <table className="min-w-full border-collapse table-auto ">
+                          <thead>
+                            <tr>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Sl. No.
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Description
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {physicalFactorRows &&
+                              physicalFactorRows.length > 0 &&
+                              physicalFactorRows.map((item: any) => (
+                                <tr key={item.id}>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.id}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.description}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {humanFactorRows.length > 0 && (
+                  <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                    <div className="">
+                      <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                        <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                          Human Factors &nbsp;
+                        </h3>
+                      </div>
+
+                      <div className="mt-1">
+                        <table className="min-w-full border-collapse table-auto ">
+                          <thead>
+                            <tr>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Sl. No.
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Description
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {humanFactorRows &&
+                              humanFactorRows.length > 0 &&
+                              humanFactorRows.map((item: any) => (
+                                <tr key={item.id}>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.id}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.description}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {systemFactorRows.length > 0 && (
+                  <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                    <div className="">
+                      <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                        <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                          System Factors &nbsp;
+                        </h3>
+                      </div>
+
+                      <div className="mt-1">
+                        <table className="min-w-full border-collapse table-auto ">
+                          <thead>
+                            <tr>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Sl. No.
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Description
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Action
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {systemFactorRows &&
+                              systemFactorRows.length > 0 &&
+                              systemFactorRows.map((item: any) => (
+                                <tr key={item.id}>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.id}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.description}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {recomendationRows.length > 0 && (
+                  <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                    <div className="">
+                      <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                        <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                          Recommendations &nbsp;
+                        </h3>
+                      </div>
+
+                      <div className="mt-1">
+                        <table className="min-w-full border-collapse table-auto ">
+                          <thead>
+                            <tr>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Sl. No.
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Recommendation
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Responsibility
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Fcator
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Control Type
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Target Date
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {recomendationRows &&
+                              recomendationRows.length > 0 &&
+                              recomendationRows.map((item: any) => (
+                                <tr key={item.id}>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.id}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.recommendation}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.responsibility}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.factor}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.control_type}
+                                  </td>
+                                  <td className="px-4 py-2 text-gray-700 border-b">
+                                    {item.target_date}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {documentsRow.length > 0 && (
+                  <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                    <div className="">
+                      <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                        <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
+                          Upload Documents &nbsp;
+                        </h3>
+                      </div>
+                      <div className="mt-1">
+                        <table className="min-w-full border-collapse table-auto ">
+                          <thead>
+                            <tr>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Sl. No.
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Document type
+                              </th>
+                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
+                                Documents
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {/* Render added rows */}
+                            {documentsRow.map((row: any, index: any) => (
+                              <tr key={row.id}>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {index + 1}
+                                </td>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  {row.document_type}
+                                </td>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  <img
+                                    src={`${ASSET_BASE_URL}imsimages/investigation/${
+                                      row.document || ""
+                                    }`}
+                                    alt={`preview-${index}`}
+                                    className="object-cover w-10 h-10 rounded-lg cursor-pointer"
+                                    onClick={() =>
+                                      openImageModal(
+                                        `${ASSET_BASE_URL}imsimages/investigation/${row.document}`,
+                                      )
+                                    }
+                                  />
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -982,7 +1438,7 @@ function ViewIms() {
       >
         <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
           <img
-            src={`${ASSET_BASE_URL}imsimages/logims/${modalImage || ""}`}
+            src={modalImage}
             alt="previewimage"
             className="object-cover w-full h-full rounded-lg"
           />

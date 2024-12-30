@@ -71,7 +71,7 @@ function PtwDashboard() {
       },
       title: {
         display: true,
-        text: `Issue List FY ${currYear}-${nexYear.toString().substr(-2)}`,
+        text: "PERMIT YTD",
         color: themeState.isDarkMode ? "#095e7d" : "#577490",
       },
       datalabels: {
@@ -99,23 +99,25 @@ function PtwDashboard() {
   };
 
   const dataTrendCPAMonth = {
-    labels: [],
+    labels: [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ],
     datasets: [
       {
-        label: "Total",
-        data: [],
+        label: "",
+        data: [120, 130, 150, 170, 190, 200, 210, 220, 240, 250, 260, 300],
         backgroundColor: "#528dbd",
-      },
-      {
-        label: "Closed",
-        data: [],
-        backgroundColor: "#b8db6f",
-      },
-
-      {
-        label: "Pending",
-        data: [],
-        backgroundColor: "#f37d08",
       },
     ],
   };
@@ -125,7 +127,7 @@ function PtwDashboard() {
     plugins: {
       title: {
         display: true,
-        text: "Factory Wise Issue List",
+        text: "PERMIT Open/Approved/Closed",
         color: themeState.isDarkMode ? "#095e7d" : "#577490",
       },
       datalabels: {
@@ -153,22 +155,22 @@ function PtwDashboard() {
   };
 
   const dataTrendCPAFic = {
-    labels: [],
+    labels: ["EHS", "Maintenance"],
     datasets: [
       {
-        label: "Assigned",
-        data: [],
+        label: "Open",
+        data: [50, 60, 45],
         backgroundColor: "#528dbd",
       },
       {
         label: "Closed",
-        data: [],
+        data: [40, 50, 35],
         backgroundColor: "#b8db6f",
       },
 
       {
-        label: "Pending",
-        data: [],
+        label: "Overdue",
+        data: [10, 10, 10],
         backgroundColor: "#f37d08",
       },
     ],
@@ -179,7 +181,7 @@ function PtwDashboard() {
     plugins: {
       title: {
         display: true,
-        text: "Team Wise Issue List",
+        text: "Permit Violations - Open/Closed",
         color: themeState.isDarkMode ? "#095e7d" : "#577490",
       },
       datalabels: {
@@ -245,22 +247,17 @@ function PtwDashboard() {
   };
 
   const dataTrendCPATeam = {
-    labels: [],
+    labels: ["EHS", "Maintenance"],
     datasets: [
       {
-        label: "Assigned",
-        data: [],
-        backgroundColor: "#528dbd",
-      },
-      {
         label: "Closed",
-        data: [],
+        data: [50, 60],
         backgroundColor: "#b8db6f",
       },
 
       {
-        label: "Pending",
-        data: [],
+        label: "Overdue",
+        data: [40, 50],
         backgroundColor: "#f37d08",
       },
     ],
@@ -359,7 +356,7 @@ function PtwDashboard() {
     plugins: {
       title: {
         display: true,
-        text: "Day Wise Issue List",
+        text: "Department Wise Permit Status -Open/Closed",
         color: themeState.isDarkMode ? "#095e7d" : "#577490",
       },
       datalabels: {
@@ -514,23 +511,17 @@ function PtwDashboard() {
   // };
 
   const dataTrendDayWiseIssue = {
-    labels: [],
+    labels: ["EHS", "Maintenance"],
     datasets: [
       {
-        label: "Total",
-        data: [],
+        label: "Target",
+        data: [50, 60],
         backgroundColor: "#528dbd",
       },
       {
-        label: "Closed",
-        data: [],
+        label: "Actual",
+        data: [40, 50],
         backgroundColor: "#b8db6f",
-      },
-
-      {
-        label: "Pending",
-        data: [],
-        backgroundColor: "#f37d08",
       },
     ],
   };

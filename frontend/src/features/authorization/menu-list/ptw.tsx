@@ -80,7 +80,7 @@ const PTW_MENU_LIST: IMenuItem[] = [
   },
   {
     id: 13,
-    name: "Clsoe Permit",
+    name: "Close Permit",
     icon: <ClipboardDocumentCheckIcon className="w-5 h-5" />,
     iconSelected: <ClipboardDocumentCheckIconSolid className="w-5 h-5" />,
     appId: 2,

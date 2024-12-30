@@ -289,13 +289,7 @@ function ViewSio() {
       sioLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogSioData = !isAdmin
-        ? [
-            ...sioLogHistoryData.historyLogSioData.filter(
-              (item) => +item.created_by === authState.ID,
-            ),
-          ]
-        : [...sioLogHistoryData.historyLogSioData];
+      const historyLogSioData = [...sioLogHistoryData.historyLogSioData];
 
       setTeamData({
         historyLogSioData,

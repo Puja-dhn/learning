@@ -4,6 +4,7 @@ interface IUserData {
   name: string;
   email: string;
   mobile: string;
+  department: string;
   designation: string;
   emp_type: string;
   status: string;

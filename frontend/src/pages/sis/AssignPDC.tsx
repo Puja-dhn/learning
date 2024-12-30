@@ -130,6 +130,8 @@ function AssignPDC() {
     historyLogSioData: [],
   });
 
+  const queryClient = useQueryClient();
+
   const [logDetails, setLogDetails] = useState<ILogSioTeamData>({
     historyLogSioData: [],
   });
@@ -188,6 +190,9 @@ function AssignPDC() {
           true,
           2000,
         );
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] === "sioOpenDataQuery",
+        });
         setShowPDCAssignDialog((oldState) => ({
           ...oldState,
           status: false,
@@ -215,6 +220,9 @@ function AssignPDC() {
           true,
           2000,
         );
+        queryClient.invalidateQueries({
+          predicate: (query) => query.queryKey[0] === "sioOpenDataQuery",
+        });
         setShowLogDetailsDialog((oldState) => ({
           ...oldState,
           status: false,
@@ -244,7 +252,7 @@ function AssignPDC() {
         </IconButton>
       ),
     },
-    { field: "id", headerName: "Log No", width: 70 },
+    { field: "disp_logno", headerName: "Log No", width: 70 },
     { field: "obs_datetime", headerName: "Observation Date", width: 250 },
     { field: "department", headerName: "Department", width: 240 },
     { field: "area", headerName: "Area", width: 250 },
@@ -259,12 +267,22 @@ function AssignPDC() {
   // const [reportedByList, setReportedByList] = useState<IOptionList[]>([
   //   { id: 0, name: "All Reported By" },
   // ]);
-  const queryClient = useQueryClient();
 
   const [filterList, setFilterList] = useState<ILogSioFilterForm>({
     ...initialFilterValues,
   });
-
+  const [modalImage, setModalImage] = useState<string>("");
+  const [showImageDialog, setShowImageDialog] = useState({
+    status: false,
+  });
+  const handleImageDialogClose = () => {
+    setShowImageDialog((oldState) => ({ ...oldState, status: false }));
+    setModalImage("");
+  };
+  const openImageModal = (image: any) => {
+    setModalImage(image);
+    setShowImageDialog({ status: true });
+  };
   const isAdmin =
     authState.ROLES &&
     authState.ROLES.length > 0 &&
@@ -337,13 +355,7 @@ function AssignPDC() {
       sioLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogSioData = !isAdmin
-        ? [
-            ...sioLogHistoryData.historyLogSioData.filter(
-              (item) => +item.created_by === authState.ID,
-            ),
-          ]
-        : [...sioLogHistoryData.historyLogSioData];
+      const historyLogSioData = [...sioLogHistoryData.historyLogSioData];
 
       setTeamData({
         historyLogSioData,
@@ -769,6 +781,7 @@ function AssignPDC() {
                         src={`${ASSET_BASE_URL}sioimages/${preview || ""}`}
                         alt={`preview-${index}`}
                         className="object-cover w-24 h-24 rounded-lg"
+                        onClick={() => openImageModal(preview)}
                       />
                     </div>
                   ))}
@@ -979,6 +992,7 @@ function AssignPDC() {
                                 }`}
                                 alt={`preview-${index}`}
                                 className="object-cover w-full h-20 rounded-lg"
+                                onClick={() => openImageModal(preview)}
                               />
                             </div>
                           ))}
@@ -1031,6 +1045,21 @@ function AssignPDC() {
           )}
         </div>
       </ModalPopupMobile>
+      <ModalPopup
+        heading="View Image"
+        onClose={handleImageDialogClose}
+        openStatus={showImageDialog.status}
+        hasSubmit={false}
+        size="fullscreen"
+      >
+        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+          <img
+            src={`${ASSET_BASE_URL}sioimages/${modalImage || ""}`}
+            alt="previewimage"
+            className="object-cover w-full h-full rounded-lg"
+          />
+        </div>
+      </ModalPopup>
     </div>
   );
 }

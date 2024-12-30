@@ -15,6 +15,9 @@ import ILogRecomFilterForm from "../types/ILogRecomFilterForm";
 import ILogRecommendationData from "../types/ILogRecommendationData";
 import IRecomCloseForm from "../types/IRecomCloseForm";
 import ILogDocumentData from "../types/ILogDocumentData";
+import IDocuments from "../types/IDocuments";
+import IRecommendations from "../types/IRecommendations";
+import IInvestigation from "../types/IInvestigation";
 
 const addNewImsData = (formData: any) => {
   return http.post<ILogImsForm, AxiosResponse<string>>(
@@ -37,9 +40,9 @@ const getIMSData = (filterData: ILogImsFilterForm) => {
       INJURY_DETAILS: IInjuryDtls[];
       SUGG_TEAM: ITeamDtls[];
       WITNESS_TEAM: ITeamDtls[];
-      INVESTIGATION_DATA: ILogInvestigationData[];
-      RECOMMENDATION_DATA: ILogRecommendationData[];
-      DOCUMENTS: ILogDocumentData[];
+      INVESTIGATION_DATA: IInvestigation[];
+      RECOMMENDATION_DATA: IRecommendations[];
+      DOCUMENTS_DATA: IDocuments[];
     }>
   >("/ims/get-ims-data", filterData);
 };

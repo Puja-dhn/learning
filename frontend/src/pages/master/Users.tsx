@@ -91,6 +91,12 @@ const tableColumns = [
     colType: "Normal",
   },
   {
+    label: "Department",
+    minWidth: "min-w-[240px]",
+    dbCol: "department",
+    colType: "Normal",
+  },
+  {
     label: "Designation",
     minWidth: "min-w-[240px]",
     dbCol: "designation",
@@ -116,8 +122,9 @@ const initialEditValues: IUserDataEdit = {
   name: "",
   email: "",
   mobile: "",
+  department: "",
   designation: "",
-  emp_type: "",
+  emp_type: "Permanent",
   status: "",
   profile_pic_url: "",
   roles: "",
@@ -982,7 +989,7 @@ function Users() {
           <div className="w-full h-full grid grid-cols-[7fr_2fr] gap-4 ">
             <div className="h-full grid grid-rows-[auto_1fr] gap-4 overflow-auto">
               <div className="flex flex-wrap justify-evenly items-center p-4 border-[1px]  border-gray-300 rounded-lg dark:border-gray-500">
-                <div className="p-2 basis-full lg:basis-1/4">
+                <div className="hidden p-2 basis-full lg:basis-1/4">
                   <TextField
                     disabled
                     name="id"
@@ -1008,6 +1015,13 @@ function Users() {
                   <TextField
                     name="mobile"
                     label="Mobile"
+                    control={controlEdit}
+                  />
+                </div>
+                <div className="p-2 basis-full lg:basis-1/4">
+                  <TextField
+                    name="department"
+                    label="Department"
                     control={controlEdit}
                   />
                 </div>

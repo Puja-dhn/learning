@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 import { shallowEqual } from "react-redux";
 import { SubmitHandler, useForm } from "react-hook-form";
 import {
@@ -23,7 +25,7 @@ import { useAppSelector } from "@/store/hooks";
 import usePtwOpenLogDetailQuery from "@/features/ptw/hooks/usePtwOpenLogDetailQuery";
 import { usePTWMasterDataQuery } from "@/features/ptw/hooks";
 import ILogPTWApproveForm from "@/features/ptw/types/ptw/ILogPTWApproveForm";
-import { TextArea, TextField } from "@/features/ui/form";
+import { DropdownList, TextArea, TextField } from "@/features/ui/form";
 import { submitCustodianApproval } from "@/features/ptw/services/ptw.services";
 import ILogPtwData from "@/features/ptw/types/ptw/ILogPtwData";
 import IConfigsList from "@/features/ptw/types/ptw/IConfigsList";
@@ -53,8 +55,13 @@ const initialFilterValues: ILogPtwFilterForm = {
   area: "All",
   date_from: "",
   date_to: "",
-  status: "All",
+  status: "Open",
 };
+
+const approveFormSchema = Yup.object().shape({
+  issuer_id: Yup.string().required("Issuer is required"),
+  comments: Yup.string().required("Comments is required"),
+});
 
 function ApprovePtw() {
   const alertToast = useAlertConfig();
@@ -135,6 +142,7 @@ function ApprovePtw() {
 
         setConfigs(historyPTWMasterData[0].CONFIG);
         setAreas(historyPTWMasterData[0].AREA);
+        setUsers(historyPTWMasterData[0].USERS);
 
         const filtercontractors = historyPTWMasterData[0].CONTRACTORS.map(
           (contractor: any) => ({
@@ -389,6 +397,7 @@ function ApprovePtw() {
       esms_checklist: row.esms_checklist,
       hot_work_checklist: row.hot_work_checklist,
       equipment: row.equipment,
+      why_moc_remarks: row.why_moc_remarks,
     });
 
     setShowViewPtwDialog({
@@ -403,6 +412,7 @@ function ApprovePtw() {
     formState: formStatePDC,
   } = useForm<ILogPTWApproveForm>({
     defaultValues: initialApproveValues,
+    resolver: yupResolver(approveFormSchema),
   });
 
   const { submitCount, errors } = formStatePDC;
@@ -556,14 +566,7 @@ function ApprovePtw() {
       ptwLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogPtwData = !isAdmin
-        ? [
-            ...ptwLogHistoryData.historyLogPtwData.filter(
-              (item: any) => +item.created_by === authState.ID,
-            ),
-          ]
-        : [...ptwLogHistoryData.historyLogptwData];
-
+      const historyLogPtwData = [...ptwLogHistoryData.historyLogPtwData];
       setTeamData({
         historyLogPtwData,
       });
@@ -945,7 +948,7 @@ function ApprovePtw() {
                     <div className="p-1">
                       <TextArea
                         name="why_moc_remarks"
-                        label="Why MOC select No (Remarks) "
+                        label="Why MOC Not Required "
                         control={controlView}
                         disabled
                       />
@@ -1510,7 +1513,7 @@ function ApprovePtw() {
                             return (
                               <tr key={index}>
                                 <td className="px-4 py-2 border-b">
-                                  {index + 2}
+                                  {index + 1}
                                 </td>{" "}
                                 {/* Display row number starting from 2 */}
                                 <td className="px-4 py-2 border-b">
@@ -1598,42 +1601,43 @@ function ApprovePtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assConfinedChecklist && assConfinedChecklist.length > 0 && (
-                        <div>
-                          {assConfinedChecklist
-                            .reduce((rows: any, item: any, index: any) => {
-                              if (index % 4 === 0) rows.push([]);
-                              rows[rows.length - 1].push(item);
-                              return rows;
-                            }, [])
-                            .map((row: any, rowIndex: any) => (
-                              <div
-                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                key={rowIndex}
-                              >
-                                {row.map((item2: any, index: any) => (
-                                  <div
-                                    className="p-1 text-gray-700"
-                                    key={index}
-                                  >
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                        value="Yes"
-                                        checked={handleCheckedAssConfinedChecklist(
-                                          item2.id,
-                                        )}
-                                      />
-                                      &nbsp;
-                                      {item2.name}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                        </div>
-                      )}
+                      {assConfinedChecklist &&
+                        assConfinedChecklist.length > 0 && (
+                          <div>
+                            {assConfinedChecklist
+                              .reduce((rows: any, item: any, index: any) => {
+                                if (index % 4 === 0) rows.push([]);
+                                rows[rows.length - 1].push(item);
+                                return rows;
+                              }, [])
+                              .map((row: any, rowIndex: any) => (
+                                <div
+                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                  key={rowIndex}
+                                >
+                                  {row.map((item2: any, index: any) => (
+                                    <div
+                                      className="p-1 text-gray-700"
+                                      key={index}
+                                    >
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                          value="Yes"
+                                          checked={handleCheckedAssConfinedChecklist(
+                                            item2.id,
+                                          )}
+                                        />
+                                        &nbsp;
+                                        {item2.name}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
                     </div>
                     <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                       <TextField
@@ -1681,42 +1685,43 @@ function ApprovePtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assLiftingChecklist && assLiftingChecklist.length > 0 && (
-                        <div>
-                          {assLiftingChecklist
-                            .reduce((rows: any, item: any, index: any) => {
-                              if (index % 4 === 0) rows.push([]);
-                              rows[rows.length - 1].push(item);
-                              return rows;
-                            }, [])
-                            .map((row: any, rowIndex: any) => (
-                              <div
-                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                key={rowIndex}
-                              >
-                                {row.map((item2: any, index: any) => (
-                                  <div
-                                    className="p-1 text-gray-700"
-                                    key={index}
-                                  >
-                                    <label>
-                                      <input
-                                        type="checkbox"
-                                        name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                        value="Yes"
-                                        checked={handleCheckeAssLiftingChecklist(
-                                          item2.id,
-                                        )}
-                                      />
-                                      &nbsp;
-                                      {item2.name}
-                                    </label>
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                        </div>
-                      )}
+                      {assLiftingChecklist &&
+                        assLiftingChecklist.length > 0 && (
+                          <div>
+                            {assLiftingChecklist
+                              .reduce((rows: any, item: any, index: any) => {
+                                if (index % 4 === 0) rows.push([]);
+                                rows[rows.length - 1].push(item);
+                                return rows;
+                              }, [])
+                              .map((row: any, rowIndex: any) => (
+                                <div
+                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                  key={rowIndex}
+                                >
+                                  {row.map((item2: any, index: any) => (
+                                    <div
+                                      className="p-1 text-gray-700"
+                                      key={index}
+                                    >
+                                      <label>
+                                        <input
+                                          type="checkbox"
+                                          name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                          value="Yes"
+                                          checked={handleCheckeAssLiftingChecklist(
+                                            item2.id,
+                                          )}
+                                        />
+                                        &nbsp;
+                                        {item2.name}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              ))}
+                          </div>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -1848,11 +1853,13 @@ function ApprovePtw() {
                   </span>
                   {custodianName}
                 </div>
-                <div className="p-2 text-gray-700 basis-full sm:basis-1/2 lg:basis-1/2 dark:text-gray-300">
-                  <span className="font-semibold">
-                    Name of Issuer:&nbsp;&nbsp;
-                  </span>
-                  {issuerName}
+                <div className="p-1">
+                  <DropdownList
+                    name="issuer_id"
+                    label="Issuer"
+                    control={controlApprove}
+                    optionList={[{ id: "", name: "Select issuers" }, ...users]}
+                  />
                 </div>
                 <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/2">
                   <TextArea

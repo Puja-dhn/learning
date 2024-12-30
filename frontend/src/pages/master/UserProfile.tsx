@@ -32,6 +32,7 @@ const initialEditValues: IUserProfileEdit = {
   name: "",
   email: "",
   mobile: "",
+  department: "",
   designation: "",
   emp_type: "",
   status: "",
@@ -250,6 +251,22 @@ function UserProfile() {
                   disabled
                   name="emp_type"
                   label="Employee Type"
+                  control={controlEdit}
+                />
+              </div>
+              <div className="p-2 basis-full lg:basis-1/3">
+                <TextField
+                  disabled
+                  name="department"
+                  label="Department"
+                  control={controlEdit}
+                />
+              </div>
+              <div className="p-2 basis-full lg:basis-1/3">
+                <TextField
+                  disabled
+                  name="gender"
+                  label="Gender"
                   control={controlEdit}
                 />
               </div>

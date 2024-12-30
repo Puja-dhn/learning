@@ -16,7 +16,7 @@ import LogViolations from "./pages/ptw/LogViolations";
 import ViewViolations from "./pages/ptw/ViewViolations";
 import CloseViolations from "./pages/ptw/CloseViolations";
 import UserProfile from "./pages/master/UserProfile";
-import OrgStructure from "./pages/master/OrgStructure";
+import OrgStructures from "./pages/master/OrgStructures";
 import ClosePtw from "./pages/ptw/ClosePtw";
 import SioDashboard from "./pages/sis/SioDashboard";
 import PtwDashboard from "./pages/ptw/PtwDashboard";
@@ -75,7 +75,7 @@ function App() {
               path="context-definations"
               element={<ContextDefinations />}
             />
-            <Route path="org-structure" element={<OrgStructure />} />
+            <Route path="org-structure" element={<OrgStructures />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 
