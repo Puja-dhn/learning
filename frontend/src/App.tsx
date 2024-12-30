@@ -76,7 +76,7 @@ function App() {
 
           <Route
             path="sio"
-            element={<PrivateRoutes outlet={<HomeLayout appId={2} />} />}
+            element={<PrivateRoutes outlet={<HomeLayout appId={1} />} />}
           >
             <Route index element={<LogSis />} />
             <Route path="dashboard" element={<LogSis />} />
@@ -88,7 +88,7 @@ function App() {
           </Route>
           <Route
             path="ptw"
-            element={<PrivateRoutes outlet={<HomeLayout appId={3} />} />}
+            element={<PrivateRoutes outlet={<HomeLayout appId={2} />} />}
           >
             <Route index element={<LogPtw />} />
             <Route path="dashboard" element={<LogPtw />} />
@@ -103,7 +103,7 @@ function App() {
 
           <Route
             path="ims"
-            element={<PrivateRoutes outlet={<HomeLayout appId={4} />} />}
+            element={<PrivateRoutes outlet={<HomeLayout appId={3} />} />}
           >
             <Route index element={<LogIms />} />
             <Route path="dashboard" element={<LogIms />} />

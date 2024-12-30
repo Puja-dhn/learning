@@ -352,9 +352,7 @@ const SUGGESTION_SCHEMES: IOptionList[] = [
   { id: "Implemented", name: "Implemented" },
   { id: "Special Implemented", name: "Special Implemented" },
 ];
-const SUGGESTION_COMPANIES: IOptionList[] = [
-  { id: "Tata Motors Limited", name: "Tata Motors Limited" },
-];
+const SUGGESTION_COMPANIES: IOptionList[] = [];
 const SUGGESTION_DOCTYPE: IOptionList[] = [
   { id: "Before", name: "Before" },
   { id: "After", name: "After" },

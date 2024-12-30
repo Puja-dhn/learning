@@ -731,7 +731,6 @@ function IncidentInvestigation() {
       ...documentsRow,
       { ...newDocument, id: documentsRow.length + 1 },
     ];
-    console.log(updatedDocumentsRow);
     setDocumentsRow(updatedDocumentsRow);
     setNewDocument({ id: 0, documentType: "", document: "" }); // Reset the input fields
     setValue("documents", JSON.stringify(updatedDocumentsRow), {
@@ -768,7 +767,7 @@ function IncidentInvestigation() {
               }
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
-              checkboxSelection
+              checkboxSelection={false}
               sx={{
                 border: 0,
                 "& .MuiDataGrid-columnHeader": {

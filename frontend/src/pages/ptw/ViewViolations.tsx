@@ -383,7 +383,7 @@ function ViewViolations() {
               }
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
-              checkboxSelection
+              checkboxSelection={false}
               sx={{
                 border: 0,
                 "& .MuiDataGrid-columnHeader": {

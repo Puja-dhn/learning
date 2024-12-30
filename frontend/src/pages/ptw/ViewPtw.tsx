@@ -864,7 +864,7 @@ function ViewPtw() {
               }
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
-              checkboxSelection
+              checkboxSelection={false}
               sx={{
                 border: 0,
                 "& .MuiDataGrid-columnHeader": {
@@ -1835,43 +1835,42 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assConfinedChecklist &&
-                        assConfinedChecklist.length > 0 && (
-                          <div>
-                            {assConfinedChecklist
-                              .reduce((rows: any, item: any, index: any) => {
-                                if (index % 4 === 0) rows.push([]);
-                                rows[rows.length - 1].push(item);
-                                return rows;
-                              }, [])
-                              .map((row: any, rowIndex: any) => (
-                                <div
-                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                  key={rowIndex}
-                                >
-                                  {row.map((item2: any, index: any) => (
-                                    <div
-                                      className="p-1 text-gray-700"
-                                      key={index}
-                                    >
-                                      <label>
-                                        <input
-                                          type="checkbox"
-                                          name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                          value="Yes"
-                                          checked={handleCheckedAssConfinedChecklist(
-                                            item2.id,
-                                          )}
-                                        />
-                                        &nbsp;
-                                        {item2.name}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                      {assConfinedChecklist && assConfinedChecklist.length > 0 && (
+                        <div>
+                          {assConfinedChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]);
+                              rows[rows.length - 1].push(item);
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`ass_confined_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckedAssConfinedChecklist(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                     <div className="grid grid-cols-1 gap-2 p-2 md:grid-cols-4">
                       <TextField
@@ -1919,43 +1918,42 @@ function ViewPtw() {
                       </h3>
                     </div>
                     <div className="p-2 mt-1 ">
-                      {assLiftingChecklist &&
-                        assLiftingChecklist.length > 0 && (
-                          <div>
-                            {assLiftingChecklist
-                              .reduce((rows: any, item: any, index: any) => {
-                                if (index % 4 === 0) rows.push([]);
-                                rows[rows.length - 1].push(item);
-                                return rows;
-                              }, [])
-                              .map((row: any, rowIndex: any) => (
-                                <div
-                                  className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
-                                  key={rowIndex}
-                                >
-                                  {row.map((item2: any, index: any) => (
-                                    <div
-                                      className="p-1 text-gray-700"
-                                      key={index}
-                                    >
-                                      <label>
-                                        <input
-                                          type="checkbox"
-                                          name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
-                                          value="Yes"
-                                          checked={handleCheckeAssLiftingChecklist(
-                                            item2.id,
-                                          )}
-                                        />
-                                        &nbsp;
-                                        {item2.name}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              ))}
-                          </div>
-                        )}
+                      {assLiftingChecklist && assLiftingChecklist.length > 0 && (
+                        <div>
+                          {assLiftingChecklist
+                            .reduce((rows: any, item: any, index: any) => {
+                              if (index % 4 === 0) rows.push([]);
+                              rows[rows.length - 1].push(item);
+                              return rows;
+                            }, [])
+                            .map((row: any, rowIndex: any) => (
+                              <div
+                                className="grid grid-cols-1 gap-2 mb-4 border-b border-gray-200 md:grid-cols-4"
+                                key={rowIndex}
+                              >
+                                {row.map((item2: any, index: any) => (
+                                  <div
+                                    className="p-1 text-gray-700"
+                                    key={index}
+                                  >
+                                    <label>
+                                      <input
+                                        type="checkbox"
+                                        name={`ass_lifting_${item2.id}`} // You can use a unique identifier if available (like `item.id`)
+                                        value="Yes"
+                                        checked={handleCheckeAssLiftingChecklist(
+                                          item2.id,
+                                        )}
+                                      />
+                                      &nbsp;
+                                      {item2.name}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -50,7 +50,7 @@ function getLoggedIn() {
 
 function getCurrentTimer() {
   const timer = localStorage.getItem("timer-inshe");
-  let timeCounter = 10;
+  let timeCounter = 200;
   if (timer) {
     try {
       const decryptTimer = decryptData(timer);
@@ -68,7 +68,7 @@ function getCurrentTimer() {
 
 function tickTimer() {
   const timer = localStorage.getItem("timer-inshe");
-  let timeCounter = 10;
+  let timeCounter = 200;
   if (timer) {
     try {
       const decryptTimer = decryptData(timer);
@@ -85,7 +85,7 @@ function tickTimer() {
 }
 
 function resetTimer() {
-  localStorage.setItem("timer-inshe", encryptData("10"));
+  localStorage.setItem("timer-inshe", encryptData("200"));
 }
 
 function setLocalUser(user: IAuthenticatedUser) {

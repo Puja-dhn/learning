@@ -7,7 +7,7 @@ const transporter = nodemailer.createTransport({
 
 exports.sendMail = async (to, cc, subject, html) => {
   const info = await transporter.sendMail({
-    from: '"Company" <no-reply-compant@tatamotors.com>',
+    from: '"Company" <no-reply-company@company.com>',
     to,
     cc,
     subject,

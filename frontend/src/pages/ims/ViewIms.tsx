@@ -422,6 +422,7 @@ function ViewIms() {
         <div className="h-full overflow-auto border-[1px] dark:border-gray-700 ">
           <Paper sx={{ height: "100%", width: "100%" }}>
             <DataGrid
+              checkboxSelection={false}
               rows={teamData.historyLogImsData}
               columns={columns}
               getRowId={(row) =>
@@ -429,7 +430,6 @@ function ViewIms() {
               }
               initialState={{ pagination: { paginationModel } }}
               pageSizeOptions={[5, 10]}
-              checkboxSelection
               sx={{
                 border: 0,
                 "& .MuiDataGrid-columnHeader": {

@@ -24,9 +24,7 @@ function HomeFooter() {
         <div className="pr-8">
           <LogoutTimer />
         </div>
-        <div className="absolute bottom-0 right-3">
-          <HelpToggler />
-        </div>
+        <div className="absolute bottom-0 right-3">{/* <HelpToggler /> */}</div>
       </div>
     </div>
   );

@@ -278,20 +278,7 @@ exports.requestotp = async (req, res) => {
 </body>
 </html>
  `;
-  // const mailOptions = {
-  //   from: '"Nexsafe" <ngs-noreply@tatamotors.com>',
-  //   to: email,
-  //   subject: "Forgot Password",
-  //   html: htmlContent,
-  // };
 
-  // try {
-  //   await transporter.sendMail(mailOptions);
-  //   console.log("Email sent successfully");
-  // } catch (error) {
-  //   console.error("Error sending email:", error);
-  //   throw error;
-  // }
   try {
     await sendMail(`${email}`, ``, `Forgot Password`, `${htmlContent}`);
     console.log("Email sent successfully");
