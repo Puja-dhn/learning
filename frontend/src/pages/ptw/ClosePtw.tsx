@@ -568,7 +568,7 @@ function ClosePtw() {
       ptwLogHistoryData
     ) {
       // const historyLogAectData = [...aectLogHistoryData.historyLogAectData];
-      const historyLogPtwData = [...ptwLogHistoryData.historyLogptwData];
+      const historyLogPtwData = [...ptwLogHistoryData.historyLogPtwData];
 
       setTeamData({
         historyLogPtwData,

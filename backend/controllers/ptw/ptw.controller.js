@@ -142,8 +142,14 @@ exports.getPtwData = async (req, res) => {
       t1.area area_id,
       t3.name area,
       t1.work_location,
-      TO_CHAR(t1.datetime_from, 'DD-Mon-YYYY hh:mi am') AS datetime_from,
-      TO_CHAR(t1.datetime_to, 'DD-Mon-YYYY hh:mi am') AS datetime_to,
+      DATE_FORMAT(
+        t1.datetime_from,
+        '%d-%b-%Y %h:%i %p'
+    ) AS datetime_from,
+    DATE_FORMAT(
+        t1.datetime_to,
+        '%d-%b-%Y %h:%i %p'
+    ) AS datetime_to,
       t1.nearest_firealarm,
       t1.job_description,
       t1.moc_required,
@@ -230,8 +236,14 @@ exports.getOpenPtwData = async (req, res) => {
         t1.area area_id,
         t3.name area,
         t1.work_location,
-        TO_CHAR(t1.datetime_from, 'DD-Mon-YYYY hh:mi am') AS datetime_from,
-        TO_CHAR(t1.datetime_to, 'DD-Mon-YYYY hh:mi am') AS datetime_to,
+        DATE_FORMAT(
+        t1.datetime_from,
+        '%d-%b-%Y %h:%i %p'
+    ) AS datetime_from,
+    DATE_FORMAT(
+        t1.datetime_to,
+        '%d-%b-%Y %h:%i %p'
+    ) AS datetime_to,
         t1.nearest_firealarm,
         t1.job_description,
         t1.moc_required,

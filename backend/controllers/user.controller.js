@@ -436,18 +436,18 @@ exports.updateUserDetails = async (req, res) => {
     </body>
     </html>
 `;
-    try {
-      await sendMail(
-        `${email}`,
-        ``,
-        `Registration Successfull`,
-        `${htmlContent}`
-      );
-      console.log("Email sent successfully");
-    } catch (error) {
-      console.error("Error sending email:", error);
-      throw error;
-    }
+    // try {
+    //   await sendMail(
+    //     `${email}`,
+    //     ``,
+    //     `Registration Successfull`,
+    //     `${htmlContent}`
+    //   );
+    //   console.log("Email sent successfully");
+    // } catch (error) {
+    //   console.error("Error sending email:", error);
+    //   throw error;
+    // }
   } else {
     // update user details, if rfid is reset, if password is reset
 

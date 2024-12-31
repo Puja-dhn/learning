@@ -104,9 +104,151 @@ exports.getPermittoWork = async (req, res) => {
 
     const ptwData = result[0];
 
-    console.log("ptwData", ptwData);
+    const hazaedsConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='Hazard Identification'
+  `;
 
-    const htmlContent = generateHTML(ptwData);
+    const hazardsConfigs = await simpleQuery(hazaedsConfigsQuery, []);
+
+    const risksConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='Risk Assessment'
+  `;
+
+    const risksConfigs = await simpleQuery(risksConfigsQuery, []);
+
+    const ppeConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='PPE Required'
+  `;
+
+    const ppeConfigs = await simpleQuery(ppeConfigsQuery, []);
+
+    const generalConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='General Work'
+  `;
+
+    const generalConfigs = await simpleQuery(generalConfigsQuery, []);
+
+    const hotwrkConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='Hot Work'
+  `;
+
+    const hotwrkConfigs = await simpleQuery(hotwrkConfigsQuery, []);
+
+    const whConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='Work at Height'
+  `;
+
+    const whConfigs = await simpleQuery(whConfigsQuery, []);
+
+    const confinedConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='Confined Space'
+  `;
+
+    const confinedConfigs = await simpleQuery(confinedConfigsQuery, []);
+
+    const liftingConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='Lifiting Work'
+  `;
+
+    const liftingConfigs = await simpleQuery(liftingConfigsQuery, []);
+
+    const esmsConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='ESMS Work Permit'
+  `;
+
+    const esmsConfigs = await simpleQuery(esmsConfigsQuery, []);
+
+    const toolsConfigsQuery = `
+    SELECT
+        t1.id,
+        t1.checklist
+    FROM
+        t_inshe_ptw_configs t1
+    WHERE
+      t1.status = 'Active'
+      and t1.type='Tools and Equipment'
+  `;
+
+    const toolsConfigs = await simpleQuery(toolsConfigsQuery, []);
+
+    // console.log("ptwData", ptwData);
+
+    const htmlContent = generateHTML(
+      ptwData,
+      hazardsConfigs,
+      risksConfigs,
+      ppeConfigs,
+      generalConfigs,
+      hotwrkConfigs,
+      whConfigs,
+      confinedConfigs,
+      liftingConfigs,
+      esmsConfigs,
+      toolsConfigs
+    );
 
     const pdfOptions = { format: "A4" };
     pdf.create(htmlContent, pdfOptions).toStream((err, stream) => {
@@ -151,9 +293,9 @@ let getChecklistDescriptions = async (ids) => {
 function generateDateRangeTableRows(startDate, endDate) {
   const rows = [];
   let currentDate = new Date(startDate);
-  let i=0;
+  let i = 0;
   while (currentDate <= new Date(endDate)) {
-      rows.push(`
+    rows.push(`
           <tr>
               <td>Day ${i}</td>
               <td>&nbsp;</td>
@@ -162,14 +304,94 @@ function generateDateRangeTableRows(startDate, endDate) {
               <td>&nbsp;</td>
           </tr>
       `);
-      currentDate.setDate(currentDate.getDate() + 1); // Increment by 1 day
+    currentDate.setDate(currentDate.getDate() + 1); // Increment by 1 day
   }
 
-  return rows.join('');
+  return rows.join("");
 }
 
-function generateHTML(data) {
+function generateHTML(
+  data,
+  hazardsConfigs,
+  risksConfigs,
+  ppeConfigs,
+  generalConfigs,
+  hotwrkConfigs,
+  whConfigs,
+  confinedConfigs,
+  liftingConfigs,
+  esmsConfigs,
+  toolsConfigs
+) {
   const currentDate = new Date().toLocaleString();
+
+  function generateAssDynamicRows(allPermits, selectedPermits) {
+    // Helper function to chunk the array into groups of 4
+    const chunkArray = (array, size) => {
+      const chunks = [];
+      for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+      }
+      return chunks;
+    };
+
+    // Split the permits into rows of 4
+    const rows = chunkArray(allPermits, 4);
+
+    // Generate HTML for each row
+    return rows
+      .map(
+        (row) => `
+          <tr>
+            ${row
+              .map((permit) => {
+                const isChecked = selectedPermits.includes(permit) ? "✔" : "";
+                return `
+                  <td>${isChecked}</td>
+                  <th>${permit}</th>
+                `;
+              })
+              .join("")}
+          </tr>
+        `
+      )
+      .join("");
+  }
+
+  function generateConfigsDynamicRows(allPermits, selectedPermits) {
+    // Helper function to chunk the array into groups of 4
+    const chunkArray = (array, size) => {
+      const chunks = [];
+      for (let i = 0; i < array.length; i += size) {
+        chunks.push(array.slice(i, i + size));
+      }
+      return chunks;
+    };
+
+    // Split the permits into rows of 4
+    const rows = chunkArray(allPermits, 4);
+
+    // Generate HTML for each row
+    return rows
+      .map(
+        (row) => `
+          <tr>
+            ${row
+              .map((permit) => {
+                const isChecked = selectedPermits.includes(permit.id.toString())
+                  ? "✔"
+                  : "";
+                return `
+                  <td>${isChecked}</td>
+                  <td>${permit.checklist}</td>
+                `;
+              })
+              .join("")}
+          </tr>
+        `
+      )
+      .join("");
+  }
 
   function generateDynamicRows(items) {
     // Helper function to chunk the array into groups of 4
@@ -242,7 +464,7 @@ function generateHTML(data) {
               <td>${person.name}</td>
               <td>${person.contractor}</td>
               <td>${person.trade}</td>
-              <td>${person.esic_no}</td>
+              <td>${person.ticketNo}</td>
           </tr>
       `
       )
@@ -378,7 +600,14 @@ function generateHTML(data) {
                 <tr><th colspan="7"><strong>Associated Permits</strong></th><td>${
                   data.associated_permit ? "Yes" : "No"
                 }</th></tr>                    
-                ${generateDynamicRows(
+                ${generateAssDynamicRows(
+                  [
+                    "Work at Height",
+                    "Confined Space",
+                    "Lifting Work",
+                    "ESMS Work Permit",
+                    "Hot Work",
+                  ],
                   JSON.parse(data.associated_permit || "[]")
                 )}                   
                 </tbody>
@@ -389,9 +618,11 @@ function generateHTML(data) {
                 <tr><th colspan="7"><strong>Hazard Identified</strong></td><td>${
                   data.hazard_identification ? "Yes" : "No"
                 }</th></tr>
-                ${generateDynamicRows(
-                  JSON.parse(data.hazards || "[]")
-                )}               
+                
+                ${generateConfigsDynamicRows(
+                  hazardsConfigs,
+                  JSON.parse(data.hazard_identification || "[]")
+                )}          
                 <tr><th colspan="2">Any Other Specific Hazards</th><td colspan="6">${
                   data.other_hazards || "None"
                 }</td></tr>
@@ -403,7 +634,10 @@ function generateHTML(data) {
                 <tr><th colspan="7"><strong>Risk Assessment</strong></th><td>${
                   data.risk_assessment ? "Yes" : "No"
                 }</td></tr>
-                ${generateDBDynamicRows(JSON.parse(data.risk_assessment || "[]"))}
+                ${generateConfigsDynamicRows(
+                  risksConfigs,
+                  JSON.parse(data.risk_assessment || "[]")
+                )}
                 </tbody>
             </table>
 
@@ -412,7 +646,10 @@ function generateHTML(data) {
                 <tr><th colspan="7"><strong>PPE Required</strong></th><td>${
                   data.ppe_required ? "Yes" : "No"
                 }</td></tr>
-                ${generateDBDynamicRows(JSON.parse(data.ppe_required || "[]"))}
+                ${generateConfigsDynamicRows(
+                  ppeConfigs,
+                  JSON.parse(data.ppe_required || "[]")
+                )}
                 </tbody>
             </table>
 
@@ -421,7 +658,8 @@ function generateHTML(data) {
                 <tr><th colspan="7"><strong>Tools and Equipment required for the job identified, available, and inspected OK</strong></th><td>${
                   data.equipment_checklist ? "Yes" : "No"
                 }</td></tr>
-                ${generateDynamicRows(
+                ${generateConfigsDynamicRows(
+                  toolsConfigs,
                   JSON.parse(data.equipment_checklist || "[]")
                 )}
                 </tbody>
@@ -466,13 +704,14 @@ function generateHTML(data) {
   </tbody>
 </table>
 
-
+<br><br><br><br><br>
             <table>
                 <tbody>
                 <tr><th colspan="7"><strong>General Work/Cold Work?</strong></td><td>${
                   data.general_work_dtls ? "Yes" : "No"
                 }</th></tr>
-                ${generateDynamicRows(
+                ${generateConfigsDynamicRows(
+                  generalConfigs,
                   JSON.parse(data.general_work_dtls || "[]")
                 )}              
                 </tbody>
@@ -502,7 +741,8 @@ function generateHTML(data) {
                 ${
                   data.work_height_checklist
                     ? `
-                ${generateDynamicRows(
+                ${generateConfigsDynamicRows(
+                  whConfigs,
                   JSON.parse(data.work_height_checklist || "[]")
                 )}
                 <tr>
@@ -523,7 +763,8 @@ function generateHTML(data) {
                 ${
                   data.confined_space_checklist
                     ? `
-                ${generateDynamicRows(
+                ${generateConfigsDynamicRows(
+                  confinedConfigs,
                   JSON.parse(data.confined_space_checklist || "[]")
                 )}
                 <tr>
@@ -549,6 +790,60 @@ function generateHTML(data) {
                   `
                     : ""
                 }  
+                </tbody>
+            </table>
+              <table>
+                <tbody>
+                <tr><td colspan="7"><strong>Lifiting Work</strong></td><td>${
+                  data.lifting_work_checklist ? "Yes" : "No"
+                }</td></tr>
+                ${
+                  data.lifting_work_checklist
+                    ? `
+                ${generateConfigsDynamicRows(
+                  liftingConfigs,
+                  JSON.parse(data.lifting_work_checklist || "[]")
+                )}
+               
+                 `
+                    : ""
+                }
+                </tbody>
+            </table>
+            <table>
+                <tbody>
+                <tr><td colspan="7"><strong>ESMS Work Permit</strong></td><td>${
+                  data.esms_checklist ? "Yes" : "No"
+                }</td></tr>
+                ${
+                  data.esms_checklist
+                    ? `
+                ${generateConfigsDynamicRows(
+                  esmsConfigs,
+                  JSON.parse(data.esms_checklist || "[]")
+                )}
+               
+                 `
+                    : ""
+                }
+                </tbody>
+            </table>
+             <table>
+                <tbody>
+                <tr><td colspan="7"><strong>Hot Work</strong></td><td>${
+                  data.hot_work_checklist ? "Yes" : "No"
+                }</td></tr>
+                ${
+                  data.hot_work_checklist
+                    ? `
+                ${generateConfigsDynamicRows(
+                  hotwrkConfigs,
+                  JSON.parse(data.hot_work_checklist || "[]")
+                )}
+               
+                 `
+                    : ""
+                }
                 </tbody>
             </table>
 
@@ -642,7 +937,10 @@ Plant Head
                     </tr>
                 </thead>
                 <tbody>
-                    ${generateDateRangeTableRows(data.datetime_from,data.datetime_to)}
+                    ${generateDateRangeTableRows(
+                      data.datetime_from,
+                      data.datetime_to
+                    )}
                 </tbody>
             </table>
 
@@ -805,4 +1103,4 @@ Plant Head
         </div>
     </body>
     </html>`;
-};
+}

@@ -31,6 +31,8 @@ import ILogPtwFilterForm from "@/features/ptw/types/ptw/ILogPtwFilterForm";
 import ILogPtwData from "@/features/ptw/types/ptw/ILogPtwData";
 import IAreasList from "@/features/sis/types/sis/IAreasList";
 import { display } from "@mui/system";
+import { AxiosResponse } from "axios";
+import http from "@/features/common/utils/http-common";
 
 interface ILogPtwTeamData {
   historyLogPtwData: ILogPtwData[];
@@ -285,232 +287,34 @@ function ViewPtw() {
     setShowViewPtwDialog((oldState) => ({ ...oldState, status: false }));
   };
   const handleDownloadClick = async (row: any) => {
-    console.log(row);
-    // if (!containerRef.current) {
-    //   console.error("Container ref is null");
-    //   return;
-    // }
+    const formData: Record<string, string> = { id: row.id };
+    loader.show();
 
-    // try {
-    //   const scale = 2; // Increased scale for better quality
-    //   const container = containerRef.current;
+    try {
+      const response: AxiosResponse<ArrayBuffer> = await http.post(
+        "/ptw/get-permit-to-work",
+        formData,
+        { responseType: "arraybuffer" },
+      );
 
-    //   // Get the bounding rectangle of the container
-    //   const { top, left, width, height } = container.getBoundingClientRect();
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
 
-    //   // Calculate the offset to exclude header
-    //   const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    //   const footerHeight = document.querySelector("footer")?.offsetHeight || 0;
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "permit-to-work.pdf");
+      document.body.appendChild(link);
+      link.click();
 
-    //   const canvas = await html2canvas(document.documentElement, {
-    //     scale: scale,
-    //     x: left,
-    //     y: top + headerHeight,
-    //     width: width,
-    //     height: height - headerHeight - footerHeight,
-    //     useCORS: true,
-    //     allowTaint: true,
-    //   });
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
 
-    //   const imgData = canvas.toDataURL("image/png");
-    //   const pdf = new jsPDF({
-    //     orientation: width > height ? "l" : "p",
-    //     unit: "px",
-    //     format: [width, height - headerHeight - footerHeight],
-    //   });
-
-    //   pdf.addImage(
-    //     imgData,
-    //     "PNG",
-    //     0,
-    //     0,
-    //     width,
-    //     height - headerHeight - footerHeight,
-    //   );
-    //   pdf.save("foundry-report.pdf");
-    // } catch (error) {
-    //   console.error("Error generating PDF:", error);
-    // } finally {
-    // }
-    // const content = document.getElementById("content");
-
-    // if (!content) {
-    //   console.error("Content container not found.");
-    //   return;
-    // }
-
-    // try {
-    //   // Temporarily show the content for capturing (if it's hidden)
-    //   content.style.display = "block";
-
-    //   // Capture content as canvas using html2canvas with a higher scale for better quality
-    //   const canvas = await html2canvas(content, {
-    //     scale: 3, // High resolution for sharp images
-    //     useCORS: true, // Handle CORS for external images
-    //     scrollX: 0, // No horizontal scroll offset
-    //     scrollY: -window.scrollY, // Adjust for vertical scroll offset
-    //     backgroundColor: null, // Transparent background (if required)
-    //   });
-
-    //   // Create a new jsPDF instance with A4 page dimensions
-    //   const pdf = new jsPDF("p", "mm", "a4");
-
-    //   // A4 dimensions in mm
-    //   const pdfWidth = 210; // A4 width in mm
-    //   const pdfHeight = 297; // A4 height in mm (standard)
-
-    //   // Get the canvas dimensions
-    //   const canvasWidth = canvas.width;
-    //   const canvasHeight = 6000;
-
-    //   // Scale the canvas to fit A4 page
-    //   const scaleX = pdfWidth / canvasWidth;
-    //   const scaleY = pdfHeight / canvasHeight;
-
-    //   // Choose the best scaling factor (maintains aspect ratio)
-    //   const scale = Math.min(scaleX, scaleY);
-
-    //   // Calculate the image width and height
-    //   const imgWidth = canvasWidth * scale;
-    //   const imgHeight = canvasHeight * scale;
-
-    //   // Add the first page with the image, ensuring it covers the entire page
-    //   pdf.addImage(
-    //     canvas.toDataURL("image/png"),
-    //     "PNG",
-    //     0,
-    //     0,
-    //     imgWidth,
-    //     imgHeight,
-    //   );
-
-    //   // Now handle the overflow by adding additional pages if needed
-    //   let currentY = imgHeight; // Track the current Y position in the canvas
-    //   const pageHeight = pdfHeight; // A4 page height (standard A4 size)
-
-    //   // Add content slices to new pages if the content height exceeds the page height
-    //   while (currentY < canvasHeight) {
-    //     // Calculate the height of the next slice
-    //     const sliceHeight = Math.min(pageHeight, canvasHeight - currentY);
-
-    //     // Create a temporary canvas to hold the slice
-    //     const pageCanvas = document.createElement("canvas");
-    //     pageCanvas.width = canvasWidth;
-    //     pageCanvas.height = sliceHeight;
-
-    //     const pageCtx = pageCanvas.getContext("2d");
-
-    //     if (pageCtx) {
-    //       // Draw the slice from the original canvas
-    //       pageCtx.drawImage(
-    //         canvas,
-    //         0, // X offset for the image on the original canvas
-    //         currentY, // Y offset for the image on the original canvas
-    //         canvasWidth, // Width of the canvas section
-    //         sliceHeight, // Height of the slice
-    //         0, // X offset on the pageCanvas
-    //         0, // Y offset on the pageCanvas
-    //         canvasWidth, // Width of the slice on the pageCanvas
-    //         sliceHeight, // Height of the slice on the pageCanvas
-    //       );
-
-    //       // Convert the slice to an image
-    //       const imgData = pageCanvas.toDataURL("image/png");
-
-    //       // Add the slice to the next page of the PDF
-    //       pdf.addImage(
-    //         imgData,
-    //         "PNG",
-    //         0,
-    //         0,
-    //         pdfWidth,
-    //         (pdfWidth / canvasWidth) * sliceHeight,
-    //       );
-
-    //       // Update the current Y position for the next slice
-    //       currentY += sliceHeight;
-
-    //       // Add a new page if the content still exceeds the current page
-    //       if (currentY < canvasHeight) {
-    //         pdf.addPage();
-    //       }
-    //     } else {
-    //       console.error("Error: Unable to get 2D context for pageCanvas.");
-    //       break;
-    //     }
-    //   }
-
-    //   // Save the generated PDF
-    //   pdf.save("content-design.pdf");
-
-    //   // After generating the PDF, hide the content again
-    //   content.style.display = "none";
-    // } catch (error) {
-    //   console.error("Error generating PDF:", error);
-    // }
-
-    // if (!containerRef.current) {
-    //   console.error("Container ref is null");
-    //   return;
-    // }
-
-    // loader.show();
-
-    // try {
-    //   const scale = 2;
-    //   const container = containerRef.current;
-
-    //   const { top, left, width, height } = container.getBoundingClientRect();
-    //   const headerHeight = document.querySelector("header")?.offsetHeight || 0;
-    //   const footerHeight = document.querySelector("footer")?.offsetHeight || 0;
-
-    //   // Adjust the capture area based on header and footer heights
-    //   const captureHeight = height + headerHeight + footerHeight;
-
-    //   // Create the canvas
-    //   const canvas = await html2canvas(document.documentElement, {
-    //     scale,
-    //     x: left,
-    //     y: top,
-    //     width,
-    //     height: captureHeight,
-    //     useCORS: true,
-    //     allowTaint: true,
-    //   });
-
-    //   const imgData = canvas.toDataURL("image/png");
-
-    //   // Create the PDF document
-    //   const pdf = new jsPDF({
-    //     orientation: "p",
-    //     unit: "px",
-    //     format: [width, captureHeight],
-    //   });
-
-    //   // If the content height exceeds the page height, split it into multiple pages
-    //   let pageHeight = pdf.internal.pageSize.height;
-    //   let currentHeight = 0;
-
-    //   // Loop to add images for multi-page PDFs
-    //   while (currentHeight < captureHeight) {
-    //     const remainingHeight = captureHeight - currentHeight;
-    //     const imageHeight = Math.min(remainingHeight, pageHeight);
-
-    //     pdf.addImage(imgData, "PNG", 0, -currentHeight, width, imageHeight);
-    //     currentHeight += imageHeight;
-
-    //     if (currentHeight < captureHeight) {
-    //       pdf.addPage(); // Add a new page if there is more content
-    //     }
-    //   }
-
-    //   // Save the PDF
-    //   pdf.save("permit.pdf");
-    // } catch (error) {
-    //   console.error("Error generating PDF:", error);
-    // } finally {
-    //   loader.hide();
-    // }
+      alertToast.show("success", "Report Downloaded Successfully", true, 2000);
+    } catch (error) {
+      alertToast.show("error", "Failed to download the report", true, 2000);
+    } finally {
+      loader.hide();
+    }
   };
 
   const handleViewClick = (row: ILogPtwData) => {

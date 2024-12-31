@@ -5,7 +5,11 @@ import { ModalPopup } from "@/features/ui/popup";
 import useOrgStructureDataQuery from "@/features/master/hooks/useOrgStructureDataQuery";
 import IOrgStructureList from "@/features/master/types/IOrgStructureList";
 import IOrgStructureForm from "@/features/master/types/IOrgStructureList";
-import { addOrgStructureData,updateOrgStructureData,getUsersData } from "@/features/master/services/orgstructure.services";
+import {
+  addOrgStructureData,
+  updateOrgStructureData,
+  getUsersData,
+} from "@/features/master/services/orgstructure.services";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useQueryClient } from "react-query";
 import { AxiosResponse } from "axios";
@@ -13,15 +17,19 @@ import http from "@/features/common/utils/http-common";
 import { IOptionList } from "@/features/ui/types";
 
 const OrgStructures: React.FC = () => {
-  const [orgStructureData, setOrgStructureData] = useState<IOrgStructureList[]>([]);
+  const [orgStructureData, setOrgStructureData] = useState<IOrgStructureList[]>(
+    [],
+  );
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentNode, setCurrentNode] = useState<IOrgStructureForm | null>(null);
+  const [currentNode, setCurrentNode] = useState<IOrgStructureForm | null>(
+    null,
+  );
   const [isEditMode, setIsEditMode] = useState(false);
   const [users, setUsers] = useState<IOptionList[]>([]);
-    const alertToast = useAlertConfig();
-    const loader = useLoaderConfig();
-   const queryClient = useQueryClient();
+  const alertToast = useAlertConfig();
+  const loader = useLoaderConfig();
+  const queryClient = useQueryClient();
 
   const initialFilterValues: IOrgStructureForm = {
     id: "",
@@ -33,14 +41,18 @@ const OrgStructures: React.FC = () => {
   };
 
   useEffect(() => {
-    const formData: Record<string, string> = { id: "3" }; 
-    const downloadPermitToWorkPDF = async (formData: Record<string, string>) => {
+    const formData: Record<string, string> = { id: "3" };
+    const downloadPermitToWorkPDF = async (
+      formData: Record<string, string>,
+    ) => {
       try {
         const response: AxiosResponse<string> = await http.post(
           "/ptw/get-permit-to-work",
-          formData         
+          formData,
         );
-        const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
+        const url = window.URL.createObjectURL(
+          new Blob([response.data], { type: "application/pdf" }),
+        );
         const link = document.createElement("a");
         link.href = url;
         link.setAttribute("download", "permit-to-work.pdf");
@@ -56,9 +68,10 @@ const OrgStructures: React.FC = () => {
     downloadPermitToWorkPDF(formData);
   }, []);
 
-  const [filterList, setFilterList] = useState<IOrgStructureForm>(initialFilterValues);
-  const { data: orgStructureListData, isLoading: isOrgStructureDataLoading } = useOrgStructureDataQuery(filterList);
-  
+  const [filterList, setFilterList] =
+    useState<IOrgStructureForm>(initialFilterValues);
+  const { data: orgStructureListData, isLoading: isOrgStructureDataLoading } =
+    useOrgStructureDataQuery(filterList);
 
   useEffect(() => {
     if (isOrgStructureDataLoading) {
@@ -66,12 +79,15 @@ const OrgStructures: React.FC = () => {
     } else {
       loader.hide();
     }
-getUsersData().then((response) => {
-  if (response.data) {
-    console.log("response.data.historyUserData",response.data.historyUserData);
-    setUsers([...response.data.historyUserData]);
-  }
-});
+    getUsersData().then((response) => {
+      if (response.data) {
+        console.log(
+          "response.data.historyUserData",
+          response.data.historyUserData,
+        );
+        setUsers([...response.data.historyUserData]);
+      }
+    });
 
     if (orgStructureListData) {
       setOrgStructureData([...orgStructureListData.historyOrgStructureData]);
@@ -79,22 +95,26 @@ getUsersData().then((response) => {
   }, [orgStructureListData, isOrgStructureDataLoading]);
 
   const getChildren = (parentId: string) => {
-    return orgStructureData.filter((node) => node.parent_id === parentId && !node.is_deleted);
+    return orgStructureData.filter(
+      (node) => node.parent_id === parentId && !node.is_deleted,
+    );
   };
-  const handleEdit = (node: IOrgStructureForm) => {   
-      setCurrentNode(node);
-      setIsEditMode(true);
-      setIsModalOpen(true); 
+  const handleEdit = (node: IOrgStructureForm) => {
+    setCurrentNode(node);
+    setIsEditMode(true);
+    setIsModalOpen(true);
   };
 
-  const handleAddNew = (parentId: string) => {   
-        setCurrentNode({ ...initialFilterValues, parent_id: parentId });
-        setIsEditMode(false);
-        setIsModalOpen(true);      
+  const handleAddNew = (parentId: string) => {
+    setCurrentNode({ ...initialFilterValues, parent_id: parentId });
+    setIsEditMode(false);
+    setIsModalOpen(true);
   };
 
   const handleDelete = (id: string) => {
-    setOrgStructureData((prevData) => prevData.filter((node) => node.id !== id));
+    setOrgStructureData((prevData) =>
+      prevData.filter((node) => node.id !== id),
+    );
   };
 
   const handleToggleExpand = (id: string) => {
@@ -113,25 +133,12 @@ getUsersData().then((response) => {
     setOrgStructureData((prevData) => {
       if (isEditMode) {
         updateOrgStructureData(node)
-        .then(() => {
-          alertToast.show("success", "Data updated successfully", true, 2000);
-          queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === "orgStructureDataQuery" });          
-        })
-        .catch((err: any) => {
-          if (err.response && err.response.status) {
-            alertToast.show("warning", err.response.data.errorMessage, true);
-          }
-        })
-        .finally(() => {
-          loader.hide();
-        });
-        return prevData.map((item) => (item.id === node.id ? node : item));        
-      } else {
-        loader.show();   
-          addOrgStructureData(node)
           .then(() => {
-            alertToast.show("success", "Data added successfully", true, 2000);            
-            queryClient.invalidateQueries({ predicate: (query) => query.queryKey[0] === "orgStructureDataQuery" });
+            alertToast.show("success", "Data updated successfully", true, 2000);
+            queryClient.invalidateQueries({
+              predicate: (query) =>
+                query.queryKey[0] === "orgStructureDataQuery",
+            });
           })
           .catch((err: any) => {
             if (err.response && err.response.status) {
@@ -140,17 +147,36 @@ getUsersData().then((response) => {
           })
           .finally(() => {
             loader.hide();
-          }); 
+          });
+        return prevData.map((item) => (item.id === node.id ? node : item));
+      } else {
+        loader.show();
+        addOrgStructureData(node)
+          .then(() => {
+            alertToast.show("success", "Data added successfully", true, 2000);
+            queryClient.invalidateQueries({
+              predicate: (query) =>
+                query.queryKey[0] === "orgStructureDataQuery",
+            });
+          })
+          .catch((err: any) => {
+            if (err.response && err.response.status) {
+              alertToast.show("warning", err.response.data.errorMessage, true);
+            }
+          })
+          .finally(() => {
+            loader.hide();
+          });
         return [...prevData, { ...node, id: `${Date.now()}` }];
       }
     });
     setIsModalOpen(false);
   };
 
-  const TreeNode: React.FC<{ node: IOrgStructureForm; children: IOrgStructureForm[] }> = ({
-    node,
-    children,
-  }) => {
+  const TreeNode: React.FC<{
+    node: IOrgStructureForm;
+    children: IOrgStructureForm[];
+  }> = ({ node, children }) => {
     const isExpanded = expandedNodes.has(node.id);
     return (
       <div style={{ marginLeft: 20 }}>
@@ -165,11 +191,11 @@ getUsersData().then((response) => {
           <strong
             onClick={() => handleToggleExpand(node.id)}
             style={{ cursor: "pointer", fontWeight: "bold" }}
-            className="transition-color duration-200 hover:text-blue-600"
+            className="duration-200 transition-color hover:text-blue-600"
           >
             {node.name}
           </strong>
-          <div className="flex items-center ml-auto gap-4">
+          <div className="flex items-center gap-4 ml-auto">
             <IconButton onClick={() => handleEdit(node)}>
               <PencilIcon className="w-5 h-5 text-gray-700 hover:text-blue-600" />
             </IconButton>
@@ -184,7 +210,11 @@ getUsersData().then((response) => {
         {isExpanded && children.length > 0 && (
           <div className="pl-6">
             {children.map((child) => (
-              <TreeNode key={child.id} node={child} children={getChildren(child.id)} />
+              <TreeNode
+                key={child.id}
+                node={child}
+                children={getChildren(child.id)}
+              />
             ))}
           </div>
         )}
@@ -199,7 +229,9 @@ getUsersData().then((response) => {
   }> = ({ node, onSave, onClose }) => {
     const [formData, setFormData] = useState(node);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (
+      e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    ) => {
       const { name, value } = e.target;
       setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
@@ -223,38 +255,45 @@ getUsersData().then((response) => {
         showError
       >
         <div className="p-4">
-          <label className="block text-sm font-medium text-gray-700">Name</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Name
+          </label>
           <input
-            className="input-box p-2 border rounded-md w-full text-black"
+            className="w-full p-2 text-black border rounded-md input-box"
             name="name"
             value={formData.name}
             onChange={handleChange}
             placeholder="Name"
             required
           />
-         <label className="block text-sm font-medium text-gray-700">Department Head</label>
-         <select
-  className="input-box p-2 border rounded-md w-full mt-2 text-black"
-  name="head_user_id"
-  value={formData.head_user_id}
-  onChange={handleChange}
-  required
->
-  <option value="">Select Dept. Head</option>
-  {users.map((user) => (
-    <option key={user.id} value={user.id}>
-      {user.name}
-    </option>
-  ))}
-</select>
-          <label className="flex items-center space-x-2 mt-2 d-none">
+          <label className="block text-sm font-medium text-gray-700">
+            Department Head
+          </label>
+          <select
+            className="w-full p-2 mt-2 text-black border rounded-md input-box"
+            name="head_user_id"
+            value={formData.head_user_id}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select Dept. Head</option>
+            {users.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name}
+              </option>
+            ))}
+          </select>
+          <label className="flex items-center mt-2 space-x-2 d-none">
             <input
               className="d-none"
               type="checkbox"
               name="is_deleted"
               checked={formData.is_deleted}
               onChange={(e) =>
-                setFormData((prevData) => ({ ...prevData, is_deleted: e.target.checked }))
+                setFormData((prevData) => ({
+                  ...prevData,
+                  is_deleted: e.target.checked,
+                }))
               }
               hidden
             />
@@ -269,7 +308,9 @@ getUsersData().then((response) => {
 
   return (
     <div className="relative flex flex-col w-full h-full p-2 overflow-auto">
-      <h3 className="text-lg font-semibold text-gray-700">Org Structure Tree</h3>
+      <h3 className="text-lg font-semibold text-gray-700">
+        Org Structure Tree
+      </h3>
       {rootNodes.map((rootNode) => (
         <TreeNode
           key={rootNode.id}
@@ -278,7 +319,11 @@ getUsersData().then((response) => {
         />
       ))}
       {isModalOpen && currentNode && (
-        <Modal node={currentNode} onSave={handleSave} onClose={() => setIsModalOpen(false)} />
+        <Modal
+          node={currentNode}
+          onSave={handleSave}
+          onClose={() => setIsModalOpen(false)}
+        />
       )}
     </div>
   );
