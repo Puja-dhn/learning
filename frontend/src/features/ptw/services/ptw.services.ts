@@ -88,5 +88,5 @@ export {
   addNewViolationData,
   getViolationData,
   getOpenViolationData,
-  closeViolations,
+  closeViolations
 };

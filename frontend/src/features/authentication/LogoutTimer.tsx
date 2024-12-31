@@ -18,7 +18,7 @@ function LogoutTimer() {
   const queryClient = useQueryClient();
   useEffect(() => {
     const newSocket = io(SOCKET_BASE_URL, {
-      path: "/she-websocket",
+      path: "/ehs-websocket",
       transports: ["websocket"],
     });
 

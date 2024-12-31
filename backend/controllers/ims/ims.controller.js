@@ -100,13 +100,14 @@ exports.getImsMasterData = async (req, res) => {
 
     const usersQuery = `
     SELECT DISTINCT
-        t1.id,
-        t1.name name
+        t1.emp_no AS id,
+    	CONCAT(t1.name, " (", t1.emp_no, ")") AS name
     FROM
         t_inshe_users t1
     WHERE
-      t1.status = 'active'
+      t1.status = 'Active'
       and t1.id !=1
+      order by name asc
      
   `;
 

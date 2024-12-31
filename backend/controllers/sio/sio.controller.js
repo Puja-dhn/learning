@@ -289,7 +289,7 @@ exports.getSioData = async (req, res) => {
   const sioQuery = `
   SELECT 
     t1.id,
-    TO_CHAR(t1.obs_datetime, 'DD-Mon-YYYY hh:mi am') AS obs_datetime,
+    DATE_FORMAT(t1.obs_datetime, '%d-%b-%Y %h:%i %p') AS obs_datetime,
     t2.name department,
     t3.name area,
     t4.context_name category,
@@ -370,7 +370,7 @@ exports.getOpenSioData = async (req, res) => {
   const sioQuery = `
     SELECT 
       t1.id,
-     TO_CHAR(t1.obs_datetime, 'DD-Mon-YYYY hh:mi am') AS obs_datetime,
+      DATE_FORMAT(t1.obs_datetime, '%d-%b-%Y %h:%i %p') AS obs_datetime,
       t1.department department_id,
       t2.name department,
       t1.area area_id,
@@ -509,7 +509,7 @@ exports.getAssignedSioData = async (req, res) => {
   const sioQuery = `
     SELECT DISTINCT
       t1.id,
-      TO_CHAR(t1.obs_datetime, 'DD-Mon-YYYY hh:mi am') AS obs_datetime,
+      DATE_FORMAT(t1.obs_datetime, '%d-%b-%Y %h:%i %p') AS obs_datetime,
       t1.department department_id,
       t2.name department,
       t1.area area_id,
