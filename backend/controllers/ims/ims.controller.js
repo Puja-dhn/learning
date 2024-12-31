@@ -213,7 +213,7 @@ exports.addNewIms = async (req, res) => {
 
   const areaHead = resultArea[0].head_id;
   let insertResult;
-  if (+injury_type === 10) {
+  if (+injury_type === 11) {
     // Insert into incident header
     const insertQuery = `
   INSERT INTO t_inshe_incident_header (
@@ -342,7 +342,6 @@ exports.addNewIms = async (req, res) => {
         company,
         age,
         sex,
-        deployed_date,
         body_part,
         injury_nature,
         status,
@@ -350,7 +349,7 @@ exports.addNewIms = async (req, res) => {
         created_by,
         updated_at,
         updated_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
   await parseAndInsert(injury_details, injuryInsertQuery, (injury) => [
     incidentId,
@@ -361,7 +360,6 @@ exports.addNewIms = async (req, res) => {
     injury.company,
     injury.age,
     injury.sex,
-    injury.deployedDate,
     injury.bodyPart,
     injury.injuryNature,
     "Submitted",

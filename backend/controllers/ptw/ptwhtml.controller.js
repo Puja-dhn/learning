@@ -87,13 +87,17 @@ exports.getPermittoWork = async (req, res) => {
       t1.updated_by,
       t7.name log_by,
       LPAD(t1.id, 6, '0') AS disp_logno,
-      t1.equipment
+      t1.equipment,
+      t8.name custodian,
+      t9.name issuer
     FROM
       t_inshe_log_ptw t1
       join t_inshe_org_structures t2 on t1.department = t2.id
       join t_inshe_org_structures t3 on t1.area = t3.id
       left join t_inshe_users t5 on t1.pending_on = t5.id
       join t_inshe_users t7 on t1.created_by = t7.id
+      join t_inshe_users t8 on t2.head_user_id = t8.id
+      join t_inshe_users t9 on t1.issuer = t9.id
     WHERE
      t1.id = ?;`;
     const result = await simpleQuery(query, [id]);
@@ -290,16 +294,17 @@ let getChecklistDescriptions = async (ids) => {
   return result;
 };
 
-function generateDateRangeTableRows(startDate, endDate) {
+function generateDateRangeTableRows(startDate, endDate, issuer, initiator) {
   const rows = [];
   let currentDate = new Date(startDate);
   let i = 0;
   while (currentDate <= new Date(endDate)) {
+    i++;
     rows.push(`
           <tr>
               <td>Day ${i}</td>
-              <td>&nbsp;</td>
-              <td>&nbsp;</td>
+              <td>${issuer}</td>
+              <td>${initiator}</td>
               <td>&nbsp;</td>
               <td>&nbsp;</td>
           </tr>
@@ -735,9 +740,9 @@ function generateHTML(
            }
             <table>
                 <tbody>
-                <tr><td colspan="7"><strong>Work at Height</strong></td><td>${
+                <tr><th colspan="7"><strong>Work at Height</strong></th><th>${
                   data.work_height_checklist ? "Yes" : "No"
-                }</td></tr>
+                }</th></tr>
                 ${
                   data.work_height_checklist
                     ? `
@@ -757,7 +762,7 @@ function generateHTML(
 
              <table>
                 <tbody>
-                <tr><td colspan="7"><strong>Confined Space</strong></td><td>${
+                <tr><th colspan="7"><strong>Confined Space</strong></th><td>${
                   data.confined_space_checklist ? "Yes" : "No"
                 }</td></tr>
                 ${
@@ -794,7 +799,7 @@ function generateHTML(
             </table>
               <table>
                 <tbody>
-                <tr><td colspan="7"><strong>Lifiting Work</strong></td><td>${
+                <tr><th colspan="7"><strong>Lifiting Work</strong></th><td>${
                   data.lifting_work_checklist ? "Yes" : "No"
                 }</td></tr>
                 ${
@@ -812,7 +817,7 @@ function generateHTML(
             </table>
             <table>
                 <tbody>
-                <tr><td colspan="7"><strong>ESMS Work Permit</strong></td><td>${
+                <tr><th colspan="7"><strong>ESMS Work Permit</strong></th><td>${
                   data.esms_checklist ? "Yes" : "No"
                 }</td></tr>
                 ${
@@ -830,7 +835,7 @@ function generateHTML(
             </table>
              <table>
                 <tbody>
-                <tr><td colspan="7"><strong>Hot Work</strong></td><td>${
+                <tr><th colspan="7"><strong>Hot Work</strong></th><td>${
                   data.hot_work_checklist ? "Yes" : "No"
                 }</td></tr>
                 ${
@@ -875,7 +880,7 @@ Time
 <th>
 Initiator
 </th>
-<td>&nbsp;</td>
+<td>${data.log_by}</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -884,7 +889,7 @@ Initiator
 <th>
 Custodian
 </th>
-<td>&nbsp;</td>
+<td>${data.custodian}</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -893,7 +898,7 @@ Custodian
 <th>
 Issuer
 </th>
-<td>&nbsp;</td>
+<td>${data.issuer}</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
 <td>&nbsp;</td>
@@ -939,7 +944,9 @@ Plant Head
                 <tbody>
                     ${generateDateRangeTableRows(
                       data.datetime_from,
-                      data.datetime_to
+                      data.datetime_to,
+                      data.issuer,
+                      data.log_by
                     )}
                 </tbody>
             </table>

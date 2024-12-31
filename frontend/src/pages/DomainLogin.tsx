@@ -98,12 +98,7 @@ function DomainLogin() {
             handleConfirmOk: () => {
               logoutConcurrentLogin(res.data.ID);
               setLocalUser(res.data);
-              alertToast.show(
-                "success",
-                t("form.success.login_successfull"),
-                true,
-                2000,
-              );
+              alertToast.show("success", "Login Successfull", true, 2000);
 
               setLoggedUser(res.data);
               navigate("/master", { replace: true });
@@ -111,12 +106,7 @@ function DomainLogin() {
           });
         } else {
           setLocalUser(res.data);
-          alertToast.show(
-            "success",
-            t("form.success.login_successfull"),
-            true,
-            2000,
-          );
+          alertToast.show("success", "Login Successfull", true, 2000);
 
           setLoggedUser(res.data);
           navigate("/master", { replace: true });
@@ -142,18 +132,18 @@ function DomainLogin() {
           } else if (err.response.status === 0) {
             alertToast.show(
               "error",
-              t("form.errors.api_req_network_error"),
+              "Cannot connect to API Server, Try again.",
               true,
             );
           } else {
             alertToast.show(
               "warning",
-              t("form.errors.api_data_fetching"),
+              "Error Fetching data from API. Try again.",
               true,
             );
           }
         } else {
-          alertToast.show("error", t("form.errors.defaultError"), true);
+          alertToast.show("error", "Unknown Server Error, Try again", true);
         }
       })
       .finally(() => {

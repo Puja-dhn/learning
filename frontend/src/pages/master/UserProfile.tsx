@@ -142,13 +142,9 @@ function UserProfile() {
       .catch((err) => {
         if (err.response && err.response.status) {
           if (err.response.data && err.response.data.errorTransKey) {
-            alertToast.show(
-              "warning",
-              t(`form.errors.${err.response.data.errorTransKey}`),
-              true,
-            );
+            alertToast.show("warning", err.response.data.errorTransKey, true);
           } else {
-            alertToast.show("error", t("form.errors.defaultError"), true);
+            alertToast.show("error", "Unknown Server Error, Try again", true);
           }
         }
       })

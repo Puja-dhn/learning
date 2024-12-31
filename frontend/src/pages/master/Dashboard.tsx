@@ -37,7 +37,7 @@ function Dashboard() {
     if (!isAppAccessDataLoading && isAppAccessDataError) {
       alertToast.show(
         "error",
-        t("form.errors.api_data_fetching", { ns: "common" }),
+        "Error Fetching data from API. Try again.",
         true,
       );
     }

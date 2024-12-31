@@ -398,7 +398,7 @@ function Users() {
           if (err.response.data && err.response.data.errorMessage) {
             alertToast.show("warning", err.response.data.errorMessage, true);
           } else {
-            alertToast.show("error", t("form.errors.defaultError"), true);
+            alertToast.show("error", "Unknown Server Error, Try again", true);
           }
         }
       })

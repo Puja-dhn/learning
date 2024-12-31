@@ -270,7 +270,9 @@ function CloseIncident() {
     { field: "department", headerName: "Department", width: 240 },
     { field: "area", headerName: "Area", width: 250 },
     { field: "injury_type", headerName: "Injury Type", width: 220 },
-    { field: "factors", headerName: "Factors", width: 220 },
+    { field: "factors", headerName: "Cause Of Incident", width: 220 },
+    { field: "incident_details", headerName: "Incident details", width: 220 },
+    { field: "action_taken", headerName: "Action Taken", width: 220 },
     { field: "pending_on", headerName: "Pending On", width: 200 },
     { field: "log_by", headerName: "Log By", width: 200 },
   ];
@@ -433,7 +435,9 @@ function CloseIncident() {
       Department: item.department,
       Area: item.area,
       "Injury Type": item.injury_type,
-      factors: item.factors,
+      "Cause Of Incident": item.factors,
+      "Incident Details": item.incident_details,
+      "Action Taken": item.action_taken,
       "Pending On": item.pending_on,
       "Log By": item.log_by,
     }));

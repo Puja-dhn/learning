@@ -213,7 +213,7 @@ function ViewIms() {
       const imagedata = teamData.DOCUMENTS_DATA.filter(
         (item) => +item.incident_id === +row.incident_no,
       );
-      if (invData[0].list_facts !== "") {
+      if (invData && invData.length > 0 && invData[0].list_facts !== "") {
         setFactRows(JSON.parse(invData[0].list_facts));
         setPhysicalFactorRows(JSON.parse(invData[0].physical_factors));
         setHumanFactorRows(JSON.parse(invData[0].human_factors));
@@ -272,7 +272,9 @@ function ViewIms() {
     { field: "department", headerName: "Department", width: 240 },
     { field: "area", headerName: "Area", width: 250 },
     { field: "injury_type", headerName: "Injury Type", width: 220 },
-    { field: "factors", headerName: "Factors", width: 220 },
+    { field: "factors", headerName: "Cause Of Incident", width: 220 },
+    { field: "incident_details", headerName: "Incident details", width: 220 },
+    { field: "action_taken", headerName: "Action Taken", width: 220 },
     { field: "pending_on", headerName: "Pending On", width: 200 },
     { field: "log_by", headerName: "Log By", width: 200 },
   ];
@@ -455,7 +457,9 @@ function ViewIms() {
       Department: item.department,
       Area: item.area,
       "Injury Type": item.injury_type,
-      factors: item.factors,
+      "Cause Of Incident": item.factors,
+      "Incident Details": item.incident_details,
+      "Action Taken": item.action_taken,
       "Pending On": item.pending_on,
       "Log By": item.log_by,
     }));
@@ -877,9 +881,7 @@ function ViewIms() {
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Name
                               </th>
-                              <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                                Department
-                              </th>
+
                               <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                                 Company
                               </th>
@@ -913,9 +915,7 @@ function ViewIms() {
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.name}
                                 </td>
-                                <td className="px-4 py-2 text-gray-700 border-b">
-                                  {item.department}
-                                </td>
+
                                 <td className="px-4 py-2 text-gray-700 border-b">
                                   {item.company}
                                 </td>
@@ -1077,7 +1077,7 @@ function ViewIms() {
                   </div>
                 )}
 
-                {investigations && (
+                {investigations && investigations.length > 0 && (
                   <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                     <div className="">
                       <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
