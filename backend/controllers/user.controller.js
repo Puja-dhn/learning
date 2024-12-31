@@ -145,9 +145,11 @@ exports.getUserDetailsList = async (req, res) => {
                   t1.emp_no,
                   t1.email,
                   t1.mobile,
+                  t1.department,
                   t1.designation,
                   t1.emp_type,
                   t1.status,
+                  t1.gender,
                   NVL(t1.profile_pic_url,'profile_photo_default.png') profile_pic_url,
                   ${strSqlRolesCol}
                 FROM
@@ -190,9 +192,11 @@ exports.getUserDetailsList = async (req, res) => {
                   NVL(t1.profile_pic_url,'profile_photo_default.png') profile_pic_url,
                   t1.email,
                    t1.mobile,
+                   t1.department,
                    t1.designation,
                    t1.emp_type,
                    t1.status,
+                   t1.gender,
                   ${strSqlRolesCol}
                  
                 FROM
@@ -253,6 +257,7 @@ exports.updateUserDetails = async (req, res) => {
     name,
     email,
     mobile,
+    department,
     designation,
     emp_type,
     profile_pic_url,
@@ -321,8 +326,8 @@ exports.updateUserDetails = async (req, res) => {
         );
       }
       const insertSqlUsers = `
-      INSERT into t_inshe_users(emp_no,name,email,mobile,password,designation,emp_type,status,profile_pic_url,created_at,created_by)values(
-      ?,?,?,?,?,?,?,?,?,?,?
+      INSERT into t_inshe_users(emp_no,name,email,mobile,password,department,designation,emp_type,status,profile_pic_url,created_at,created_by)values(
+      ?,?,?,?,?,?,?,?,?,?,?,?
       )
       `;
       const resultUsers = await simpleQuery(insertSqlUsers, [
@@ -331,6 +336,7 @@ exports.updateUserDetails = async (req, res) => {
         email,
         mobile,
         bycryptedPassword,
+        department,
         designation,
         emp_type,
         status,
@@ -474,6 +480,7 @@ exports.updateUserDetails = async (req, res) => {
           name = ?,
           email = ?,
           mobile = ?,
+          department = ?,
           designation = ?,
           emp_type = ?
           
@@ -485,6 +492,7 @@ exports.updateUserDetails = async (req, res) => {
       name,
       email,
       mobile,
+      department,
       designation,
       emp_type,
       id,

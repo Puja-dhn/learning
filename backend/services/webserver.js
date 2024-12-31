@@ -91,12 +91,11 @@ function initialize() {
 
     app.use(express.static("static"));
 
-     // custom 404
+    // custom 404
 
-     app.use((req, res, next) => {
+    app.use((req, res, next) => {
       res.status(404).send("Sorry! The requested Resource is not found");
     });
-
 
     // http startup
 
@@ -107,7 +106,7 @@ function initialize() {
       }
 
       console.log(
-        `Web server listening on https://${hostname}:${webServerConfig.port}`
+        `Web server listening on http://${hostname}:${webServerConfig.port}`
       );
 
       resolve();

@@ -88,7 +88,7 @@ exports.getSIOMasterData = async (req, res) => {
     const usersQuery = `
     SELECT DISTINCT
         t1.id,
-        t1.name
+        CONCAT(t1.name, ' (', t1.emp_no, ')') AS name
     FROM
         t_inshe_users t1
     WHERE
@@ -267,6 +267,7 @@ exports.getSioData = async (req, res) => {
     obs_date_to,
     status,
   } = req.body;
+  // console.log(req.body);
 
   const strId = id > 0 ? ` and t1.id=${id}` : "";
   const strDepartment =
@@ -283,12 +284,12 @@ exports.getSioData = async (req, res) => {
   const strToDate =
     obs_date_to !== "" ? ` and DATE(t1.obs_datetime) <='${obs_date_to}'` : "";
 
-  const strPendingOn = !isAdmin ? `t1.pending_on = ${pending_on}` : "";
+  //const strPendingOn = !isAdmin ? ` AND t1.pending_on = ${logged_user_id}` : "";
 
   const sioQuery = `
   SELECT 
     t1.id,
-    t1.obs_datetime,
+    TO_CHAR(t1.obs_datetime, 'DD-Mon-YYYY hh:mi am') AS obs_datetime,
     t2.name department,
     t3.name area,
     t4.context_name category,
@@ -298,7 +299,7 @@ exports.getSioData = async (req, res) => {
     t1.obs_photos,
     t1.closure_desc,
     t1.closure_photos,
-    t5.name pending_on,
+    CONCAT(t5.name, ' (', t5.emp_no, ')') AS pending_on,
     t6.name responsibilities,
     t1.target_date,
     t1.action_plan,
@@ -312,12 +313,12 @@ exports.getSioData = async (req, res) => {
     LPAD(t1.id, 6, '0') AS disp_logno
   FROM
     t_inshe_log_sio t1
-    join t_inshe_org_structures t2 on t1.department = t2.id
-    join t_inshe_org_structures t3 on t1.area = t3.id
-    join t_inshe_context_definitions t4 on t1.category = t4.context_id
+    left join t_inshe_org_structures t2 on t1.department = t2.id
+    left join t_inshe_org_structures t3 on t1.area = t3.id
+    left join t_inshe_context_definitions t4 on t1.category = t4.context_id
     left join t_inshe_users t5 on t1.pending_on = t5.id
     left join t_inshe_users t6 on t1.responsibilities = t6.id
-    join t_inshe_users t7 on t1.created_by = t7.id
+    left join t_inshe_users t7 on t1.created_by = t7.id
   WHERE
     1=1
     ${strId}
@@ -369,7 +370,7 @@ exports.getOpenSioData = async (req, res) => {
   const sioQuery = `
     SELECT 
       t1.id,
-      t1.obs_datetime,
+     TO_CHAR(t1.obs_datetime, 'DD-Mon-YYYY hh:mi am') AS obs_datetime,
       t1.department department_id,
       t2.name department,
       t1.area area_id,
@@ -383,7 +384,7 @@ exports.getOpenSioData = async (req, res) => {
       t1.closure_desc,
       t1.closure_photos,
       t1.pending_on pending_on_id,
-      t5.name pending_on,
+      CONCAT(t5.name, ' (', t5.emp_no, ')') AS pending_on,
       t6.name responsibilities,
       t1.target_date,
       t1.action_plan,
@@ -394,7 +395,7 @@ exports.getOpenSioData = async (req, res) => {
       t1.updated_by,
       t7.name log_by,
       t1.closure_date,
-      LPAD(t1.id, 6, '0') AS disp_logno
+       LPAD(t1.id, 6, '0') AS disp_logno
     FROM
       t_inshe_log_sio t1
       join t_inshe_org_structures t2 on t1.department = t2.id
@@ -508,7 +509,7 @@ exports.getAssignedSioData = async (req, res) => {
   const sioQuery = `
     SELECT DISTINCT
       t1.id,
-      t1.obs_datetime,
+      TO_CHAR(t1.obs_datetime, 'DD-Mon-YYYY hh:mi am') AS obs_datetime,
       t1.department department_id,
       t2.name department,
       t1.area area_id,
@@ -522,7 +523,7 @@ exports.getAssignedSioData = async (req, res) => {
       t1.closure_desc,
       t1.closure_photos,
       t1.pending_on pending_on_id,
-      t5.name pending_on,
+     CONCAT(t5.name, ' (', t5.emp_no, ')') AS pending_on,
       t6.name responsibilities,
       t1.target_date,
       t1.action_plan,

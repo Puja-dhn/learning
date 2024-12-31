@@ -566,7 +566,7 @@ exports.getImsData = async (req, res) => {
       t1.list_facts,
       t1.physical_factors,
       t1.human_factors,
-      t1.syatem_factors,
+      t1.system_factors,
       t1.status,
       t1.risk_identified,
       t1.identified_control,
@@ -581,12 +581,47 @@ exports.getImsData = async (req, res) => {
 
   const resultInvestigation = await simpleQuery(investigationQuery, []);
 
+  const recommendationQuery = `
+  SELECT DISTINCT
+      t1.id,
+      t1.incident_id,
+      t1.recommendation,
+      t1.responsibility,
+      t1.factor,
+      t1.control_type,
+      t1.target_date,
+      t1.status
+  FROM
+      t_inshe_incident_recommendation t1
+  WHERE
+    1=1 
+`;
+
+  const resultRecommendation = await simpleQuery(recommendationQuery, []);
+
+  const documentsQuery = `
+  SELECT DISTINCT
+      t1.id,
+      t1.incident_id,
+      t1.document_type,
+      t1.document,
+      t1.status
+  FROM
+      t_inshe_incident_documents t1
+  WHERE
+    1=1 
+`;
+
+  const resultDocuments = await simpleQuery(documentsQuery, []);
+
   res.status(200).json({
     historyLogImsData: [...resultIms],
     INJURY_DETAILS: [...resultInjury],
     SUGG_TEAM: [...resultSuggTeams],
     WITNESS_TEAM: [...resultWittTeams],
-    INVESTIGATION_DATE: [...resultInvestigation],
+    INVESTIGATION_DATA: [...resultInvestigation],
+    RECOMMENDATION_DATA: [...resultRecommendation],
+    DOCUMENTS_DATA: [...resultDocuments],
   });
 };
 exports.getImsOthersData = async (req, res) => {

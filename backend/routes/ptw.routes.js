@@ -1,5 +1,6 @@
 const express = require("express");
 const ptwController = require("../controllers/ptw/ptw.controller");
+const ptwhtmlController = require("../controllers/ptw/ptwhtml.controller");
 const router = express.Router();
 
 router.post("/get-ptw-master-data", ptwController.getPTWMasterData);
@@ -13,5 +14,8 @@ router.post("/add-new-violation", ptwController.addNewViolationData);
 router.post("/get-violation-data", ptwController.getViolationData);
 router.post("/get-openviolation-data", ptwController.getOpenViolationData);
 router.post("/close-violations", ptwController.closeViolations);
+
+// Permit Download
+router.post("/get-permit-to-work", ptwhtmlController.getPermittoWork);
 
 module.exports = router;

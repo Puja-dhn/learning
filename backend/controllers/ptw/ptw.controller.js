@@ -77,11 +77,13 @@ exports.getPTWMasterData = async (req, res) => {
     const usersQuery = `
     SELECT DISTINCT
         t1.id,
-        t1.name
+         CONCAT(t1.name, ' (', t1.emp_no, ')') AS name
     FROM
         t_inshe_users t1
     WHERE
       t1.status = 'active'
+      and t1.id !=1
+      order by t1.name asc
      
   `;
 
@@ -140,8 +142,8 @@ exports.getPtwData = async (req, res) => {
       t1.area area_id,
       t3.name area,
       t1.work_location,
-      t1.datetime_from,
-      t1.datetime_to,
+      TO_CHAR(t1.datetime_from, 'DD-Mon-YYYY hh:mi am') AS datetime_from,
+      TO_CHAR(t1.datetime_to, 'DD-Mon-YYYY hh:mi am') AS datetime_to,
       t1.nearest_firealarm,
       t1.job_description,
       t1.moc_required,
@@ -149,9 +151,9 @@ exports.getPtwData = async (req, res) => {
       t1.moc_no,
       t1.supervisor_name,
       t1.pending_on pending_on_id,
-      t5.name pending_on,
+      CONCAT(t5.name, ' (', t5.emp_no, ')') AS pending_on,
       t1.status,
-      t1.contractor,
+      t8.contractor_name contractor,
       t1.esic_no,
       t1.associated_permit,
       t1.hazard_identification,
@@ -187,13 +189,15 @@ exports.getPtwData = async (req, res) => {
       t1.updated_by,
       t7.name log_by,
       LPAD(t1.id, 6, '0') AS disp_logno,
-      t1.equipment
+      t1.equipment,
+      t1.why_moc_remarks
     FROM
       t_inshe_log_ptw t1
       join t_inshe_org_structures t2 on t1.department = t2.id
       join t_inshe_org_structures t3 on t1.area = t3.id
       left join t_inshe_users t5 on t1.pending_on = t5.id
       join t_inshe_users t7 on t1.created_by = t7.id
+      join t_inshe_contractors t8 on t1.contractor = t8.id
     WHERE
       1=1
       ${strId}
@@ -215,6 +219,7 @@ exports.getOpenPtwData = async (req, res) => {
   const { ID: logged_user_id, ROLES } = req.user;
   const { id, department, category, area, date_from, date_to, status } =
     req.body;
+
   const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
 
   const sioQuery = `
@@ -225,8 +230,8 @@ exports.getOpenPtwData = async (req, res) => {
         t1.area area_id,
         t3.name area,
         t1.work_location,
-        t1.datetime_from,
-        t1.datetime_to,
+        TO_CHAR(t1.datetime_from, 'DD-Mon-YYYY hh:mi am') AS datetime_from,
+        TO_CHAR(t1.datetime_to, 'DD-Mon-YYYY hh:mi am') AS datetime_to,
         t1.nearest_firealarm,
         t1.job_description,
         t1.moc_required,
@@ -234,9 +239,9 @@ exports.getOpenPtwData = async (req, res) => {
         t1.moc_no,
         t1.supervisor_name,
         t1.pending_on pending_on_id,
-        t5.name pending_on,
+         CONCAT(t5.name, ' (', t5.emp_no, ')') AS pending_on,
         t1.status,
-        t1.contractor,
+        t8.contractor_name contractor,
         t1.esic_no,
         t1.associated_permit,
         t1.hazard_identification,
@@ -271,13 +276,16 @@ exports.getOpenPtwData = async (req, res) => {
         t1.updated_at,
         t1.updated_by,
         t7.name log_by,
-        LPAD(t1.id, 6, '0') AS disp_logno
+        LPAD(t1.id, 6, '0') AS disp_logno,
+        t1.equipment,
+      t1.why_moc_remarks
       FROM
         t_inshe_log_ptw t1
         join t_inshe_org_structures t2 on t1.department = t2.id
         join t_inshe_org_structures t3 on t1.area = t3.id
         left join t_inshe_users t5 on t1.pending_on = t5.id
         join t_inshe_users t7 on t1.created_by = t7.id
+         join t_inshe_contractors t8 on t1.contractor = t8.id
       WHERE
         1=1
         and t1.status = ?
@@ -394,7 +402,7 @@ exports.addNewPTWData = async (req, res) => {
       WHERE
         t1.is_deleted = 0 AND t1.id = ?
     `;
-    const resultDepartments = await simpleQuery(departmentQuery, [DEPARTMENT]);
+    const resultDepartments = await simpleQuery(departmentQuery, [+department]);
     if (!resultDepartments.length) {
       return res.status(400).json({ message: "Department not found." });
     }
@@ -417,7 +425,7 @@ exports.addNewPTWData = async (req, res) => {
     `;
 
     const values = [
-      DEPARTMENT,
+      department,
       area,
       work_location,
       datetime_from,
