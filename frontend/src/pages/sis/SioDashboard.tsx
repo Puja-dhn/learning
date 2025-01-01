@@ -19,6 +19,7 @@ import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 import { useAppSelector } from "@/store/hooks";
 
 import { IOptionList } from "@/features/ui/types";
+import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 
 ChartJS.register(
   ArcElement,
@@ -45,6 +46,12 @@ function SioDashboard() {
   const [defectType, setDefectType] = useState<IOptionList[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [departments, setDepartments] = useState<IOptionList[]>([]);
+
+  const [department, setDepartment] = useState("");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
   const currentDate = new Date();
   const month = currentDate.getMonth() + 1;
 
@@ -62,6 +69,30 @@ function SioDashboard() {
 
   const appModePaddingClass =
     globalState.appMode === "FullScreen" ? "p-0 px-2.5 " : " p-2.5  pb-0 ";
+
+  const {
+    data: sioMasterData,
+    isLoading: isSIOMasterDataLoading,
+    isError: isSIOMasterDataError,
+  } = useSIOMasterDataQuery();
+
+  useEffect(() => {
+    if (isSIOMasterDataLoading) {
+      loader.show();
+    } else {
+      loader.hide();
+    }
+
+    if (!isSIOMasterDataLoading && isSIOMasterDataError) {
+      alertToast.show("error", "Error Reading API", true);
+    }
+
+    if (!isSIOMasterDataLoading && !isSIOMasterDataError && sioMasterData) {
+      const historySIOMasterData = [sioMasterData.historySIOMasterData];
+
+      setDepartments(historySIOMasterData[0].DEPARTMENT);
+    }
+  }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
 
   const optionsTrendCPAMonth = {
     maintainAspectRatio: false,
@@ -530,6 +561,40 @@ function SioDashboard() {
     <div
       className={`relative w-full h-full grid ${adjustGridClass} ${appModePaddingClass} gap-2.5  overflow-auto `}
     >
+      <div className="flex items-center gap-4 p-2 bg-gray-200 rounded-md shadow-md dark:bg-gray-700">
+        <div>
+          <select
+            className="p-1 border rounded-md"
+            value={department}
+            onChange={(e) => setDepartment(e.target.value)}
+          >
+            <option value="">All</option>
+            {departments &&
+              departments.length > 0 &&
+              departments.map((item) => (
+                <option key={item.id} value={item.name}>
+                  {item.name}
+                </option>
+              ))}
+          </select>
+        </div>
+        <div>
+          <input
+            type="date"
+            className="p-1 border rounded-md"
+            value={fromDate}
+            onChange={(e) => setFromDate(e.target.value)}
+          />
+        </div>
+        <div>
+          <input
+            type="date"
+            className="p-1 border rounded-md"
+            value={toDate}
+            onChange={(e) => setToDate(e.target.value)}
+          />
+        </div>
+      </div>
       <div className="relative w-full h-full overflow-auto ">
         <div className="grid grid-cols-2 lg:grid-cols-2 gap-2.5 mt-[10px]">
           <div className="h-[300px]  flex justify-between border-[1px] rounded-lg shadow-md dark:border-gray-500 p-2 bg-gradient-to-b from-[#f1f1f1] to-[#ffffff]   dark:bg-gray-600 overflow-hidden">

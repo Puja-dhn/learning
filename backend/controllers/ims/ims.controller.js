@@ -1524,6 +1524,7 @@ exports.submitInvestigationData = async (req, res) => {
     potential_outcome,
     action_taken,
     incident_details,
+    repeated_incident,
     status,
     immediate_action,
     risk_identified,
@@ -1562,6 +1563,7 @@ exports.submitInvestigationData = async (req, res) => {
   const investigationInsertQuery = `
   INSERT INTO t_inshe_incident_investigation (
     incident_id,
+    repeated_incident,
     list_facts,
     physical_factors,
     human_factors,
@@ -1576,10 +1578,11 @@ exports.submitInvestigationData = async (req, res) => {
     created_by,
     updated_at,
     updated_by
-  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 `;
   await simpleQuery(investigationInsertQuery, [
     incident_no,
+    repeated_incident,
     list_facts,
     physical_factors,
     human_factors,
@@ -1645,7 +1648,7 @@ exports.submitInvestigationData = async (req, res) => {
     currentTime,
     ID,
     currentTime,
-    areaHead,
+    recom.resp_id,
   ]);
 
   const documentInsertQuery = `

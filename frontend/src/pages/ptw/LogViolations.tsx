@@ -6,7 +6,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 import { useQueryClient } from "react-query";
 
 import { Button } from "@/features/ui/buttons";
-import { TextArea, TextField } from "@/features/ui/form";
+import { DropdownList, TextArea, TextField } from "@/features/ui/form";
 import { useAppSelector } from "@/store/hooks";
 import { useAlertConfig, useLoaderConfig } from "@/features/ui/hooks";
 
@@ -16,6 +16,8 @@ import ILogViolationForm from "@/features/ptw/types/ptw/ILogViolationForm";
 import useViolationMasterDataQuery from "@/features/ptw/hooks/useViolationMasterDataQuery";
 import IViolationMasterData from "@/features/ptw/types/ptw/IViolationMasterData";
 import { addNewViolationData } from "@/features/ptw/services/ptw.services";
+import { IOptionList } from "@/features/ui/types";
+import { SelectSearchable } from "@/features/ui/elements";
 
 interface ILogViolationTeamData {
   historyLogViolationData: IViolationMasterData[];
@@ -40,6 +42,9 @@ function LogViolations() {
   const [teamData, setTeamData] = useState<ILogViolationTeamData>({
     historyLogViolationData: [],
   });
+
+  const [permitList, setPermitList] = useState<IOptionList[]>([]);
+  const [filterPermitList, setFilterPermitList] = useState<IOptionList[]>([]);
 
   const {
     handleSubmit,
@@ -78,6 +83,14 @@ function LogViolations() {
       setTeamData({
         historyLogViolationData,
       });
+      const permitData = vioMasterData.historyViolationMasterData.map(
+        (item) => ({
+          id: item.id,
+          name: item.job_description.substring(0, 100),
+        }),
+      );
+      setPermitList(permitData);
+      setFilterPermitList(permitData);
     }
   }, [vioMasterData, isVIOMasterDataLoading, isVIOMasterDataError]);
 
@@ -142,6 +155,27 @@ function LogViolations() {
       });
   };
 
+  const [selectedIssuer, setSelectedIssuer] =
+    useState<string>("Select issuers");
+  const [searchText, setSearchText] = useState<string>("");
+
+  const handleSearchTextChange = (newSearchText: string) => {
+    setSearchText(newSearchText);
+    if (newSearchText !== "") {
+      const filtered = permitList.filter((option) =>
+        option.name.toLowerCase().includes(newSearchText.toLowerCase()),
+      );
+      setFilterPermitList(filtered);
+    } else {
+      setFilterPermitList(permitList);
+    }
+  };
+
+  const handleOptionChange = (selectedItem: IOptionList) => {
+    setSelectedIssuer(selectedItem.name);
+    setValue("permit_no", selectedItem.id.toString(), { shouldValidate: true });
+  };
+
   return (
     <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
       <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
@@ -155,11 +189,26 @@ function LogViolations() {
           <form className="w-[100%]   gap-4  justify-evenly">
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div className="p-1">
-                <TextField
+                <span className="text-gray-900">Permit</span>
+                <SelectSearchable
+                  selectedValue={selectedIssuer}
+                  optionList={[...permitList]}
+                  searchText={searchText}
+                  searchTextChangeHandler={handleSearchTextChange}
+                  onChange={handleOptionChange}
+                  className="mt-[9px]"
+                />
+                {/* <DropdownList
                   name="permit_no"
                   label="Permit No"
                   control={control}
-                />
+                  optionList={[{ id: "", name: "Select" }, ...permitList]}
+                /> */}
+                {/* <TextField
+                  name="permit_no"
+                  label="Permit No"
+                  control={control}
+                /> */}
               </div>
               <div className="p-1">
                 <TextField

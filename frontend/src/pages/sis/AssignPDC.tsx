@@ -30,6 +30,7 @@ import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 import { submitPDCAssign } from "@/features/sis/services/sis.services";
 import IAreasList from "@/features/sis/types/sis/IAreasList";
+import { SelectSearchable } from "@/features/ui/elements";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -82,6 +83,7 @@ function AssignPDC() {
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
+  const [filterUsers, setFilterUsers] = useState<IOptionList[]>([]);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const {
     data: sioMasterData,
@@ -108,6 +110,7 @@ function AssignPDC() {
       setSeverity(historySIOMasterData[0].SEVERITY);
       setAreas(historySIOMasterData[0].AREA);
       setUsers(historySIOMasterData[0].USERS);
+      setFilterUsers(historySIOMasterData[0].USERS);
     }
   }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
   useEffect(() => {
@@ -147,6 +150,7 @@ function AssignPDC() {
     handleSubmit: handleSubmitPDCDetails,
     reset: resetPDCData,
     control: controlPDC,
+    setValue: setPdcData,
   } = useForm<ISIOPDCAssignData>({
     defaultValues: initialPDCAssignValues,
     resolver: yupResolver(assignPDCFormSchema),
@@ -388,6 +392,7 @@ function AssignPDC() {
     control: controlAssignForm,
     handleSubmit,
     reset: resetAssignPDC,
+    setValue: setPdcValueMobile,
   } = useForm<ISIOPDCAssignData>({
     defaultValues: initialPDCAssignValues,
     resolver: yupResolver(assignPDCFormSchema),
@@ -419,6 +424,32 @@ function AssignPDC() {
     const month = d.toLocaleString("en-US", { month: "short" });
     const year = d.getFullYear();
     return `${day}-${month}-${year}`;
+  };
+
+  const [selectedIssuer, setSelectedIssuer] =
+    useState<string>("Select issuers");
+  const [searchText, setSearchText] = useState<string>("");
+
+  const handleSearchTextChange = (newSearchText: string) => {
+    setSearchText(newSearchText);
+    if (newSearchText !== "") {
+      const filtered = users.filter((option) =>
+        option.name.toLowerCase().includes(newSearchText.toLowerCase()),
+      );
+      setFilterUsers(filtered);
+    } else {
+      setFilterUsers(users);
+    }
+  };
+
+  const handleOptionChange = (selectedItem: IOptionList) => {
+    setSelectedIssuer(selectedItem.name);
+    setPdcData("responsibilities", selectedItem.id.toString(), {
+      shouldValidate: true,
+    });
+    setPdcValueMobile("responsibilities", selectedItem.id.toString(), {
+      shouldValidate: true,
+    });
   };
 
   return (
@@ -796,7 +827,18 @@ function AssignPDC() {
                   <div className="w-[100%]   gap-4  justify-evenly">
                     <div className="grid grid-cols-1 md:grid-cols-2">
                       <div className="p-1">
-                        <DropdownList
+                        <span className="text-gray-900">
+                          Responsible Person
+                        </span>
+                        <SelectSearchable
+                          selectedValue={selectedIssuer}
+                          optionList={[...filterUsers]}
+                          searchText={searchText}
+                          searchTextChangeHandler={handleSearchTextChange}
+                          onChange={handleOptionChange}
+                          className="mt-[9px]"
+                        />
+                        {/* <DropdownList
                           name="responsibilities"
                           label="Responsible Person"
                           control={controlPDC}
@@ -804,7 +846,7 @@ function AssignPDC() {
                             { id: "", name: "Select Responsible Person" },
                             ...users,
                           ]}
-                        />
+                        /> */}
                       </div>
                       <div className="p-1">
                         <TextField
@@ -1010,7 +1052,15 @@ function AssignPDC() {
                   <div className="p-3 ">
                     <div className="grid grid-cols-1 md:grid-cols-2">
                       <div className="p-1">
-                        <DropdownList
+                        <SelectSearchable
+                          selectedValue={selectedIssuer}
+                          optionList={[...filterUsers]}
+                          searchText={searchText}
+                          searchTextChangeHandler={handleSearchTextChange}
+                          onChange={handleOptionChange}
+                          className="mt-[9px]"
+                        />
+                        {/* <DropdownList
                           name="responsibilities"
                           label="Responsible Person"
                           control={controlAssignForm}
@@ -1018,7 +1068,7 @@ function AssignPDC() {
                             { id: "", name: "Select Responsible Person" },
                             ...users,
                           ]}
-                        />
+                        /> */}
                       </div>
                       <div className="p-1">
                         <TextField

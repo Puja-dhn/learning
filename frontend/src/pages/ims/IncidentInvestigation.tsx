@@ -30,7 +30,7 @@ import ILogImsFilterForm from "@/features/ims/types/ILogImsFilterForm";
 import useIMSMasterDataQuery from "@/features/ims/hooks/useIMSMasterDataQuery";
 import ILogImsData from "@/features/ims/types/ILogImsData";
 
-import { InputText } from "@/features/ui/elements";
+import { InputText, SelectSearchable } from "@/features/ui/elements";
 import useImsInvestigationDetailQuery from "@/features/ims/hooks/useImsInvestigationDetailQuery";
 import ILogInvestigationData from "@/features/ims/types/ILogInvestigationData";
 import { submitInvestigationData } from "@/features/ims/services/ims.services";
@@ -84,6 +84,7 @@ const initialInvestigationValues: ILogInvestigationData = {
   potential_outcome: "",
   action_taken: "",
   incident_details: "",
+  repeated_incident: "",
   ims_photos: "",
   immediate_action: "",
   status: "",
@@ -122,6 +123,7 @@ function IncidentInvestigation() {
   const [factors, setFactors] = useState<IOptionList[]>([]);
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
+  const [filterUsers, setFilterUsers] = useState<IOptionList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
 
   const {
@@ -149,6 +151,7 @@ function IncidentInvestigation() {
       setFactors(historyImsMasterData[0].FACTORS);
       setAreas(historyImsMasterData[0].AREA);
       setUsers(historyImsMasterData[0].USERS);
+      setFilterUsers(historyImsMasterData[0].USERS);
     }
   }, [imsMasterData, isIMSMasterDataLoading, isIMSMasterDataError]);
 
@@ -243,6 +246,7 @@ function IncidentInvestigation() {
       action_taken: row.action_taken,
       incident_details: row.incident_details,
       immediate_action: row.immediate_action,
+      repeated_incident: "No",
     });
     setShowInvestigationDialog({
       status: true,
@@ -656,6 +660,8 @@ function IncidentInvestigation() {
 
   const [recomDescription, setRecomDescription] = useState<string>("");
   const [recomResponsibility, setRecomResponsibility] = useState<string>("");
+  const [recomResponsibilityId, setRecomResponsibilityId] =
+    useState<string>("");
   const [recomFactor, setRecomFactor] = useState<string>("");
   const [recomControltype, setRecomControlType] = useState<string>("");
   const [recomTargetDate, setRecomTargetDate] = useState<string>("");
@@ -682,6 +688,7 @@ function IncidentInvestigation() {
       id: recomendationRows.length + 1,
       recommendation: recomDescription,
       responsibility: recomResponsibility,
+      resp_id: recomResponsibilityId,
       factor: recomFactor,
       control_type: recomControltype,
       target_date: recomTargetDate,
@@ -693,6 +700,7 @@ function IncidentInvestigation() {
     });
     setRecomDescription("");
     setRecomResponsibility("");
+    setRecomResponsibilityId("");
     setRecomFactor("");
     setRecomControlType("");
     setRecomTargetDate("");
@@ -736,6 +744,27 @@ function IncidentInvestigation() {
     setValue("documents", JSON.stringify(updatedDocumentsRow), {
       shouldValidate: true,
     });
+  };
+  const [selectedIssuer, setSelectedIssuer] =
+    useState<string>("Select issuers");
+  const [searchText, setSearchText] = useState<string>("");
+
+  const handleSearchTextChange = (newSearchText: string) => {
+    setSearchText(newSearchText);
+    if (newSearchText !== "") {
+      const filtered = users.filter((option) =>
+        option.name.toLowerCase().includes(newSearchText.toLowerCase()),
+      );
+      setFilterUsers(filtered);
+    } else {
+      setFilterUsers(users);
+    }
+  };
+
+  const handleOptionChange = (selectedItem: IOptionList) => {
+    setSelectedIssuer(selectedItem.name);
+    setRecomResponsibility(selectedItem.name);
+    setRecomResponsibilityId(selectedItem.id.toString());
   };
 
   return (
@@ -1088,6 +1117,7 @@ function IncidentInvestigation() {
                   />
                 </div>
               </div>
+
               <div className="py-1">
                 <div className="border-b-[#00000036] border-b-[1px] pb-2">
                   <span className="mr-2 font-medium text-gray-800 dark:text-gray-300">
@@ -1406,6 +1436,27 @@ function IncidentInvestigation() {
                       control={controlInvestigation}
                       disabled
                     />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 ">
+                  <div className="p-1 text-gray-700">
+                    <input
+                      type="checkbox"
+                      value="Yes"
+                      onChange={(e) =>
+                        setValue(
+                          "repeated_incident",
+                          e.target.checked ? "Yes" : "No",
+                          {
+                            shouldValidate: true,
+                          },
+                        )
+                      }
+                      checked={
+                        watchInvestigation("repeated_incident") === "Yes"
+                      }
+                    />{" "}
+                    Repeated Incident?
                   </div>
                 </div>
                 <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
@@ -1873,7 +1924,7 @@ function IncidentInvestigation() {
                               Responsibility
                             </th>
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
-                              Fcator
+                              Factor
                             </th>
                             <th className="px-4 py-2 text-sm text-left text-gray-700 border-b">
                               Control Type
@@ -1901,14 +1952,22 @@ function IncidentInvestigation() {
                               />
                             </td>
                             <td className="px-4 py-2 border-b">
-                              <InputText
+                              <SelectSearchable
+                                selectedValue={selectedIssuer}
+                                optionList={[...filterUsers]}
+                                searchText={searchText}
+                                searchTextChangeHandler={handleSearchTextChange}
+                                onChange={handleOptionChange}
+                                className="mt-[9px]"
+                              />
+                              {/* <InputText
                                 type="text"
                                 value={recomResponsibility}
                                 changeHandler={(e: any) =>
                                   handleRecomResponsibilityChange(e)
                                 }
                                 className="w-full"
-                              />
+                              /> */}
                             </td>
                             <td className="px-4 py-2 border-b">
                               <InputText

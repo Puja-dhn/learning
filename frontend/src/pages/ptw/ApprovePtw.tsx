@@ -33,6 +33,7 @@ import IContractorList from "@/features/ptw/types/ptw/IContractorList";
 import ILogPtwFilterForm from "@/features/ptw/types/ptw/ILogPtwFilterForm";
 import IAreasList from "@/features/sis/types/sis/IAreasList";
 import { IOptionList } from "@/features/ui/types";
+import { SelectSearchable } from "@/features/ui/elements";
 
 interface ILogPtwTeamData {
   historyLogPtwData: ILogPtwData[];
@@ -72,6 +73,7 @@ function ApprovePtw() {
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
+  const [filterUsers, setFilterUsers] = useState<IOptionList[]>([]);
   const [isHazardSectionOpen, setIsHazardSectionOpen] = useState(false);
   const [hazardsChecklist, setHazardsChecklist] = useState<IOptionList[]>([]);
   const [configs, setConfigs] = useState<IConfigsList[]>([]);
@@ -143,7 +145,7 @@ function ApprovePtw() {
         setConfigs(historyPTWMasterData[0].CONFIG);
         setAreas(historyPTWMasterData[0].AREA);
         setUsers(historyPTWMasterData[0].USERS);
-
+        setFilterUsers(historyPTWMasterData[0].USERS);
         const filtercontractors = historyPTWMasterData[0].CONTRACTORS.map(
           (contractor: any) => ({
             id: contractor.id,
@@ -410,6 +412,7 @@ function ApprovePtw() {
     reset: resetApproveForm,
     control: controlApprove,
     formState: formStatePDC,
+    setValue: setApproveValue,
   } = useForm<ILogPTWApproveForm>({
     defaultValues: initialApproveValues,
     resolver: yupResolver(approveFormSchema),
@@ -596,30 +599,31 @@ function ApprovePtw() {
   const handleApproveFormSubmit: SubmitHandler<ILogPTWApproveForm> = (
     values: any,
   ) => {
-    loader.show();
-    submitCustodianApproval(values)
-      .then(() => {
-        alertToast.show(
-          "success",
-          "Custodian Approved Succesfully",
-          true,
-          2000,
-        );
-        setShowApproveDialog((oldState) => ({
-          ...oldState,
-          status: false,
-        }));
-        handleRefresh();
-      })
+    console.log(values);
+    // loader.show();
+    // submitCustodianApproval(values)
+    //   .then(() => {
+    //     alertToast.show(
+    //       "success",
+    //       "Custodian Approved Succesfully",
+    //       true,
+    //       2000,
+    //     );
+    //     setShowApproveDialog((oldState) => ({
+    //       ...oldState,
+    //       status: false,
+    //     }));
+    //     handleRefresh();
+    //   })
 
-      .catch((err) => {
-        if (err.response && err.response.status) {
-          alertToast.show("warning", err.response.data.errorMessage, true);
-        }
-      })
-      .finally(() => {
-        loader.hide();
-      });
+    //   .catch((err) => {
+    //     if (err.response && err.response.status) {
+    //       alertToast.show("warning", err.response.data.errorMessage, true);
+    //     }
+    //   })
+    //   .finally(() => {
+    //     loader.hide();
+    //   });
   };
   const handleExport = () => {
     const rows = teamData.historyLogPtwData.map((item) => ({
@@ -691,6 +695,28 @@ function ApprovePtw() {
     if (assHotWrkChecklistIds.includes(`${type}`)) {
       return true;
     }
+  };
+  const [selectedIssuer, setSelectedIssuer] =
+    useState<string>("Select issuers");
+  const [searchText, setSearchText] = useState<string>("");
+
+  const handleSearchTextChange = (newSearchText: string) => {
+    setSearchText(newSearchText);
+    if (newSearchText !== "") {
+      const filtered = users.filter((option) =>
+        option.name.toLowerCase().includes(newSearchText.toLowerCase()),
+      );
+      setFilterUsers(filtered);
+    } else {
+      setFilterUsers(users);
+    }
+  };
+
+  const handleOptionChange = (selectedItem: IOptionList) => {
+    setSelectedIssuer(selectedItem.name);
+    setApproveValue("issuer_id", selectedItem.id.toString(), {
+      shouldValidate: true,
+    });
   };
   return (
     <div className="flex flex-col w-full h-full gap-2 p-4 overflow-hidden text-sm md:p-6">
@@ -1854,12 +1880,21 @@ function ApprovePtw() {
                   {custodianName}
                 </div>
                 <div className="p-1">
-                  <DropdownList
+                  <span className="text-gray-900">Issuer</span>
+                  <SelectSearchable
+                    selectedValue={selectedIssuer}
+                    optionList={[...filterUsers]}
+                    searchText={searchText}
+                    searchTextChangeHandler={handleSearchTextChange}
+                    onChange={handleOptionChange}
+                    className="mt-[9px]"
+                  />
+                  {/* <DropdownList
                     name="issuer_id"
                     label="Issuer"
                     control={controlApprove}
                     optionList={[{ id: "", name: "Select issuers" }, ...users]}
-                  />
+                  /> */}
                 </div>
                 <div className="p-2 basis-full sm:basis-1/2 lg:basis-1/2">
                   <TextArea
