@@ -14,11 +14,13 @@ interface IProps {
   onChange: (e: IOptionList) => void;
   defaultSelectValue?: string;
   className?: string;
+  topOffset?: number;
 }
 
 const defaultProps = {
   defaultSelectValue: "",
   className: "",
+  topOffset: 0,
 };
 function SelectSearchable(props: IProps) {
   const {
@@ -29,6 +31,7 @@ function SelectSearchable(props: IProps) {
     searchTextChangeHandler,
     onChange,
     className,
+    topOffset,
   } = props;
   const [status, setStatus] = useState(false);
   const buttonText = selectedValue || defaultSelectValue || "Searh Value";
@@ -66,6 +69,7 @@ function SelectSearchable(props: IProps) {
       let currTop = 0;
       let currLeft = 0;
       let currWidth = 0;
+      const currtopOffset = topOffset || 0;
 
       if (
         targetButtonPosition.y +
@@ -80,9 +84,10 @@ function SelectSearchable(props: IProps) {
       currLeft = targetButtonPosition.x;
       currWidth = targetButtonPosition.width;
       if (position === "bottom") {
-        currTop = targetButtonPosition.y + targetButtonPosition.height;
+        currTop =
+          targetButtonPosition.y + targetButtonPosition.height - currtopOffset;
       } else {
-        currTop = targetButtonPosition.y - 300;
+        currTop = targetButtonPosition.y - 300 - currtopOffset;
       }
 
       setListPosition({

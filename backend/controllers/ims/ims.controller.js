@@ -1589,10 +1589,10 @@ exports.submitInvestigationData = async (req, res) => {
     system_factors,
     "Submitted",
     risk_identified,
-    identified_control,
-    control_type,
-    control_description,
-    control_adequate_desc,
+    identified_control | null,
+    control_type | null,
+    control_description | null,
+    control_adequate_desc | null,
     currentTime,
     ID,
     currentTime,
@@ -1747,11 +1747,330 @@ exports.closeRecommendation = async (req, res) => {
   SET status = 'Closed', 
       closure_remarks = ?,
       updated_at = ?, 
-      updated_by = ? ,
+      updated_by = ? 
      
   WHERE id = ?
 `;
   await simpleQuery(updateHeaderQuery, [close_remarks, currentTime, ID, id]);
+
+  res.status(200).json({ message: "Data processed successfully." });
+};
+exports.getPendingHdInitiateData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
+
+  const { incident_no, date_from, date_to, status } = req.body;
+
+  const strId = incident_no > 0 ? ` and t1.incident_id=${id}` : "";
+
+  const strStatus = status !== "All" ? ` and t1.status='${status}'` : "";
+  const strFromDate =
+    date_from !== "" ? ` and DATE(t1.created_at) >='${date_from}'` : "";
+  const strToDate =
+    date_to !== "" ? ` and DATE(t1.created_at) <='${date_to}'` : "";
+
+  const imsQuery = `
+  SELECT 
+    t8.id incident_no,
+    DATE_FORMAT(t8.inc_date_time, '%d-%b-%Y %h:%i:%s %p') AS inc_date_time,
+    t8.department department_id,
+    t2.name department,
+    t8.area area_id,
+    t8.ims_photos,
+    t3.name area,
+    t1.recommendation,
+    t1.responsibility,
+    t1.factor,
+    t1.control_type,
+    t1.target_date,
+    t1.status,
+    LPAD(t1.id, 6, '0') AS disp_logno,
+    t1.id
+  FROM
+    t_inshe_incident_recommendation t1
+    join t_inshe_incident_header t8 on t1.incident_id = t8.id
+    join t_inshe_org_structures t2 on t8.department = t2.id
+    join t_inshe_org_structures t3 on t8.area = t3.id
+  WHERE
+    1=1
+    ${strId}
+    ${strFromDate}
+    ${strToDate}
+    and t1.status = 'Closed'
+    order by t1.id desc
+`;
+
+  const resultIms = await simpleQuery(imsQuery, [logged_user_id]);
+
+  res.status(200).json({
+    historyLogImsData: [...resultIms],
+  });
+};
+exports.getHdMasterData = async (req, res) => {
+  try {
+    const departmentQuery = `
+      SELECT DISTINCT
+          t1.id,
+          t1.head_user_id,
+          t1.name
+      FROM
+          t_inshe_org_structures t1
+      WHERE
+              t1.is_deleted = 0
+        and t1.category = "DEPT"
+       
+    `;
+
+    const resultDepartments = await simpleQuery(departmentQuery, []);
+
+    const injuryQuery = `
+      SELECT DISTINCT
+          t1.context_id id,
+          t1.context_name name
+      FROM
+          t_inshe_context_definitions t1
+      WHERE
+        t1.is_deleted = 0
+        and definitions_type = "IMS_LOG_INJURY_TYPE"
+       
+    `;
+
+    const resultInjury = await simpleQuery(injuryQuery, []);
+
+    const factorsQuery = `
+    SELECT DISTINCT
+        t1.context_id id,
+        t1.context_name name
+    FROM
+        t_inshe_context_definitions t1
+    WHERE
+      t1.is_deleted = 0
+      and definitions_type = "IMS_FACTORS"
+     
+  `;
+
+    const resultFactors = await simpleQuery(factorsQuery, []);
+
+    const areasQuery = `
+    SELECT DISTINCT
+        t1.id,
+        t1.parent_id,
+        t1.name
+    FROM
+        t_inshe_org_structures t1
+    WHERE
+      t1.is_deleted = 0
+      and t1.category = "AREA"
+      order by t1.name asc
+  `;
+
+    const resultAreas = await simpleQuery(areasQuery, []);
+
+    const contractorsQuery = `
+    SELECT DISTINCT
+        t1.id,
+        t1.contractor_name name
+    FROM
+        t_inshe_contractors t1
+    WHERE
+      t1.status = 'active'
+     
+  `;
+
+    const resultContractors = await simpleQuery(contractorsQuery, []);
+
+    const usersQuery = `
+    SELECT DISTINCT
+        t1.emp_no AS id,
+    	CONCAT(t1.name, " (", t1.emp_no, ")") AS name
+    FROM
+        t_inshe_users t1
+    WHERE
+      t1.status = 'Active'
+      and t1.id !=1
+      order by name asc
+     
+  `;
+
+    const resultUsers = await simpleQuery(usersQuery, []);
+
+    const bodypartQuery = `
+    SELECT DISTINCT
+        t1.context_id id,
+        t1.context_name name
+    FROM
+        t_inshe_context_definitions t1
+    WHERE
+      t1.is_deleted = 0
+      and definitions_type = "IMS_INJURY_BODYPART"
+     
+  `;
+
+    const resultBodypart = await simpleQuery(bodypartQuery, []);
+
+    const injNatureQuery = `
+    SELECT DISTINCT
+        t1.context_id id,
+        t1.context_name name
+    FROM
+        t_inshe_context_definitions t1
+    WHERE
+      t1.is_deleted = 0
+      and definitions_type = "IMS_INJURY_NATURE"
+     
+  `;
+    const resultInjNature = await simpleQuery(injNatureQuery, []);
+
+    const injuryMedicalQuery = `
+  SELECT DISTINCT
+      t1.context_id id,
+      t1.context_name name
+  FROM
+      t_inshe_context_definitions t1
+  WHERE
+    t1.is_deleted = 0
+    and definitions_type = "IMS_INJURY_TYPE"
+   
+`;
+
+    const resultInjuryMedical = await simpleQuery(injuryMedicalQuery, []);
+
+    const masterDetails = {
+      DEPARTMENT: [...resultDepartments],
+      INJURYTYPE: [...resultInjury],
+      FACTORS: [...resultFactors],
+      AREA: [...resultAreas],
+      CONTRACTORS: [...resultUsers],
+      USERS: [...resultUsers],
+      BODYPART: [...resultBodypart],
+      INJURYNATURE: [...resultInjNature],
+      INJURYMEDICAL: [...resultInjuryMedical],
+    };
+
+    res.status(200).json({ historyIMSMasterData: masterDetails });
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    res.status(500).json({
+      error: "An error occurred while fetching data",
+    });
+  }
+};
+exports.submitHDInitiate = async (req, res) => {
+  const { ID } = req.user;
+  const { recomid, incidentno, hddata } = req.body;
+  const currentTime = new Date();
+  const hdDetailsArray = JSON.parse(hddata);
+  if (Array.isArray(hdDetailsArray) && hdDetailsArray.length > 0) {
+    const updateHdInitiateQuery = `
+      insert into t_inshe_hd_details(recom_id,incident_id,department,area,hd_status,pending_on,created_at,created_by)
+      values(?, ?,  ?, ?, ?, ?, ?, ?)
+      `;
+
+    for (const detail of hdDetailsArray) {
+      const departmentQuery = `
+        SELECT DISTINCT
+            t1.parent_id,
+            t1.head_user_id
+        FROM
+            t_inshe_org_structures t1
+        WHERE
+                t1.is_deleted = 0
+          and t1.id = ?
+         
+      `;
+
+      const resultDepartments = await simpleQuery(departmentQuery, [
+        detail.area,
+      ]);
+      await simpleQuery(updateHdInitiateQuery, [
+        recomid,
+        incidentno,
+        resultDepartments[0].parent_id,
+        detail.area,
+        detail.value,
+        resultDepartments[0].head_user_id,
+        currentTime,
+        ID,
+      ]);
+    }
+  }
+
+  console.log("Data updated successfully.");
+  res.status(200).json({ message: "Data processed successfully." });
+};
+exports.getHdCloseData = async (req, res) => {
+  const { ID: logged_user_id, ROLES } = req.user;
+  const isAdmin = ROLES && ROLES.length > 0 && ROLES.includes(1);
+
+  const { incident_no, date_from, date_to } = req.body;
+
+  const strId = incident_no > 0 ? ` and t1.id=${id}` : "";
+
+  const strFromDate =
+    date_from !== "" ? ` and DATE(t1.created_at) >='${date_from}'` : "";
+  const strToDate =
+    date_to !== "" ? ` and DATE(t1.created_at) <='${date_to}'` : "";
+
+  const imsQuery = `
+  SELECT 
+    LPAD(t1.id, 6, '0') AS disp_logno,
+    LPAD(t1.incident_id, 6, '0') AS incident_no,
+    t3.name department,
+    t4.name area,
+    t2.recommendation,
+    t1.implemented_status as status,
+    t1.closure_remarks,
+    t1.close_date,
+    t1.id,
+    t1.close_evidance
+  FROM
+    t_inshe_hd_details t1
+    join t_inshe_incident_recommendation t2 on t1.recom_id = t2.id
+    join t_inshe_org_structures t3 on t1.department = t3.id
+    join t_inshe_org_structures t4 on t1.area = t4.id
+  WHERE
+    1=1
+    and t1.pending_on = ?
+    and t1.hd_status = 'Applicable'
+    ${strId}
+    ${strFromDate}
+    ${strToDate}
+    order by t1.id desc
+`;
+
+  const resultIms = await simpleQuery(imsQuery, [logged_user_id]);
+
+  res.status(200).json({
+    historyLogHdData: [...resultIms],
+  });
+};
+exports.submitCloseHd = async (req, res) => {
+  const { ID } = req.user;
+  const { id, implemented_status, evidance_file, close_remarks } =
+    req.body.pdcData;
+
+  const currentTime = new Date();
+
+  const updateHeaderQuery = `
+  UPDATE t_inshe_hd_details
+  SET implemented_status = ?, 
+      close_evidance = ?,
+      closure_remarks = ?,
+      close_date = ?,
+      updated_at = ?, 
+      updated_by = ? 
+     
+  WHERE id = ?
+`;
+  await simpleQuery(updateHeaderQuery, [
+    implemented_status,
+    evidance_file,
+    close_remarks,
+    currentTime,
+    currentTime,
+    ID,
+    id,
+  ]);
 
   res.status(200).json({ message: "Data processed successfully." });
 };

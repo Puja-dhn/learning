@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Select from "react-select";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -17,6 +18,7 @@ import ILogImsForm from "@/features/ims/types/ILogImsForm";
 import { InputText } from "@/features/ui/elements";
 import { addNewImsData } from "@/features/ims/services/ims.services";
 import { API_BASE_URL, ASSET_BASE_URL } from "@/features/common/constants";
+import ISelectList from "@/features/common/types/ISelectList";
 
 const initialFormValues: ILogImsForm = {
   inc_date_time: "",
@@ -59,6 +61,7 @@ function LogIms() {
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [contractors, setContractors] = useState<IOptionList[]>([]);
   const [users, setUsers] = useState<IOptionList[]>([]);
+  const [filterUsers, setFilterUsers] = useState<ISelectList[]>([]);
   const [bodypartList, setBodypartList] = useState<IOptionList[]>([]);
   const [injuryNameList, setInjuryNameList] = useState<IOptionList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
@@ -116,6 +119,14 @@ function LogIms() {
       setAreas(historyIMSMasterData[0].AREA);
       setContractors(historyIMSMasterData[0].CONTRACTORS);
       setUsers(historyIMSMasterData[0].USERS);
+      const userOptions: ISelectList[] = historyIMSMasterData[0].USERS.map(
+        (user: any) => ({
+          value: user.id,
+          label: user.name,
+        }),
+      );
+
+      setFilterUsers(userOptions);
       setBodypartList(historyIMSMasterData[0].BODYPART);
       setInjuryNameList(historyIMSMasterData[0].INJURYNATURE);
     }
@@ -260,11 +271,11 @@ function LogIms() {
 
   // Handle input changes for the suggested team row
   const handleSuggTeamInputChange = (field: string, value: string) => {
-    const fusers = users.filter((item) => +item.id === +value);
+    const fusers = filterUsers.filter((item) => item.value === value);
     setSuggTeamNewRow((prev) => ({
       ...prev,
       id: value,
-      name: fusers[0].name,
+      name: fusers[0].label,
     }));
   };
 
@@ -861,7 +872,16 @@ function LogIms() {
                             />
                           </td>
                           <td className="px-4 py-2 border-b">
-                            <select
+                            <Select
+                              options={filterUsers}
+                              onChange={(e: any) => {
+                                if (e) {
+                                  handleSuggTeamInputChange("name", e.value);
+                                }
+                              }}
+                              className="mt-[4px] bg-gray-600 text-black rounded-lg "
+                            />
+                            {/* <select
                               value={suggTeamNewRow.id}
                               onChange={(e) =>
                                 handleSuggTeamInputChange(
@@ -877,7 +897,7 @@ function LogIms() {
                                 users.map((item) => (
                                   <option value={item.id}>{item.name}</option>
                                 ))}
-                            </select>
+                            </select> */}
                           </td>
 
                           <td className="px-4 py-2 border-b">

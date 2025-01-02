@@ -34,6 +34,7 @@ import { InputText, SelectSearchable } from "@/features/ui/elements";
 import useImsInvestigationDetailQuery from "@/features/ims/hooks/useImsInvestigationDetailQuery";
 import ILogInvestigationData from "@/features/ims/types/ILogInvestigationData";
 import { submitInvestigationData } from "@/features/ims/services/ims.services";
+import Select from "react-select";
 
 interface ILogImsTeamData {
   historyLogImsData: ILogImsData[];
@@ -1339,7 +1340,7 @@ function IncidentInvestigation() {
           !(Object.keys(errorsFilter).length === 0) && submitCountFilter > 0
         }
       >
-        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+        <div className="flex flex-col w-full h-full p-2 overflow-auto ">
           <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
             <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
               <div className="flex flex-col gap-2">

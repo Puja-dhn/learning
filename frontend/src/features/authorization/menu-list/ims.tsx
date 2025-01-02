@@ -19,6 +19,8 @@ import CloseIncident from "@/pages/ims/CloseIncident";
 import CategorizeIncident from "@/pages/ims/CategorizeIncident";
 import IncidentInvestigation from "@/pages/ims/IncidentInvestigation";
 import CloseRecommendation from "@/pages/ims/CloseRecommendation";
+import HDInitiate from "@/pages/ims/HDInitiate";
+import HDClosure from "@/pages/ims/HDClosure";
 
 const PageNotFound = React.lazy(() => import("@/pages/PageNotFound"));
 
@@ -124,6 +126,28 @@ const IMS_MENU_LIST: IMenuItem[] = [
     appId: 3,
     path: "close-recommendation",
     element: <CloseRecommendation />,
+    children: [],
+    menuType: "Normal",
+  },
+  {
+    id: 25,
+    name: "HD Initiate",
+    icon: <UserGroupIcon className="w-5 h-5" />,
+    iconSelected: <UserGroupIcon className="w-5 h-5" />,
+    appId: 3,
+    path: "hd-initiate",
+    element: <HDInitiate />,
+    children: [],
+    menuType: "Normal",
+  },
+  {
+    id: 26,
+    name: "HD Closure",
+    icon: <UserGroupIcon className="w-5 h-5" />,
+    iconSelected: <UserGroupIcon className="w-5 h-5" />,
+    appId: 3,
+    path: "hd-closure",
+    element: <HDClosure />,
     children: [],
     menuType: "Normal",
   },

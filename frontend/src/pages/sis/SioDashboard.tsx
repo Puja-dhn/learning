@@ -20,6 +20,8 @@ import { useAppSelector } from "@/store/hooks";
 
 import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
+import useSIODashboardQuery from "@/features/sis/hooks/useSIODashboardQuery";
+import ISIODashboardData from "@/features/sis/types/sis/ISIODashboardData";
 
 ChartJS.register(
   ArcElement,
@@ -65,6 +67,49 @@ function SioDashboard() {
   const [nexYear, setNexYear] = useState<number>(nextYear);
   const [currMonth, setCurrMonth] = useState<number>(month);
 
+  const [teamData, setTeamData] = useState<ISIODashboardData>({
+    currMonth: "Current Month",
+    currFYear: 0,
+    monthNameList: [
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+    ],
+    monthWiseCPA: [],
+    monthWiseTotalCPAList: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    monthWisePendingCPAList: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    monthWiseCloseCPAList: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ficNameList: [],
+    ficWiseCPA: [],
+    ficWiseAssignedCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ficWisePendingCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ficWiseCloseCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    teamNameList: [],
+    teamWiseCPA: [],
+    teamWiseAssignedCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    teamWisePendingCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    teamWiseCloseCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ownTeamNameList: [],
+    ownTeamCPA: [],
+    ownTeamAssignedCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ownTeamPendingCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ownTeamCloseCPA: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    dayList: [],
+    dayWiseIssue: [],
+    dayWiseAssignedIssue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    dayWisePendingIssue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    dayWiseCloseIssue: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  });
+
   const adjustGridClass = "grid-rows-[auto_auto_1fr]";
 
   const appModePaddingClass =
@@ -93,6 +138,142 @@ function SioDashboard() {
       setDepartments(historySIOMasterData[0].DEPARTMENT);
     }
   }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
+
+  const {
+    data: dashboardData,
+    isLoading: dashboardeDataLoading,
+    isError: dashboardeDataError,
+  } = useSIODashboardQuery(+department, fromDate, toDate);
+
+  useEffect(() => {
+    if (dashboardeDataLoading) {
+      loader.show();
+    } else {
+      loader.hide();
+    }
+
+    if (!dashboardeDataLoading && dashboardeDataError) {
+      alertToast.show("error", "Error Reading API", true);
+    }
+
+    if (!dashboardeDataLoading && !dashboardeDataError && dashboardData) {
+      // on team change, calculate the team data and set tema data state
+
+      // if (globalState && globalState.teamId >= 0) {
+      const currTeamData: ISIODashboardData = {
+        ...dashboardData,
+        monthNameList: [],
+        monthWiseTotalCPAList: [],
+        monthWisePendingCPAList: [],
+        monthWiseCloseCPAList: [],
+        ficNameList: [],
+        ficWiseAssignedCPA: [],
+        ficWisePendingCPA: [],
+        ficWiseCloseCPA: [],
+        teamNameList: [],
+        teamWiseAssignedCPA: [],
+        teamWisePendingCPA: [],
+        teamWiseCloseCPA: [],
+        ownTeamNameList: [],
+        ownTeamAssignedCPA: [],
+        ownTeamPendingCPA: [],
+        ownTeamCloseCPA: [],
+        dayList: [],
+        dayWiseAssignedIssue: [],
+        dayWisePendingIssue: [],
+        dayWiseCloseIssue: [],
+      };
+
+      // if (cpaDashboardData.monthWiseCPA.length > 0) {
+      //   cpaDashboardData.monthWiseCPA.forEach((item) => {
+      //     currTeamData.monthNameList.push(item.NAME);
+      //     currTeamData.monthWiseTotalCPAList.push(item.DATA1);
+      //   });
+      // }
+      // if (cpaDashboardData.monthWiseCPA.length > 0) {
+      //   cpaDashboardData.monthWiseCPA.forEach((item) => {
+      //     currTeamData.monthWisePendingCPAList.push(item.DATA2);
+      //   });
+      // }
+      // if (cpaDashboardData.monthWiseCPA.length > 0) {
+      //   cpaDashboardData.monthWiseCPA.forEach((item) => {
+      //     currTeamData.monthWiseCloseCPAList.push(item.DATA3);
+      //   });
+      // }
+      // // fic wise cpa
+      // if (cpaDashboardData.ficWiseCPA.length > 0) {
+      //   cpaDashboardData.ficWiseCPA.forEach((item) => {
+      //     currTeamData.ficNameList.push(item.NAME);
+      //     currTeamData.ficWiseAssignedCPA.push(item.DATA1);
+      //   });
+      // }
+      // if (cpaDashboardData.ficWiseCPA.length > 0) {
+      //   cpaDashboardData.ficWiseCPA.forEach((item) => {
+      //     currTeamData.ficWisePendingCPA.push(item.DATA2);
+      //   });
+      // }
+      // if (cpaDashboardData.ficWiseCPA.length > 0) {
+      //   cpaDashboardData.ficWiseCPA.forEach((item) => {
+      //     currTeamData.ficWiseCloseCPA.push(item.DATA3);
+      //   });
+      // }
+      // // team wise cpa
+      // if (cpaDashboardData.teamWiseCPA.length > 0) {
+      //   cpaDashboardData.teamWiseCPA.forEach((item) => {
+      //     currTeamData.teamNameList.push(item.NAME);
+      //     currTeamData.teamWiseAssignedCPA.push(item.DATA1);
+      //   });
+      // }
+      // if (cpaDashboardData.teamWiseCPA.length > 0) {
+      //   cpaDashboardData.teamWiseCPA.forEach((item) => {
+      //     currTeamData.teamWisePendingCPA.push(item.DATA2);
+      //   });
+      // }
+      // if (cpaDashboardData.teamWiseCPA.length > 0) {
+      //   cpaDashboardData.teamWiseCPA.forEach((item) => {
+      //     currTeamData.teamWiseCloseCPA.push(item.DATA3);
+      //   });
+      // }
+
+      // // own team wise cpa
+      // if (cpaDashboardData.ownTeamCPA.length > 0) {
+      //   cpaDashboardData.ownTeamCPA.forEach((item) => {
+      //     currTeamData.ownTeamNameList.push(item.NAME);
+      //     currTeamData.ownTeamAssignedCPA.push(item.DATA1);
+      //   });
+      // }
+      // if (cpaDashboardData.ownTeamCPA.length > 0) {
+      //   cpaDashboardData.ownTeamCPA.forEach((item) => {
+      //     currTeamData.ownTeamPendingCPA.push(item.DATA2);
+      //   });
+      // }
+      // if (cpaDashboardData.ownTeamCPA.length > 0) {
+      //   cpaDashboardData.ownTeamCPA.forEach((item) => {
+      //     currTeamData.ownTeamCloseCPA.push(item.DATA3);
+      //   });
+      // }
+      // // day wise issue
+      // if (cpaDashboardData.dayWiseIssue.length > 0) {
+      //   cpaDashboardData.dayWiseIssue.forEach((item) => {
+      //     currTeamData.dayList.push(item.NAME);
+      //     currTeamData.dayWiseAssignedIssue.push(item.DATA1);
+      //   });
+      // }
+      // if (cpaDashboardData.dayWiseIssue.length > 0) {
+      //   cpaDashboardData.dayWiseIssue.forEach((item) => {
+      //     currTeamData.dayWisePendingIssue.push(item.DATA2);
+      //   });
+      // }
+      // if (cpaDashboardData.dayWiseIssue.length > 0) {
+      //   cpaDashboardData.dayWiseIssue.forEach((item) => {
+      //     currTeamData.dayWiseCloseIssue.push(item.DATA3);
+      //   });
+      // }
+      setTeamData({
+        ...currTeamData,
+      });
+    }
+  }, [dashboardData, dashboardeDataLoading, dashboardeDataError]);
 
   const optionsTrendCPAMonth = {
     maintainAspectRatio: false,

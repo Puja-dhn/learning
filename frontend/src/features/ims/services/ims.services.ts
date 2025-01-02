@@ -14,10 +14,13 @@ import ILogInvestigationData from "../types/ILogInvestigationData";
 import ILogRecomFilterForm from "../types/ILogRecomFilterForm";
 import ILogRecommendationData from "../types/ILogRecommendationData";
 import IRecomCloseForm from "../types/IRecomCloseForm";
-import ILogDocumentData from "../types/ILogDocumentData";
 import IDocuments from "../types/IDocuments";
 import IRecommendations from "../types/IRecommendations";
 import IInvestigation from "../types/IInvestigation";
+import IHDMasterData from "../types/IHDMasterData";
+import ICloseHDFilterForm from "../types/ICloseHDFilterForm";
+import ICloseHDData from "../types/ICloseHDData";
+import IHdCloseForm from "../types/IHdCloseForm";
 
 const addNewImsData = (formData: any) => {
   return http.post<ILogImsForm, AxiosResponse<string>>(
@@ -143,6 +146,45 @@ const closeRecommendation = (pdcData: IRecomCloseForm) => {
     pdcData,
   });
 };
+const getHDMasterData = () => {
+  return http.post<any, AxiosResponse<{ historyIMSMasterData: IHDMasterData }>>(
+    "/ims/get-hd-master-data",
+  );
+};
+const getPendingHDInitiateData = (filterData: ILogRecomFilterForm) => {
+  return http.post<
+    ILogRecomFilterForm,
+    AxiosResponse<{
+      historyLogImsData: ILogRecommendationData[];
+    }>
+  >("/ims/get-pending-hdinitiate-data", filterData);
+};
+const submitHDInitiate = (
+  recomid: number,
+  incidentno: number,
+  hddata: string,
+) => {
+  return http.post<any, AxiosResponse<string>>("/ims/submit-hd-initiate", {
+    recomid,
+    incidentno,
+    hddata,
+  });
+};
+
+const getHdCloseData = (filterData: ICloseHDFilterForm) => {
+  return http.post<
+    ICloseHDFilterForm,
+    AxiosResponse<{
+      historyLogHdData: ICloseHDData[];
+    }>
+  >("/ims/get-hdclose-data", filterData);
+};
+
+const submitCloseHd = (pdcData: IHdCloseForm) => {
+  return http.post<any, AxiosResponse<string>>("/ims/submit-close-hd", {
+    pdcData,
+  });
+};
 
 export {
   getIMSMasterData,
@@ -159,4 +201,9 @@ export {
   submitInvestigationData,
   getRecommendationData,
   closeRecommendation,
+  getHDMasterData,
+  getPendingHDInitiateData,
+  submitHDInitiate,
+  getHdCloseData,
+  submitCloseHd,
 };

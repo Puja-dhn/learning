@@ -1,0 +1,82 @@
+-- phpMyAdmin SQL Dump
+-- version 5.0.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 172.27.129.80
+-- Generation Time: Jan 02, 2025 at 02:27 PM
+-- Server version: 10.4.8-MariaDB
+-- PHP Version: 7.1.33
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `ptwnew`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `t_inshe_hd_details`
+--
+
+CREATE TABLE `t_inshe_hd_details` (
+  `id` int(11) NOT NULL,
+  `recom_id` int(11) NOT NULL,
+  `incident_id` int(11) NOT NULL,
+  `department` varchar(255) NOT NULL,
+  `area` varchar(255) NOT NULL,
+  `hd_status` varchar(50) NOT NULL,
+  `implemented_status` varchar(50) NOT NULL,
+  `pending_on` varchar(20) DEFAULT NULL,
+  `closure_remarks` text DEFAULT NULL,
+  `close_evidance` text DEFAULT NULL,
+  `close_date` date DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_by` int(11) NOT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `updated_by` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `t_inshe_hd_details`
+--
+
+INSERT INTO `t_inshe_hd_details` (`id`, `recom_id`, `incident_id`, `department`, `area`, `hd_status`, `implemented_status`, `pending_on`, `closure_remarks`, `close_evidance`, `close_date`, `created_at`, `created_by`, `updated_at`, `updated_by`) VALUES
+(6, 3, 6, '11', '82', 'Applicable', '', '1', NULL, NULL, NULL, '2025-01-02 07:14:04', 1, '2025-01-02 09:28:58', 0),
+(7, 3, 6, '11', '85', 'Applicable', '', '1', NULL, NULL, NULL, '2025-01-02 07:14:04', 1, '2025-01-02 09:29:02', 0),
+(8, 3, 6, '11', '84', 'Applicable', 'Implemented', '1', 'test close remarks', '[\"20250102_155842_1_skill matrix (1).jpg\",\"20250102_155842_2_skill matrix.jpg\"]', '2025-01-02', '2025-01-02 07:14:04', 1, '2025-01-02 10:28:49', 1),
+(9, 3, 6, '11', '83', 'Not Applicable', '', '1', NULL, NULL, NULL, '2025-01-02 07:14:04', 1, '2025-01-02 09:28:13', 0);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `t_inshe_hd_details`
+--
+ALTER TABLE `t_inshe_hd_details`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `t_inshe_hd_details`
+--
+ALTER TABLE `t_inshe_hd_details`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

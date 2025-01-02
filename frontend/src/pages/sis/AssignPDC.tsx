@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Select from "react-select";
 import { shallowEqual } from "react-redux";
 import * as Yup from "yup";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -30,7 +31,7 @@ import { IOptionList } from "@/features/ui/types";
 import useSIOMasterDataQuery from "@/features/sis/hooks/useSIOMasterDataQuery";
 import { submitPDCAssign } from "@/features/sis/services/sis.services";
 import IAreasList from "@/features/sis/types/sis/IAreasList";
-import { SelectSearchable } from "@/features/ui/elements";
+import ISelectList from "@/features/common/types/ISelectList";
 
 interface ILogSioTeamData {
   historyLogSioData: ILogSioData[];
@@ -82,8 +83,8 @@ function AssignPDC() {
   const [severity, setSeverity] = useState<IOptionList[]>([]);
   const [areas, setAreas] = useState<IAreasList[]>([]);
   const [filteredAreas, setFilteredAreas] = useState<IOptionList[]>([]);
-  const [users, setUsers] = useState<IOptionList[]>([]);
-  const [filterUsers, setFilterUsers] = useState<IOptionList[]>([]);
+  const [users, setUsers] = useState<ISelectList[]>([]);
+  const [filterUsers, setFilterUsers] = useState<any>([]);
   const [imagePreviews, setImagePreviews] = useState<any>([]);
   const {
     data: sioMasterData,
@@ -109,8 +110,15 @@ function AssignPDC() {
       setCategories(historySIOMasterData[0].CATEGORY);
       setSeverity(historySIOMasterData[0].SEVERITY);
       setAreas(historySIOMasterData[0].AREA);
-      setUsers(historySIOMasterData[0].USERS);
-      setFilterUsers(historySIOMasterData[0].USERS);
+
+      const userOptions: ISelectList[] = historySIOMasterData[0].USERS.map(
+        (user: any) => ({
+          value: user.id,
+          label: user.name,
+        }),
+      );
+      setUsers(userOptions);
+      setFilterUsers(userOptions);
     }
   }, [sioMasterData, isSIOMasterDataLoading, isSIOMasterDataError]);
   useEffect(() => {
@@ -164,6 +172,7 @@ function AssignPDC() {
     { id: "PDC Assigned", name: "PDC Assigned" },
     { id: "Closed", name: "Closed" },
   ];
+
   const handleActionClick = (row: ILogSIOData) => {
     resetPDCData({
       id: row.id,
@@ -434,7 +443,7 @@ function AssignPDC() {
     setSearchText(newSearchText);
     if (newSearchText !== "") {
       const filtered = users.filter((option) =>
-        option.name.toLowerCase().includes(newSearchText.toLowerCase()),
+        option.label.toLowerCase().includes(newSearchText.toLowerCase()),
       );
       setFilterUsers(filtered);
     } else {
@@ -720,7 +729,7 @@ function AssignPDC() {
           !(Object.keys(errorsFilter).length === 0) && submitCountFilter > 0
         }
       >
-        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+        <div className="flex flex-col w-full h-full p-2 overflow-auto ">
           <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
             <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
               <div className="pb-2 border-b-2 border-gray-200 dark:border-gray-500">
@@ -826,18 +835,41 @@ function AssignPDC() {
 
                   <div className="w-[100%]   gap-4  justify-evenly">
                     <div className="grid grid-cols-1 md:grid-cols-2">
-                      <div className="p-1">
+                      <div className="p-1 ">
                         <span className="text-gray-900">
                           Responsible Person
                         </span>
-                        <SelectSearchable
+                        <Select
+                          options={filterUsers}
+                          onChange={(selectedItem: any) => {
+                            if (selectedItem) {
+                              setSelectedIssuer(selectedItem.label); // Assuming 'label' contains the name
+                              setPdcData(
+                                "responsibilities",
+                                selectedItem.value.toString(),
+                                {
+                                  shouldValidate: true,
+                                },
+                              );
+                              setPdcValueMobile(
+                                "responsibilities",
+                                selectedItem.value.toString(),
+                                {
+                                  shouldValidate: true,
+                                },
+                              );
+                            }
+                          }}
+                          className="mt-[9px] bg-gray-600 text-black rounded-lg "
+                        />
+                        {/* <SelectSearchable
                           selectedValue={selectedIssuer}
                           optionList={[...filterUsers]}
                           searchText={searchText}
                           searchTextChangeHandler={handleSearchTextChange}
                           onChange={handleOptionChange}
                           className="mt-[9px]"
-                        />
+                        /> */}
                         {/* <DropdownList
                           name="responsibilities"
                           label="Responsible Person"
@@ -1052,14 +1084,34 @@ function AssignPDC() {
                   <div className="p-3 ">
                     <div className="grid grid-cols-1 md:grid-cols-2">
                       <div className="p-1">
-                        <SelectSearchable
+                        <span className="text-gray-900">
+                          Responsible Person
+                        </span>
+                        <Select
+                          options={filterUsers}
+                          onChange={(selectedItem: any) => {
+                            if (selectedItem) {
+                              setSelectedIssuer(selectedItem.label); // Assuming 'label' contains the name
+
+                              setPdcValueMobile(
+                                "responsibilities",
+                                selectedItem.value.toString(),
+                                {
+                                  shouldValidate: true,
+                                },
+                              );
+                            }
+                          }}
+                          className="mt-[9px] bg-gray-600 text-black rounded-lg "
+                        />
+                        {/* <SelectSearchable
                           selectedValue={selectedIssuer}
                           optionList={[...filterUsers]}
                           searchText={searchText}
                           searchTextChangeHandler={handleSearchTextChange}
                           onChange={handleOptionChange}
                           className="mt-[9px]"
-                        />
+                        /> */}
                         {/* <DropdownList
                           name="responsibilities"
                           label="Responsible Person"

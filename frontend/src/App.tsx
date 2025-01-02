@@ -20,6 +20,8 @@ import OrgStructures from "./pages/master/OrgStructures";
 import ClosePtw from "./pages/ptw/ClosePtw";
 import SioDashboard from "./pages/sis/SioDashboard";
 import PtwDashboard from "./pages/ptw/PtwDashboard";
+import HDInitiate from "./pages/ims/HDInitiate";
+import HDClosure from "./pages/ims/HDClosure";
 
 const AuthLayout = React.lazy(
   () => import("./features/layout/auth/AuthLayout"),
@@ -129,6 +131,8 @@ function App() {
               path="close-recommendation"
               element={<CloseRecommendation />}
             />
+            <Route path="hd-initiate" element={<HDInitiate />} />
+            <Route path="hd-closure" element={<HDClosure />} />
             <Route path="*" element={<PageNotFound />} />
           </Route>
 

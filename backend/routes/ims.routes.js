@@ -31,5 +31,13 @@ router.post(
 );
 router.post("/get-recommendation-data", imsController.getRecommendationData);
 router.post("/close-recommendation", imsController.closeRecommendation);
+router.post(
+  "/get-pending-hdinitiate-data",
+  imsController.getPendingHdInitiateData
+);
+router.post("/get-hd-master-data", imsController.getHdMasterData);
+router.post("/submit-hd-initiate", imsController.submitHDInitiate);
+router.post("/get-hdclose-data", imsController.getHdCloseData);
+router.post("/submit-close-hd", imsController.submitCloseHd);
 
 module.exports = router;

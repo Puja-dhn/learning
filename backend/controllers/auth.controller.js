@@ -108,7 +108,6 @@ exports.login = async (req, res) => {
     });
   }
   let isAuthenticated = false;
-
   const query = `
   SELECT
             t1.id,
@@ -279,13 +278,13 @@ exports.requestotp = async (req, res) => {
 </html>
  `;
 
-  try {
-    await sendMail(`${email}`, ``, `Forgot Password`, `${htmlContent}`);
-    console.log("Email sent successfully");
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw error;
-  }
+  // try {
+  //   await sendMail(`${email}`, ``, `Forgot Password`, `${htmlContent}`);
+  //   console.log("Email sent successfully");
+  // } catch (error) {
+  //   console.error("Error sending email:", error);
+  //   throw error;
+  // }
   let resultUpdateUsers = await database
     .simpleQuery(
       `update t_ngs_users set otp=:curr_otp, upd_ts=SYSDATE where emp_id= :curr_emp_id `,

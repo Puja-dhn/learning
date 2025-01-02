@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import Select from "react-select";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { shallowEqual } from "react-redux";
@@ -18,6 +19,7 @@ import IViolationMasterData from "@/features/ptw/types/ptw/IViolationMasterData"
 import { addNewViolationData } from "@/features/ptw/services/ptw.services";
 import { IOptionList } from "@/features/ui/types";
 import { SelectSearchable } from "@/features/ui/elements";
+import ISelectList from "@/features/common/types/ISelectList";
 
 interface ILogViolationTeamData {
   historyLogViolationData: IViolationMasterData[];
@@ -43,8 +45,8 @@ function LogViolations() {
     historyLogViolationData: [],
   });
 
-  const [permitList, setPermitList] = useState<IOptionList[]>([]);
-  const [filterPermitList, setFilterPermitList] = useState<IOptionList[]>([]);
+  const [permitList, setPermitList] = useState<any>([]);
+  const [filterPermitList, setFilterPermitList] = useState<any>([]);
 
   const {
     handleSubmit,
@@ -83,12 +85,12 @@ function LogViolations() {
       setTeamData({
         historyLogViolationData,
       });
-      const permitData = vioMasterData.historyViolationMasterData.map(
-        (item) => ({
-          id: item.id,
-          name: item.job_description.substring(0, 100),
-        }),
-      );
+      const permitData: ISelectList[] =
+        vioMasterData.historyViolationMasterData.map((item: any) => ({
+          value: item.id,
+          label: item.job_description.substring(0, 100),
+        }));
+
       setPermitList(permitData);
       setFilterPermitList(permitData);
     }
@@ -162,7 +164,7 @@ function LogViolations() {
   const handleSearchTextChange = (newSearchText: string) => {
     setSearchText(newSearchText);
     if (newSearchText !== "") {
-      const filtered = permitList.filter((option) =>
+      const filtered = permitList.filter((option: any) =>
         option.name.toLowerCase().includes(newSearchText.toLowerCase()),
       );
       setFilterPermitList(filtered);
@@ -177,7 +179,7 @@ function LogViolations() {
   };
 
   return (
-    <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+    <div className="flex flex-col w-full h-full p-2 overflow-auto ">
       <div className="p-2 bg-white shadow-lg dark:bg-gray-800">
         <div className="grid gap-1 border-[1px] border-gray-200 rounded-lg p-2 dark:border-gray-500 dark:bg-gray-800">
           <div className="pb-2 border-b-2 border-gray-200 dark:border-gray-500">
@@ -190,14 +192,26 @@ function LogViolations() {
             <div className="grid grid-cols-1 md:grid-cols-2">
               <div className="p-1">
                 <span className="text-gray-900">Permit</span>
-                <SelectSearchable
+                <Select
+                  options={filterPermitList}
+                  onChange={(selectedItem: any) => {
+                    if (selectedItem) {
+                      setSelectedIssuer(selectedItem.label);
+                      setValue("permit_no", selectedItem.value.toString(), {
+                        shouldValidate: true,
+                      });
+                    }
+                  }}
+                  className="mt-[4px] bg-gray-600 text-black rounded-lg "
+                />
+                {/* <SelectSearchable
                   selectedValue={selectedIssuer}
                   optionList={[...permitList]}
                   searchText={searchText}
                   searchTextChangeHandler={handleSearchTextChange}
                   onChange={handleOptionChange}
                   className="mt-[9px]"
-                />
+                /> */}
                 {/* <DropdownList
                   name="permit_no"
                   label="Permit No"

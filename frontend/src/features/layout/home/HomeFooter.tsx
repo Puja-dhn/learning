@@ -18,7 +18,7 @@ function HomeFooter() {
       className={`${hiddenClass} p-2 px-4 md:flex hidden dark:bg-gray-800 shadow-md dark:text-gray-300`}
     >
       <div className="text-xs text-gray-400">
-        Copyright © {year} : Root2Wings Infotech Pvt. Ltd..{" "}
+        Copyright © {year} : ABC Infotech Pvt. Ltd..{" "}
       </div>
       <div className="flex items-center justify-center">
         <div className="pr-8">

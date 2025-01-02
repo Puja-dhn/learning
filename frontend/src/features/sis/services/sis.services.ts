@@ -1,12 +1,10 @@
 import { AxiosResponse } from "axios";
 import http from "@/features/common/utils/http-common";
-import {
-  ILogSioFilterForm,
-  ILogSisForm,
-} from "../types";
+import { ILogSioFilterForm, ILogSisForm } from "../types";
 import ISIOMasterData from "../types/sis/ISIOMasterData";
 import ILogSioData from "../types/sis/ILogSioData";
 import ISIOPDCAssignData from "../types/sis/ISIOPDCAssignData";
+import ISIODashboardData from "../types/sis/ISIODashboardData";
 
 const addNewSIOData = (formData: any) => {
   return http.post<ILogSisForm, AxiosResponse<string>>(
@@ -21,8 +19,6 @@ const getSIOMasterData = () => {
     AxiosResponse<{ historySIOMasterData: ISIOMasterData }>
   >("/sio/get-sio-master-data");
 };
-
-
 
 const getSIOData = (filterData: ILogSioFilterForm) => {
   return http.post<
@@ -54,6 +50,25 @@ const submitActionTaken = (pdcData: ISIOPDCAssignData) => {
   });
 };
 
+const getSIODashboardData = (
+  department: number,
+  fromDate: string,
+  toDate: string,
+) => {
+  return http.post<
+    {
+      department: number;
+      fromDate: string;
+      toDate: string;
+    },
+    AxiosResponse<ISIODashboardData>
+  >("/voc/get-dashboard-data", {
+    department,
+    fromDate,
+    toDate,
+  });
+};
+
 export {
   getSIOData,
   addNewSIOData,
@@ -62,4 +77,5 @@ export {
   submitPDCAssign,
   getAssignedSIOData,
   submitActionTaken,
+  getSIODashboardData,
 };
