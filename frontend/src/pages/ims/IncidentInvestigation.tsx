@@ -768,6 +768,16 @@ function IncidentInvestigation() {
     setRecomResponsibilityId(selectedItem.id.toString());
   };
 
+  const [showFtaDialog, setShowFtaDialog] = useState({
+    status: false,
+  });
+  const handleFtaDialogClose = () => {
+    setShowFtaDialog((oldState) => ({ ...oldState, status: false }));
+  };
+  const openFtaModal = () => {
+    setShowFtaDialog({ status: true });
+  };
+
   return (
     <div className="flex flex-col w-full h-full gap-2 p-4 overflow-hidden text-sm md:p-6">
       <div className="h-[50px] flex justify-between items-center p-1.5 px-2.5 border-[1px] text-md font-semibold text-center bg-[#f0f8ff] rounded-lg shadow-md dark:bg-gray-600 dark:text-cyan-200 dark:border-gray-500">
@@ -1645,6 +1655,22 @@ function IncidentInvestigation() {
                 <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
                   <div className="">
                     <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
+                      <h3 className="font-semibold text-[#2d24b7] text-md dark:text-gray-300">
+                        <a
+                          className="pointer"
+                          onClick={() => openFtaModal()}
+                          role="button"
+                          aria-label="Open FTA Modal"
+                        >
+                          FTA
+                        </a>
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid border-[1px] border-gray-200 rounded-lg  dark:border-gray-500 dark:bg-gray-800">
+                  <div className="">
+                    <div className="flex items-center p-2 bg-[#e1e1e1]  rounded-lg">
                       <h3 className="font-semibold text-gray-700 text-md dark:text-gray-300">
                         Physical Factors &nbsp;
                       </h3>
@@ -2219,6 +2245,17 @@ function IncidentInvestigation() {
             alt="previewimage"
             className="object-cover w-full h-full rounded-lg"
           />
+        </div>
+      </ModalPopup>
+      <ModalPopup
+        heading="FTA"
+        onClose={handleFtaDialogClose}
+        openStatus={showFtaDialog.status}
+        hasSubmit={false}
+        size="fullscreen"
+      >
+        <div className="relative flex flex-col w-full h-full p-2 overflow-auto ">
+          content
         </div>
       </ModalPopup>
     </div>

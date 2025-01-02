@@ -1,5 +1,6 @@
 import { useQuery } from "react-query";
 import { removeJSONNull } from "@/features/common/utils/json-util";
+import { getSIODashboardData } from "../services/sis.services";
 
 const useCPADashboardQuery = (
   department: number,
@@ -17,7 +18,7 @@ const useCPADashboardQuery = (
     ],
     queryFn: async () => {
       const data = await getSIODashboardData(department, fromDate, toDate)
-        .then((res) => res.data)
+        .then((res:any) => res.data)
         .catch(() => {
           throw new Error("Error Fetching Data");
         });
