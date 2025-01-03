@@ -607,31 +607,31 @@ function ApprovePtw() {
   const handleApproveFormSubmit: SubmitHandler<ILogPTWApproveForm> = (
     values: any,
   ) => {
-    console.log(values);
-    // loader.show();
-    // submitCustodianApproval(values)
-    //   .then(() => {
-    //     alertToast.show(
-    //       "success",
-    //       "Custodian Approved Succesfully",
-    //       true,
-    //       2000,
-    //     );
-    //     setShowApproveDialog((oldState) => ({
-    //       ...oldState,
-    //       status: false,
-    //     }));
-    //     handleRefresh();
-    //   })
+    // console.log(values);
+    loader.show();
+    submitCustodianApproval(values)
+      .then(() => {
+        alertToast.show(
+          "success",
+          "Custodian Approved Succesfully",
+          true,
+          2000,
+        );
+        setShowApproveDialog((oldState) => ({
+          ...oldState,
+          status: false,
+        }));
+        handleRefresh();
+      })
 
-    //   .catch((err) => {
-    //     if (err.response && err.response.status) {
-    //       alertToast.show("warning", err.response.data.errorMessage, true);
-    //     }
-    //   })
-    //   .finally(() => {
-    //     loader.hide();
-    //   });
+      .catch((err) => {
+        if (err.response && err.response.status) {
+          alertToast.show("warning", err.response.data.errorMessage, true);
+        }
+      })
+      .finally(() => {
+        loader.hide();
+      });
   };
   const handleExport = () => {
     const rows = teamData.historyLogPtwData.map((item) => ({
