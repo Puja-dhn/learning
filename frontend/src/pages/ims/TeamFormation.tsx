@@ -992,49 +992,49 @@ function TeamFormation() {
                         </thead>
                         <tbody>
                           {/* Input row for adding new rows */}
-                          {watchView("injury_type") ===
-                            "Medical Center FAC" && (
-                            <tr>
-                              <td className="px-4 py-2 text-gray-700 border-b">
-                                1
-                              </td>
-                              <td className="px-4 py-2 border-b">
-                                <InputText
-                                  type="text"
-                                  value={suggTeamNewRow.id}
-                                  className="w-full text-gray-700"
-                                  disabled
-                                />
-                              </td>
-                              <td className="px-4 py-2 text-gray-700 border-b">
-                                <select
-                                  value={suggTeamNewRow.name}
-                                  onChange={(e) =>
-                                    handleSuggTeamInputChange(
-                                      "name",
-                                      e.target.value,
-                                    )
-                                  }
-                                  className="text-gray-700 bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"
-                                >
-                                  <option value="">Select</option>
-                                  {users &&
-                                    users.length > 0 &&
-                                    users.map((item) => (
-                                      <option value={item.id}>
-                                        {item.name}
-                                      </option>
-                                    ))}
-                                </select>
-                              </td>
+                          {+watchView("injury_type") === 10 ||
+                            (+watchView("injury_type") === 11 && (
+                              <tr>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  1
+                                </td>
+                                <td className="px-4 py-2 border-b">
+                                  <InputText
+                                    type="text"
+                                    value={suggTeamNewRow.id}
+                                    className="w-full text-gray-700"
+                                    disabled
+                                  />
+                                </td>
+                                <td className="px-4 py-2 text-gray-700 border-b">
+                                  <select
+                                    value={suggTeamNewRow.name}
+                                    onChange={(e) =>
+                                      handleSuggTeamInputChange(
+                                        "name",
+                                        e.target.value,
+                                      )
+                                    }
+                                    className="text-gray-700 bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"
+                                  >
+                                    <option value="">Select</option>
+                                    {users &&
+                                      users.length > 0 &&
+                                      users.map((item) => (
+                                        <option value={item.id}>
+                                          {item.name}
+                                        </option>
+                                      ))}
+                                  </select>
+                                </td>
 
-                              <td className="px-4 py-2 border-b">
-                                <IconButton onClick={addSuggTeamRow}>
-                                  <PlusIcon className="w-4 h-4" />
-                                </IconButton>
-                              </td>
-                            </tr>
-                          )}
+                                <td className="px-4 py-2 border-b">
+                                  <IconButton onClick={addSuggTeamRow}>
+                                    <PlusIcon className="w-4 h-4" />
+                                  </IconButton>
+                                </td>
+                              </tr>
+                            ))}
 
                           {/* Render additional rows from injuryRow */}
                           {suggTeamFilterRow &&
